@@ -52,7 +52,12 @@ tests/           calibrazione, plausibilità, urti, regole, determinismo
   quasi indipendente dall'intensità della rotazione. `K` si calibra per bisezione sulla curva di un draw.
 - **Linea di tiro:** parte dalla staffa (hack) all'estremità di consegna e passa per la scopa dello skip; il moto libero inizia quando la pietra raggiunge la hog line di consegna.
 - **Rotazione:** decresce in proporzione alla velocità. Tre livelli, espressi in giri su un draw dal rilascio all'arresto: bassa (1–2, predefinito 1,5), normale (3–4, predefinito 3,5), alta (5–8, predefinito 6,5); oppure un numero di giri a scelta.
-- **Spazzata:** riduce attrito e curl della pietra spazzata. Preset «World Curling 2026 — adattamento v1»:
+- **Spazzata:** riduce attrito e curl della pietra spazzata. L'effetto dipende dal livello degli sweeper, espresso
+  come metri guadagnati spazzando una guardia a 1,9 m/s dal rilascio all'arresto: principianti 1,0–1,7 m
+  (predefinito 1,35), club 1,8–2,5 m (2,15), élite 2,6–3,1 m (2,85), oppure un valore a scelta. Il fattore d'attrito
+  si ricava da quel guadagno per ogni profilo di ghiaccio.
+- **Precisione del tiro:** errore di linea alla scopa ed errore di peso, con livelli principiante (40 cm, 5%),
+  club (20 cm, 2,4%) ed élite (8 cm, 0,8%) oppure valori a scelta; valori proposti, da affinare con i test di gioco. Preset «World Curling 2026 — adattamento v1»:
   spazza solo chi tira, solo la pietra appena consegnata, solo davanti alla tee line.
 - **Urti:** impulso normale con restituzione e impulso tangenziale con attrito di Coulomb tra le pietre
   (scambio di rotazione); più passate per le catene.

@@ -130,14 +130,36 @@
     <details class="panel" id="p-skill" open>
       <summary data-t="section.skill"></summary>
       <div class="panel-body">
+      <label class="field">
+        <span data-t="skill.shotLevel"></span>
+        <select id="shot-level">
+          <option value="beginner" data-t="level.beginner"></option>
+          <option value="club" selected data-t="level.club"></option>
+          <option value="elite" data-t="level.elite"></option>
+          <option value="custom" data-t="level.custom"></option>
+        </select>
+      </label>
       <div class="pair">
-        <label class="field"><span data-t="skill.line"></span><input id="sk-line" type="number" min="0" max="50" step="1" value="5"></label>
-        <label class="field"><span data-t="skill.weight"></span><input id="sk-weight" type="number" min="0" max="15" step="0.5" value="2"></label>
+        <label class="field"><span data-t="skill.line"></span><input id="sk-line" type="number" min="0" max="80" step="1" value="20"></label>
+        <label class="field"><span data-t="skill.weight"></span><input id="sk-weight" type="number" min="0" max="15" step="0.1" value="2.4"></label>
       </div>
       <div class="pair">
         <label class="field"><span data-t="skill.seed"></span><input id="seed" type="number" step="1" value="1"></label>
         <button id="perfect" type="button" class="align-end" data-t="skill.perfect"></button>
       </div>
+      <div class="pair">
+        <label class="field">
+          <span data-t="skill.sweepLevel"></span>
+          <select id="sweep-level">
+            <option value="beginner" data-t="sweep.beginner"></option>
+            <option value="club" selected data-t="sweep.club"></option>
+            <option value="elite" data-t="sweep.elite"></option>
+            <option value="custom" data-t="level.custom"></option>
+          </select>
+        </label>
+        <label class="field"><span data-t="skill.sweepGain"></span><input id="sweep-gain" type="number" min="0" max="5" step="0.05" value="2.15"></label>
+      </div>
+      <p id="sweep-readout" class="hint mono"></p>
     </div>
     </details>
   </section>

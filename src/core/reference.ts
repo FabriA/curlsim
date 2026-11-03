@@ -11,7 +11,7 @@ import { TEE_Y } from "./geometry";
 export const REFERENCE_HASH = "97156709";
 
 export function referenceReplay(): Replay {
-  const params = { ...BASE_PARAMS, mu: 0.0074, curlK: 0.007 };
+  const params = { ...BASE_PARAMS, mu: 0.0074, curlK: 0.007, sweepFriction: 0.88 };
   const shot = { broomX: 0.25, broomY: TEE_Y, speed: 2.9, spin: -1 as const, spinRate: 1.2 };
   const skill = { lineSigma: 0.05, weightSigma: 0.02 };
   const seed = 20261103;

@@ -2,9 +2,9 @@
  * Laboratorio 2D – fase 1.
  * Tira, spazza, osserva traiettorie e tempi, salva e riesegui i tiri.
  */
-import { calibrate, spinRateForTurns, stopForSpeed, speedToStopAt } from "../core/calibrate";
+import { calibrate, spinRateForTurns, stopForSpeed, speedToStopAt, sweepFrictionForGain } from "../core/calibrate";
 import { BACK_LINE_OUTSIDE, FAR_HOG_INSIDE, HACK_Y, HOUSE_RADIUS, RELEASE_Y, STONE_RADIUS, TEE_Y } from "../core/geometry";
-import { DT, ENGINE_VERSION, PROFILES, SPIN_TURNS, type IceParams, type ProfileId, type SpinLevel } from "../core/params";
+import { DT, ENGINE_VERSION, PROFILES, SHOT_PRECISION, SPIN_TURNS, SWEEP_GAIN, type IceParams, type ProfileId, type SkillLevel, type SpinLevel } from "../core/params";
 import { REFERENCE_HASH, referenceReplay } from "../core/reference";
 import { makeReplay, runReplay, Sim, validateReplay, type Replay, type StonePlacement } from "../core/sim";
 import { num, t } from "../i18n";
@@ -74,6 +74,7 @@ function recalibrate(): void {
     $("derived").textContent = t("ice.derived", { mu: state.params.mu.toFixed(5), k: state.params.curlK.toFixed(5) });
     updateWeightMarks();
     updateShotReadout();
+    updateSweepReadout();
     draw();
   }, 20);
 }
@@ -166,6 +167,49 @@ function updateShotReadout(): void {
   });
 }
 
+// ——— Abilità: precisione del tiro e livello degli sweeper ———
+function applyShotLevel(level: SkillLevel | "custom"): void {
+  if (level === "custom") return;
+  const p = SHOT_PRECISION[level];
+  $<HTMLInputElement>("sk-line").value = String(Math.round(p.lineSigma * 100));
+  $<HTMLInputElement>("sk-weight").value = String(Math.round(p.weightSigma * 1000) / 10);
+}
+function syncShotLevel(): void {
+  const s = skill();
+  const match = (Object.keys(SHOT_PRECISION) as SkillLevel[]).find(
+    (k) => Math.abs(SHOT_PRECISION[k].lineSigma - s.lineSigma) < 1e-9 && Math.abs(SHOT_PRECISION[k].weightSigma - s.weightSigma) < 1e-9,
+  );
+  $<HTMLSelectElement>("shot-level").value = match ?? "custom";
+}
+
+function sweepGain(): number {
+  return Math.max(0, Number($<HTMLInputElement>("sweep-gain").value) || 0);
+}
+function applySweepLevel(level: SkillLevel | "custom"): void {
+  if (level !== "custom") $<HTMLInputElement>("sweep-gain").value = String(SWEEP_GAIN[level]);
+  updateSweepReadout();
+}
+function syncSweepLevel(): void {
+  const g = sweepGain();
+  const match = (Object.keys(SWEEP_GAIN) as SkillLevel[]).find((k) => Math.abs(SWEEP_GAIN[k] - g) < 1e-9);
+  $<HTMLSelectElement>("sweep-level").value = match ?? "custom";
+  updateSweepReadout();
+}
+
+/** Parametri del tiro: ghiaccio calibrato più l'effetto della spazzata del livello scelto. */
+function shotParams(): IceParams {
+  const ice = state.params!;
+  return { ...ice, sweepFriction: sweepFrictionForGain(ice, sweepGain()) };
+}
+
+function updateSweepReadout(): void {
+  if (!state.params) return;
+  const p = shotParams();
+  // Draw al tee spazzato dal rilascio alla tee line: tutto il percorso è spazzato.
+  const d = TEE_Y - RELEASE_Y;
+  $("sweep-readout").textContent = t("skill.sweepReadout", { f: num(p.sweepFriction, 3), d: num(d / p.sweepFriction - d, 1) });
+}
+
 // ——— Tiro ———
 function skill() {
   return {
@@ -184,7 +228,7 @@ function throwStone(): void {
   const seed = Number($<HTMLInputElement>("seed").value) + n;
   const team = nextTeam();
   const replay = makeReplay(
-    state.params,
+    shotParams(),
     team,
     state.stones,
     { broomX: state.broom.x, broomY: state.broom.y, speed: currentSpeed(), spin: currentSpin(), spinRate: currentSpinRate(), spinTurns: currentTurns() },
@@ -644,9 +688,14 @@ function init(): void {
   $("repeat").addEventListener("click", repeatLast);
   $("retry").addEventListener("click", retryFromSame);
   $("clear").addEventListener("click", clearSheet);
+  $<HTMLSelectElement>("shot-level").addEventListener("change", (e) => applyShotLevel((e.target as HTMLSelectElement).value as SkillLevel | "custom"));
+  for (const id of ["sk-line", "sk-weight"]) $(id).addEventListener("input", syncShotLevel);
+  $<HTMLSelectElement>("sweep-level").addEventListener("change", (e) => applySweepLevel((e.target as HTMLSelectElement).value as SkillLevel | "custom"));
+  $("sweep-gain").addEventListener("input", syncSweepLevel);
   $("perfect").addEventListener("click", () => {
     $<HTMLInputElement>("sk-line").value = "0";
     $<HTMLInputElement>("sk-weight").value = "0";
+    syncShotLevel();
   });
   $("copy-replay").addEventListener("click", copyReplay);
   $("load-text").addEventListener("click", () => loadReplayText($<HTMLTextAreaElement>("replay-text").value));

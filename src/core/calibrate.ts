@@ -4,7 +4,7 @@
  *  - curlK si cerca per bisezione simulando lo stesso draw finché la curva
  *    raggiunge il valore richiesto.
  */
-import { BASE_PARAMS, G, SPIN_TURNS, type IceParams, type IceTargets } from "./params";
+import { BASE_PARAMS, G, REF_GUARD_SPEED, SPIN_TURNS, type IceParams, type IceTargets } from "./params";
 import { FAR_HOG_OUTSIDE, RELEASE_Y, TEE_Y } from "./geometry";
 import { Sim } from "./sim";
 
@@ -27,6 +27,16 @@ export function speedToStopAt(params: IceParams, stopY: number): number {
 /** Punto d'arresto previsto (dritto, senza spazzata) per una velocità di rilascio. */
 export function stopForSpeed(params: IceParams, speed: number): number {
   return RELEASE_Y + (speed * speed) / (2 * params.mu * G);
+}
+
+/**
+ * Fattore d'attrito durante la spazzata che fa guadagnare `gain` metri alla guardia di
+ * riferimento spazzata dal rilascio all'arresto. Con decelerazione costante la distanza
+ * scala come 1/f, quindi f = D / (D + gain), con D la distanza senza spazzata.
+ */
+export function sweepFrictionForGain(params: IceParams, gain: number, speed = REF_GUARD_SPEED): number {
+  const d = (speed * speed) / (2 * params.mu * G);
+  return d / (d + Math.max(0, gain));
 }
 
 /**

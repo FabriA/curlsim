@@ -114,7 +114,7 @@ describe("comportamenti riconoscibili", () => {
   });
 
   it("la spazzata si interrompe alla tee line (semplificazione v1)", () => {
-    const sim = draw(speedToStopAt(params, TEE_Y - 2.5), 1, true);
+    const sim = draw(speedToStopAt(params, TEE_Y - 1), 1, true);
     expect(sim.metrics.stop!.y).toBeGreaterThan(TEE_Y);
     expect(Math.abs(sim.metrics.sweepTime - sim.metrics.hogToTee!)).toBeLessThan(0.01);
   });

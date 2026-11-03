@@ -56,11 +56,37 @@ export const PROFILES: Record<ProfileId, IceTargets> = {
 export const BASE_PARAMS: Omit<IceParams, "mu" | "curlK"> = {
   curlV0: 0.1,
   spinRatioRef: 0.1,
-  sweepFriction: 0.88,
+  sweepFriction: 0.92,
   sweepCurl: 0.85,
   restitution: 0.9,
   stoneFriction: 0.2,
   inertiaK: 0.5,
+};
+
+/** Livelli di abilità usati per sweeper e tiratori. */
+export type SkillLevel = "beginner" | "club" | "elite";
+
+/** Velocità di rilascio della guardia di riferimento per misurare l'effetto della spazzata (m/s). */
+export const REF_GUARD_SPEED = 1.9;
+
+/**
+ * Metri guadagnati spazzando dal rilascio all'arresto la guardia di riferimento (1,9 m/s),
+ * per livello degli sweeper. Intervalli indicati: principianti 1,0–1,7; club 1,8–2,5; élite 2,6–3,1.
+ * Il fattore d'attrito durante la spazzata si ricava con sweepFrictionForGain (calibrate.ts),
+ * così il guadagno resta lo stesso su ogni profilo di ghiaccio.
+ */
+export const SWEEP_GAIN: Record<SkillLevel, number> = { beginner: 1.35, club: 2.15, elite: 2.85 };
+export const SWEEP_GAIN_RANGE: Record<SkillLevel, [number, number]> = { beginner: [1.0, 1.7], club: [1.8, 2.5], elite: [2.6, 3.1] };
+
+/**
+ * Precisione del tiratore per livello: deviazione standard dell'errore di linea alla scopa (m)
+ * e dell'errore di peso (frazione della velocità di rilascio). Valori proposti, da affinare con i test di gioco.
+ * Con un errore di peso dell'1% la distanza d'arresto di un draw varia di circa il 2% (circa 55 cm).
+ */
+export const SHOT_PRECISION: Record<SkillLevel, { lineSigma: number; weightSigma: number }> = {
+  beginner: { lineSigma: 0.4, weightSigma: 0.05 },
+  club: { lineSigma: 0.2, weightSigma: 0.024 },
+  elite: { lineSigma: 0.08, weightSigma: 0.008 },
 };
 
 export type SpinLevel = "low" | "normal" | "high";
