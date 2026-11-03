@@ -1,0 +1,53 @@
+/**
+ * Calibrazione del modello sui valori di un profilo di ghiaccio.
+ *  - mu si ricava in forma chiusa dal tempo hog-to-hog di un draw al tee;
+ *  - curlK si cerca per bisezione simulando lo stesso draw finché la curva
+ *    raggiunge il valore richiesto.
+ */
+import { BASE_PARAMS, DEFAULT_SPIN_RATE, G, type IceParams, type IceTargets } from "./params";
+import { FAR_HOG_OUTSIDE, RELEASE_Y, TEE_Y } from "./geometry";
+import { Sim } from "./sim";
+
+const D_TOTAL = TEE_Y - RELEASE_Y; // dal rilascio al tee
+const D_REST = TEE_Y - FAR_HOG_OUTSIDE; // dalla hog line di gioco al tee
+
+/** Decelerazione che fa fermare al tee un draw con il tempo hog-to-hog dato. */
+export function decelerationFor(hogToHog: number): number {
+  const s = (Math.sqrt(2 * D_TOTAL) - Math.sqrt(2 * D_REST)) / hogToHog;
+  return s * s;
+}
+
+/** Velocità di rilascio che porta la pietra, dritta e senza spazzata, a fermarsi a `stopY`. */
+export function speedToStopAt(params: IceParams, stopY: number): number {
+  const a = params.mu * G;
+  const d = Math.max(0, stopY - RELEASE_Y);
+  return Math.sqrt(2 * a * d);
+}
+
+/** Punto d'arresto previsto (dritto, senza spazzata) per una velocità di rilascio. */
+export function stopForSpeed(params: IceParams, speed: number): number {
+  return RELEASE_Y + (speed * speed) / (2 * params.mu * G);
+}
+
+/** Curva di un draw al tee con i parametri dati (m). */
+export function measureDrawCurl(params: IceParams, spin: 1 | -1 = 1): number {
+  const v = speedToStopAt(params, TEE_Y);
+  const sim = new Sim(params, [], 0, { x: 0, y: RELEASE_Y, vx: 0, vy: v, w: spin * DEFAULT_SPIN_RATE });
+  sim.runToEnd();
+  return sim.delivered.x * spin;
+}
+
+export function calibrate(t: IceTargets, base = BASE_PARAMS): IceParams {
+  const mu = decelerationFor(t.hogToHog) / G;
+  const params: IceParams = { ...base, mu, curlK: 0 };
+  let lo = 0;
+  let hi = 0.05;
+  for (let i = 0; i < 30; i++) {
+    const mid = (lo + hi) / 2;
+    params.curlK = mid;
+    if (measureDrawCurl(params) < t.curl) lo = mid;
+    else hi = mid;
+  }
+  params.curlK = (lo + hi) / 2;
+  return params;
+}

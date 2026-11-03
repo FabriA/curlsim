@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!--ARTIFACT-HEAD-START-->
+<title>Laboratorio di curling</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<!--ARTIFACT-HEAD-END-->
+<link rel="stylesheet" href="/src/lab/style.css">
+</head>
+<body>
+<!--ARTIFACT-BODY-START-->
+<header class="top">
+  <div class="brand">
+    <h1 data-t="app.title">Laboratorio di curling</h1>
+    <p class="sub" data-t="app.subtitle"></p>
+  </div>
+  <p id="status" class="status" role="status" aria-live="polite"></p>
+</header>
+
+<main class="lab">
+  <section class="controls" aria-label="Comandi">
+    <fieldset class="panel">
+      <legend data-t="section.ice"></legend>
+      <label class="field">
+        <span data-t="ice.profile"></span>
+        <select id="profile">
+          <option value="straight" data-t="ice.profile.straight"></option>
+          <option value="normal" selected data-t="ice.profile.normal"></option>
+          <option value="swingy" data-t="ice.profile.swingy"></option>
+        </select>
+      </label>
+      <div class="pair">
+        <label class="field"><span data-t="ice.hogToHog"></span><input id="hh" type="number" min="11" max="18" step="0.1" value="14.5"></label>
+        <label class="field"><span data-t="ice.curl"></span><input id="curl" type="number" min="0" max="2.5" step="0.1" value="1.2"></label>
+      </div>
+      <p id="derived" class="hint mono"></p>
+    </fieldset>
+
+    <fieldset class="panel">
+      <legend data-t="section.shot"></legend>
+      <div class="field">
+        <span data-t="shot.broom"></span>
+        <p class="value" id="broom-value"></p>
+        <p class="hint" data-t="shot.broomHint"></p>
+      </div>
+      <div class="field" role="radiogroup" aria-labelledby="rot-label">
+        <span id="rot-label" data-t="shot.rotation"></span>
+        <label class="radio"><input type="radio" name="spin" id="spin-cw" checked> <span>↻</span> <span data-t="shot.cw"></span></label>
+        <label class="radio"><input type="radio" name="spin" id="spin-ccw"> <span>↺</span> <span data-t="shot.ccw"></span></label>
+      </div>
+      <label class="field">
+        <span data-t="shot.weight"></span>
+        <input id="weight" type="range" min="1.6" max="4.6" step="0.01" value="2.03">
+        <span class="value" id="weight-value"></span>
+      </label>
+      <div id="weight-marks" class="marks"></div>
+      <p id="weight-stop" class="hint"></p>
+      <div class="actions">
+        <button id="throw" class="primary" type="button" data-t="shot.throw"></button>
+        <button id="sweep-btn" class="sweep" type="button" data-t="shot.sweep"></button>
+      </div>
+      <p class="hint" data-t="shot.sweepHint"></p>
+      <p class="hint" data-t="shot.sweepOff"></p>
+      <div class="actions secondary">
+        <button id="repeat" type="button" data-t="shot.repeat"></button>
+        <button id="retry" type="button" data-t="shot.retry"></button>
+        <button id="clear" type="button" data-t="shot.clear"></button>
+      </div>
+      <label class="field inline">
+        <span data-t="shot.speed"></span>
+        <select id="play-speed">
+          <option value="1" selected>1×</option>
+          <option value="2">2×</option>
+          <option value="4">4×</option>
+          <option value="10">10×</option>
+        </select>
+      </label>
+    </fieldset>
+
+    <fieldset class="panel">
+      <legend data-t="section.skill"></legend>
+      <div class="pair">
+        <label class="field"><span data-t="skill.line"></span><input id="sk-line" type="number" min="0" max="50" step="1" value="5"></label>
+        <label class="field"><span data-t="skill.weight"></span><input id="sk-weight" type="number" min="0" max="15" step="0.5" value="2"></label>
+      </div>
+      <div class="pair">
+        <label class="field"><span data-t="skill.seed"></span><input id="seed" type="number" step="1" value="1"></label>
+        <button id="perfect" type="button" class="align-end" data-t="skill.perfect"></button>
+      </div>
+    </fieldset>
+  </section>
+
+  <section id="views" class="views" aria-label="Pista">
+    <figure class="view house-view">
+      <canvas id="house" aria-label="Casa di gioco vista dall'alto"></canvas>
+      <figcaption data-t="view.house"></figcaption>
+    </figure>
+    <figure class="view sheet-view">
+      <canvas id="sheet" aria-label="Pista intera vista dall'alto"></canvas>
+      <figcaption data-t="view.sheet"></figcaption>
+    </figure>
+  </section>
+
+  <section class="data">
+    <div class="panel">
+      <h2 data-t="section.log"></h2>
+      <p id="log-empty" class="hint" data-t="log.empty"></p>
+      <div class="table-wrap">
+        <table id="log-table" hidden>
+          <thead>
+            <tr>
+              <th data-t="log.n"></th><th data-t="log.rot"></th><th data-t="log.speed"></th>
+              <th data-t="log.hh"></th><th data-t="log.ht"></th><th data-t="log.stop"></th>
+              <th data-t="log.curl"></th><th data-t="log.turns"></th><th data-t="log.sweep"></th>
+              <th data-t="log.outcome"></th><th data-t="log.hash"></th>
+            </tr>
+          </thead>
+          <tbody id="log-body"></tbody>
+        </table>
+      </div>
+      <p class="hint" data-t="log.legend"></p>
+    </div>
+
+    <div class="panel">
+      <h2 data-t="section.replay"></h2>
+      <label class="field">
+        <span data-t="replay.textLabel"></span>
+        <textarea id="replay-text" rows="6" spellcheck="false"></textarea>
+      </label>
+      <div class="actions secondary">
+        <button id="copy-replay" type="button" data-t="replay.save"></button>
+        <button id="load-text" type="button" data-t="replay.load"></button>
+        <label class="file"><input id="load-file" type="file" accept="application/json,.json"><span data-t="replay.fromFile"></span></label>
+      </div>
+      <p id="replay-msg" class="hint" role="status"></p>
+      <div class="actions secondary">
+        <button id="det-check" type="button" data-t="replay.check"></button>
+      </div>
+      <p id="det-result" class="hint"></p>
+    </div>
+  </section>
+</main>
+<!--ARTIFACT-BODY-END-->
+<script type="module" src="/src/lab/main.ts"></script>
+</body>
+</html>
