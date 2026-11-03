@@ -10,6 +10,9 @@ import { makeReplay, runReplay, Sim, validateReplay, type Replay, type StonePlac
 import { num, t } from "../i18n";
 import type { Key } from "../i18n/it";
 import { HOUSE_VIEW, Renderer, SHEET_VIEW, type DrawStone, type Scene } from "./render";
+import { PlacementTool } from "./placement-tool";
+import { makeScenario, validateScenario, type PlacementCheck } from "../core/placement";
+import type { Team } from "../core/physics";
 
 const MAX_STONES = 16;
 
@@ -179,7 +182,7 @@ function throwStone(): void {
   }
   const n = state.log.length + 1;
   const seed = Number($<HTMLInputElement>("seed").value) + n;
-  const team = (state.log.length % 2) as 0 | 1;
+  const team = nextTeam();
   const replay = makeReplay(
     state.params,
     team,
@@ -281,6 +284,7 @@ function finishShot(): void {
     hash,
   };
   state.log.push(entry);
+  setNextTeam(replay.team === 0 ? 1 : 0);
   renderLog();
   showReplay(replay);
   setStatus(t("status.done", { n: entry.n }));
@@ -324,8 +328,46 @@ function clearSheet(): void {
 // ——— Disegno ———
 let houseR: Renderer;
 let sheetR: Renderer;
+let placement: PlacementTool | null = null;
+
+// ——— Squadre e posizionamento ———
+function nextTeam(): Team {
+  return $<HTMLInputElement>("next-1").checked ? 1 : 0;
+}
+function setNextTeam(team: Team): void {
+  $<HTMLInputElement>(team === 1 ? "next-1" : "next-0").checked = true;
+}
+function placeTeam(): Team {
+  return $<HTMLInputElement>("place-1").checked ? 1 : 0;
+}
+
+function setTool(tool: "broom" | "place"): void {
+  if (placement) placement.enabled = tool === "place";
+  houseR.canvas.dataset.tool = tool;
+  $("tool-hint").textContent = t(tool === "place" ? "place.hint" : "shot.broomHint");
+}
+
+function placementMessage(m: PlacementCheck | "removed" | "added" | "moved"): void {
+  const keys: Record<typeof m, Key> = {
+    ok: "place.moved",
+    added: "place.added",
+    moved: "place.moved",
+    removed: "place.removed",
+    outside: "place.outside",
+    overlap: "place.overlap",
+    teamFull: "place.teamFull",
+  };
+  setStatus(t(keys[m], { n: state.stones.length }));
+}
+
+function copyScenario(): void {
+  const json = JSON.stringify(makeScenario(state.stones, nextTeam()), null, 1);
+  $<HTMLTextAreaElement>("replay-text").value = json;
+  void copyReplay();
+}
 
 function scene(): Scene {
+  let highlight: Scene["highlight"] = null;
   const stones: DrawStone[] = [];
   const traces: Scene["traces"] = [];
   const sim = state.sim;
@@ -336,13 +378,16 @@ function scene(): Scene {
     traces.push(...collectTraces(sim));
   } else {
     traces.push(...state.lastTraces);
-    for (const s of state.stones) stones.push({ id: s.id, team: s.team, x: s.x, y: s.y, angle: state.angles.get(s.id) ?? 0 });
+    const pv = placement ? placement.preview() : { stones: state.stones, highlight: null };
+    highlight = pv.highlight;
+    for (const s of pv.stones) stones.push({ id: s.id, team: s.team, x: s.x, y: s.y, angle: state.angles.get(s.id) ?? 0 });
   }
   return {
     stones,
     traces,
     broom: state.broom,
     predictedStopY: state.params && !sim ? stopForSpeed(state.params, currentSpeed()) : null,
+    highlight,
     sweeping: !!sim && !sim.done && sim.canSweep() && (state.playback ? false : sweepInput()),
   };
 }
@@ -424,11 +469,23 @@ function loadReplayText(text: string): void {
     setReplayMsg(t("replay.invalid"));
     return;
   }
+  if (state.sim) return;
+  if ((r as { format?: string }).format === "curling-scenario") {
+    if (!validateScenario(r)) {
+      setReplayMsg(t("scenario.invalid"));
+      return;
+    }
+    resetTo(r.stones);
+    setNextTeam(r.nextTeam);
+    setReplayMsg(t("scenario.loaded", { n: r.stones.length }));
+    setStatus(t("status.ready", { n: state.stones.length }));
+    draw();
+    return;
+  }
   if (!validateReplay(r)) {
     setReplayMsg(t("replay.invalid"));
     return;
   }
-  if (state.sim) return;
   const msg = r.engineVersion !== ENGINE_VERSION ? t("replay.versionWarn", { v: r.engineVersion }) + " " : "";
   const { hash } = runReplay(r);
   setReplayMsg(msg + t("replay.loaded", { hash }));
@@ -456,7 +513,7 @@ function setStatus(s: string): void {
   $("status").textContent = s;
 }
 function setBusy(b: boolean): void {
-  for (const id of ["throw", "repeat", "retry", "clear", "load-file"]) $<HTMLButtonElement>(id).disabled = b;
+  for (const id of ["throw", "repeat", "retry", "clear", "load-file", "copy-scenario"]) $<HTMLButtonElement>(id).disabled = b;
 }
 
 // ——— Input ———
@@ -506,13 +563,14 @@ function bindSweepButton(): void {
 function bindBroom(): void {
   const c = houseR.canvas;
   const set = (ev: PointerEvent) => {
-    if (state.sim) return;
+    if (state.sim || placement?.enabled) return;
     const p = houseR.eventToWorld(ev);
     state.broom = { x: Math.max(-2.2, Math.min(2.2, p.x)), y: Math.max(FAR_HOG_INSIDE + 0.5, Math.min(HACK_Y, p.y)) };
     updateShotReadout();
     draw();
   };
   c.addEventListener("pointerdown", (ev) => {
+    if (placement?.enabled) return;
     c.setPointerCapture(ev.pointerId);
     set(ev);
   });
@@ -553,6 +611,20 @@ function init(): void {
   $("det-check").addEventListener("click", checkDeterminism);
   bindSweepButton();
   bindBroom();
+  placement = new PlacementTool(houseR, {
+    stones: () => state.stones,
+    setStones: (s) => {
+      state.stones = s;
+      state.lastTraces = [];
+    },
+    team: placeTeam,
+    locked: () => !!state.sim,
+    redraw: draw,
+    message: placementMessage,
+  });
+  for (const id of ["tool-broom", "tool-place"]) $(id).addEventListener("change", () => setTool($<HTMLInputElement>("tool-place").checked ? "place" : "broom"));
+  $("copy-scenario").addEventListener("click", copyScenario);
+  setTool("broom");
 
   new ResizeObserver(() => draw()).observe($("views"));
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw);

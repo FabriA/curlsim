@@ -42,11 +42,37 @@
     </fieldset>
 
     <fieldset class="panel">
+      <legend data-t="section.place"></legend>
+      <div class="field" role="radiogroup" aria-labelledby="tool-label">
+        <span id="tool-label" data-t="place.tool"></span>
+        <div class="seg">
+          <label><input type="radio" name="tool" id="tool-broom" checked><span data-t="place.toolBroom"></span></label>
+          <label><input type="radio" name="tool" id="tool-place"><span data-t="place.toolPlace"></span></label>
+        </div>
+      </div>
+      <div class="pair">
+        <div class="field" role="radiogroup" aria-labelledby="place-label">
+          <span id="place-label" data-t="place.team"></span>
+          <label class="radio"><input type="radio" name="place-team" id="place-0" checked><i class="dot t0"></i><span data-t="team.0"></span></label>
+          <label class="radio"><input type="radio" name="place-team" id="place-1"><i class="dot t1"></i><span data-t="team.1"></span></label>
+        </div>
+        <div class="field" role="radiogroup" aria-labelledby="next-label">
+          <span id="next-label" data-t="next.label"></span>
+          <label class="radio"><input type="radio" name="next-team" id="next-0" checked><i class="dot t0"></i><span data-t="team.0"></span></label>
+          <label class="radio"><input type="radio" name="next-team" id="next-1"><i class="dot t1"></i><span data-t="team.1"></span></label>
+        </div>
+      </div>
+      <div class="actions secondary">
+        <button id="copy-scenario" type="button" data-t="scenario.copy"></button>
+      </div>
+    </fieldset>
+
+    <fieldset class="panel">
       <legend data-t="section.shot"></legend>
       <div class="field">
         <span data-t="shot.broom"></span>
         <p class="value" id="broom-value"></p>
-        <p class="hint" data-t="shot.broomHint"></p>
+        <p class="hint" id="tool-hint" data-t="shot.broomHint"></p>
       </div>
       <div class="field" role="radiogroup" aria-labelledby="rot-label">
         <span id="rot-label" data-t="shot.rotation"></span>

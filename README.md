@@ -36,11 +36,12 @@ src/core/        motore puro, senza grafica (usabile anche in Node e in un Web W
   physics.ts       moto delle pietre, curl, spazzata, urti
   rules.ts         pietre fuori gioco (R2 f–h), separate dalla fisica
   sim.ts           tiro, simulazione passo-passo, replay, hash dello stato
+  placement.ts     posizionamento manuale delle pietre e scenari salvabili
   calibrate.ts     calibrazione su tempo hog-to-hog e curva di un draw
   rng.ts           generatore con seme, solo operazioni intere
   reference.ts     replay di riferimento per il controllo di determinismo
 src/i18n/        stringhe dell'interfaccia (italiano)
-src/lab/         laboratorio 2D (canvas)
+src/lab/         laboratorio 2D (canvas); placement-tool.ts è lo strumento di trascinamento riusabile
 tests/           calibrazione, plausibilità, urti, regole, determinismo
 ```
 
@@ -57,6 +58,19 @@ tests/           calibrazione, plausibilità, urti, regole, determinismo
   (scambio di rotazione); più passate per le catene.
 
 I valori sono approssimazioni su valori tipici di gioco, da validare con misure su ghiaccio.
+
+## Posizionamento delle pietre
+
+Nel pannello **Pietre in gioco** si sceglie lo strumento attivo sulla casa:
+
+- **Posiziona le pietre:** tocca un punto libero per aggiungere una pietra della squadra scelta e trascinala;
+  trascina una pietra per spostarla; portala oltre la back line o sulla linea laterale, oppure toccala due volte, per toglierla.
+  Le posizioni devono essere in gioco secondo R2 e senza sovrapposizioni; al massimo 8 pietre per squadra.
+- **Prossimo tiro** indica la squadra che tira; dopo ogni tiro passa all'altra.
+- **Copia posizione** salva la disposizione come scenario JSON (`curling-scenario`); **Carica** accetta sia replay sia scenari.
+
+La logica sta in `src/core/placement.ts` e lo strumento d'interfaccia in `src/lab/placement-tool.ts`,
+pronti per la modalità di allenamento.
 
 ## Determinismo
 

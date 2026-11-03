@@ -39,6 +39,8 @@ export interface Scene {
   /** Punto d'arresto previsto (dritto, senza spazzata) per il peso scelto. */
   predictedStopY: number | null;
   sweeping: boolean;
+  /** Pietra trascinata: anello verde se la posizione è valida, rosso se no. */
+  highlight?: { id: number; ok: boolean } | null;
 }
 
 export const HOUSE_VIEW: ViewRect = { y0: FAR_HOG_INSIDE - 0.6, y1: HACK_Y + 0.4 };
@@ -58,6 +60,8 @@ interface Palette {
   broom: string;
   aim: string;
   sweep: string;
+  ok: string;
+  bad: string;
 }
 
 function palette(): Palette {
@@ -77,6 +81,8 @@ function palette(): Palette {
     broom: g("--broom"),
     aim: g("--aim"),
     sweep: g("--sweep"),
+    ok: g("--ok"),
+    bad: g("--bad"),
   };
 }
 
@@ -168,6 +174,19 @@ export class Renderer {
 
     this.drawBroom(pal, scene.broom.x, scene.broom.y);
     for (const s of scene.stones) this.drawStone(pal, s, scene.sweeping && !!s.delivered);
+    const hl = scene.highlight;
+    if (hl) {
+      const s = scene.stones.find((x) => x.id === hl.id);
+      if (s) {
+        ctx.save();
+        ctx.strokeStyle = hl.ok ? pal.ok : pal.bad;
+        ctx.lineWidth = Math.max(2, this.scale * 0.03);
+        ctx.beginPath();
+        ctx.arc(this.X(s.x), this.Y(s.y), STONE_RADIUS * this.scale * 1.25, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
   }
 
   private drawIce(pal: Palette, W: number, H: number): void {
