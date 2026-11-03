@@ -11,8 +11,8 @@ import {
   HALF_LENGTH,
   HALF_WIDTH,
   HOG_WIDTH,
+  HACK_POINT,
   HOUSE_RADII,
-  RELEASE_Y,
   STONE_RADIUS,
   TEE_Y,
 } from "../core/geometry";
@@ -140,13 +140,13 @@ export class Renderer {
     if (this.view.y0 < -TEE_Y + 2) this.drawHouse(pal, -TEE_Y);
     this.drawLines(pal);
 
-    // Linea di mira dal rilascio alla scopa.
+    // Linea di mira dalla staffa alla scopa.
     ctx.save();
     ctx.strokeStyle = pal.aim;
     ctx.lineWidth = Math.max(1, this.scale * 0.012);
     ctx.setLineDash([this.scale * 0.15, this.scale * 0.12]);
     ctx.beginPath();
-    ctx.moveTo(this.X(0), this.Y(RELEASE_Y));
+    ctx.moveTo(this.X(HACK_POINT.x), this.Y(HACK_POINT.y));
     ctx.lineTo(this.X(scene.broom.x), this.Y(scene.broom.y));
     ctx.stroke();
     ctx.restore();

@@ -7,7 +7,7 @@
  */
 
 /** Versione del motore: entra in ogni replay. Cambiarla quando cambia il comportamento fisico. */
-export const ENGINE_VERSION = "0.1.0";
+export const ENGINE_VERSION = "0.2.0";
 
 /** Passo temporale fisso (s). */
 export const DT = 0.001;
@@ -63,5 +63,11 @@ export const BASE_PARAMS: Omit<IceParams, "mu" | "curlK"> = {
   inertiaK: 0.5,
 };
 
-/** Rotazione tipica al rilascio (rad/s): circa 2–3 giri su un draw. */
-export const DEFAULT_SPIN_RATE = 1.2;
+export type SpinLevel = "low" | "normal" | "high";
+
+/**
+ * Giri compiuti dal rilascio all'arresto su un draw al tee, per livello di rotazione:
+ * bassa 1–2, normale 3–4, alta 5–8. La velocità angolare al rilascio si ricava con
+ * spinRateForTurns (calibrate.ts).
+ */
+export const SPIN_TURNS: Record<SpinLevel, number> = { low: 1.5, normal: 3.5, high: 6.5 };

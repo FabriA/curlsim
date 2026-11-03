@@ -4,7 +4,7 @@
  * e alla riesecuzione dei replay senza interfaccia.
  */
 import { DT, ENGINE_VERSION, MAX_TICKS, type IceParams } from "./params";
-import { FAR_HOG_OUTSIDE, RELEASE_Y, TEE_Y } from "./geometry";
+import { FAR_HOG_OUTSIDE, HACK_POINT, RELEASE_Y, TEE_Y } from "./geometry";
 import { createStone, isAtRest, stepWorld, type Team, type World } from "./physics";
 import { applyBoundaryRules, applyHogRule, type Removal } from "./rules";
 import { createRng, gaussian } from "./rng";
@@ -26,6 +26,8 @@ export interface ShotInput {
   spin: 1 | -1;
   /** Modulo della rotazione al rilascio (rad/s). */
   spinRate: number;
+  /** Giri previsti su un draw al tee (informativo, per il registro). */
+  spinTurns?: number;
 }
 
 export interface Skill {
@@ -81,13 +83,18 @@ export function computeRelease(shot: ShotInput, skill: Skill, seed: number): Rel
   const rng = createRng(seed);
   const lineErr = gaussian(rng) * skill.lineSigma;
   const weightErr = gaussian(rng) * skill.weightSigma;
+  // Linea di tiro: dalla staffa alla scopa (spostata dall'errore di linea).
   const tx = shot.broomX + lineErr;
   const ty = shot.broomY;
-  const dx = tx - 0;
-  const dy = ty - RELEASE_Y;
+  const dx = tx - HACK_POINT.x;
+  const dy = ty - HACK_POINT.y;
   const d = Math.sqrt(dx * dx + dy * dy);
+  const ux = dx / d;
+  const uy = dy / d;
+  // Punto della linea in cui la pietra raggiunge la hog line di consegna.
+  const s = (RELEASE_Y - HACK_POINT.y) / uy;
   const v = shot.speed * (1 + weightErr);
-  return { x: 0, y: RELEASE_Y, vx: (dx / d) * v, vy: (dy / d) * v, w: shot.spin * shot.spinRate };
+  return { x: HACK_POINT.x + ux * s, y: RELEASE_Y, vx: ux * v, vy: uy * v, w: shot.spin * shot.spinRate };
 }
 
 export class Sim {

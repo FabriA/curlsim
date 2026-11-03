@@ -53,6 +53,19 @@
         <label class="radio"><input type="radio" name="spin" id="spin-cw" checked> <span>↻</span> <span data-t="shot.cw"></span></label>
         <label class="radio"><input type="radio" name="spin" id="spin-ccw"> <span>↺</span> <span data-t="shot.ccw"></span></label>
       </div>
+      <div class="pair">
+        <label class="field">
+          <span data-t="shot.spinLevel"></span>
+          <select id="spin-level">
+            <option value="low" data-t="spin.low"></option>
+            <option value="normal" selected data-t="spin.normal"></option>
+            <option value="high" data-t="spin.high"></option>
+            <option value="custom" data-t="spin.custom"></option>
+          </select>
+        </label>
+        <label class="field"><span data-t="shot.spinTurns"></span><input id="spin-turns" type="number" min="0" max="10" step="0.5" value="3.5"></label>
+      </div>
+      <p id="spin-rate" class="hint mono"></p>
       <label class="field">
         <span data-t="shot.weight"></span>
         <input id="weight" type="range" min="1.6" max="4.6" step="0.01" value="2.03">

@@ -2,9 +2,9 @@
  * Laboratorio 2D – fase 1.
  * Tira, spazza, osserva traiettorie e tempi, salva e riesegui i tiri.
  */
-import { calibrate, stopForSpeed, speedToStopAt } from "../core/calibrate";
+import { calibrate, spinRateForTurns, stopForSpeed, speedToStopAt } from "../core/calibrate";
 import { BACK_LINE_OUTSIDE, FAR_HOG_INSIDE, HACK_Y, HOUSE_RADIUS, RELEASE_Y, STONE_RADIUS, TEE_Y } from "../core/geometry";
-import { DEFAULT_SPIN_RATE, DT, ENGINE_VERSION, PROFILES, type IceParams, type ProfileId } from "../core/params";
+import { DT, ENGINE_VERSION, PROFILES, SPIN_TURNS, type IceParams, type ProfileId, type SpinLevel } from "../core/params";
 import { REFERENCE_HASH, referenceReplay } from "../core/reference";
 import { makeReplay, runReplay, Sim, validateReplay, type Replay, type StonePlacement } from "../core/sim";
 import { num, t } from "../i18n";
@@ -130,8 +130,30 @@ function currentSpin(): 1 | -1 {
   return $<HTMLInputElement>("spin-cw").checked ? 1 : -1;
 }
 
+function currentTurns(): number {
+  return Math.max(0, Number($<HTMLInputElement>("spin-turns").value) || 0);
+}
+function currentSpinRate(): number {
+  return spinRateForTurns(state.params!, currentTurns());
+}
+
+function applySpinLevel(level: SpinLevel | "custom"): void {
+  if (level !== "custom") $<HTMLInputElement>("spin-turns").value = String(SPIN_TURNS[level]);
+  updateShotReadout();
+}
+
+/** Allinea il menu del livello al numero di giri scritto a mano. */
+function syncSpinLevel(): void {
+  const turns = currentTurns();
+  const match = (Object.keys(SPIN_TURNS) as SpinLevel[]).find((k) => SPIN_TURNS[k] === turns);
+  $<HTMLSelectElement>("spin-level").value = match ?? "custom";
+  updateShotReadout();
+}
+
 function updateShotReadout(): void {
   if (!state.params) return;
+  const w = currentSpinRate();
+  $("spin-rate").textContent = t("shot.spinRate", { w: num(w, 2), rps: num(w / (2 * Math.PI), 2) });
   const v = currentSpeed();
   $("weight-value").textContent = t("shot.weightValue", { v: num(v, 2) });
   $("weight-stop").textContent = t("shot.weightStop", { where: describeStop(stopForSpeed(state.params, v)) });
@@ -162,7 +184,7 @@ function throwStone(): void {
     state.params,
     team,
     state.stones,
-    { broomX: state.broom.x, broomY: state.broom.y, speed: currentSpeed(), spin: currentSpin(), spinRate: DEFAULT_SPIN_RATE },
+    { broomX: state.broom.x, broomY: state.broom.y, speed: currentSpeed(), spin: currentSpin(), spinRate: currentSpinRate(), spinTurns: currentTurns() },
     skill(),
     seed,
   );
@@ -512,6 +534,8 @@ function init(): void {
     draw();
   });
   for (const id of ["spin-cw", "spin-ccw"]) $(id).addEventListener("change", updateShotReadout);
+  $<HTMLSelectElement>("spin-level").addEventListener("change", (e) => applySpinLevel((e.target as HTMLSelectElement).value as SpinLevel | "custom"));
+  $("spin-turns").addEventListener("input", syncSpinLevel);
   $("throw").addEventListener("click", throwStone);
   $("repeat").addEventListener("click", repeatLast);
   $("retry").addEventListener("click", retryFromSame);

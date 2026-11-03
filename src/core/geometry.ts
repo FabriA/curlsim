@@ -37,5 +37,14 @@ export const HOUSE_RADIUS = HOUSE_RADII[0];
 /** Raggio della pietra: circonferenza massima 914 mm (R2 a). */
 export const STONE_RADIUS = 0.145;
 
-/** Punto di partenza della simulazione: centro della pietra sul bordo della hog line di consegna. */
+/**
+ * Staffa (hack) all'estremità di consegna, sulla linea centrale: origine della linea di tiro.
+ * Il tiratore parte dalla staffa e mira alla scopa dello skip.
+ */
+export const HACK_POINT = { x: 0, y: -HACK_Y } as const;
+
+/**
+ * Inizio del moto libero: il centro della pietra raggiunge la hog line di consegna
+ * lungo la linea staffa → scopa (la pietra va rilasciata prima della hog line, R5 e).
+ */
 export const RELEASE_Y = NEAR_HOG_EDGE;

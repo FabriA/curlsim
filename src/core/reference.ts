@@ -8,7 +8,7 @@ import { BASE_PARAMS, ENGINE_VERSION } from "./params";
 import { computeRelease, type Replay } from "./sim";
 import { TEE_Y } from "./geometry";
 
-export const REFERENCE_HASH = "0e8326a5";
+export const REFERENCE_HASH = "97156709";
 
 export function referenceReplay(): Replay {
   const params = { ...BASE_PARAMS, mu: 0.0074, curlK: 0.007 };

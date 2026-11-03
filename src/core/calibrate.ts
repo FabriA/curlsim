@@ -4,7 +4,7 @@
  *  - curlK si cerca per bisezione simulando lo stesso draw finché la curva
  *    raggiunge il valore richiesto.
  */
-import { BASE_PARAMS, DEFAULT_SPIN_RATE, G, type IceParams, type IceTargets } from "./params";
+import { BASE_PARAMS, G, SPIN_TURNS, type IceParams, type IceTargets } from "./params";
 import { FAR_HOG_OUTSIDE, RELEASE_Y, TEE_Y } from "./geometry";
 import { Sim } from "./sim";
 
@@ -29,10 +29,19 @@ export function stopForSpeed(params: IceParams, speed: number): number {
   return RELEASE_Y + (speed * speed) / (2 * params.mu * G);
 }
 
-/** Curva di un draw al tee con i parametri dati (m). */
-export function measureDrawCurl(params: IceParams, spin: 1 | -1 = 1): number {
+/**
+ * Velocità angolare al rilascio (rad/s) che fa compiere `turns` giri a un draw al tee.
+ * Nel modello la rotazione cala in proporzione alla velocità, quindi i giri valgono
+ * (ω₀ / v₀) · percorso / 2π.
+ */
+export function spinRateForTurns(params: IceParams, turns: number): number {
+  return (2 * Math.PI * turns * speedToStopAt(params, TEE_Y)) / D_TOTAL;
+}
+
+/** Curva di un draw al tee con i parametri dati (m), con rotazione normale salvo indicazione. */
+export function measureDrawCurl(params: IceParams, spin: 1 | -1 = 1, turns = SPIN_TURNS.normal): number {
   const v = speedToStopAt(params, TEE_Y);
-  const sim = new Sim(params, [], 0, { x: 0, y: RELEASE_Y, vx: 0, vy: v, w: spin * DEFAULT_SPIN_RATE });
+  const sim = new Sim(params, [], 0, { x: 0, y: RELEASE_Y, vx: 0, vy: v, w: spin * spinRateForTurns(params, turns) });
   sim.runToEnd();
   return sim.delivered.x * spin;
 }

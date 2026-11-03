@@ -49,7 +49,8 @@ tests/           calibrazione, plausibilità, urti, regole, determinismo
 - **Decelerazione:** attrito costante `μ·g`; `μ` si ricava in forma chiusa dal tempo hog-to-hog di un draw al tee.
 - **Curl:** accelerazione laterale `K / √(v + v₀)` verso destra per rotazione oraria, più forte a bassa velocità;
   quasi indipendente dall'intensità della rotazione. `K` si calibra per bisezione sulla curva di un draw.
-- **Rotazione:** decresce in proporzione alla velocità (2–4 giri su un draw).
+- **Linea di tiro:** parte dalla staffa (hack) all'estremità di consegna e passa per la scopa dello skip; il moto libero inizia quando la pietra raggiunge la hog line di consegna.
+- **Rotazione:** decresce in proporzione alla velocità. Tre livelli, espressi in giri su un draw dal rilascio all'arresto: bassa (1–2, predefinito 1,5), normale (3–4, predefinito 3,5), alta (5–8, predefinito 6,5); oppure un numero di giri a scelta.
 - **Spazzata:** riduce attrito e curl della pietra spazzata. Preset «World Curling 2026 — adattamento v1»:
   spazza solo chi tira, solo la pietra appena consegnata, solo davanti alla tee line.
 - **Urti:** impulso normale con restituzione e impulso tangenziale con attrito di Coulomb tra le pietre
