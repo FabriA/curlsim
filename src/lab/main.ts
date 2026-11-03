@@ -203,6 +203,11 @@ function startSim(replay: Replay, playback: Replay | null): void {
   state.lastFrame = performance.now();
   setStatus(playback ? t("status.replaying", { n: state.log.length }) : t("status.moving"));
   setBusy(true);
+  // Su telefono porta in vista la casa, dove si vede la pietra arrivare.
+  if (isNarrow()) {
+    const smooth = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    $("views").scrollIntoView({ behavior: smooth ? "smooth" : "auto", block: "start" });
+  }
   requestAnimationFrame(frame);
 }
 
@@ -231,7 +236,9 @@ function frame(now: number): void {
       if (s.moving) state.angles.set(s.id, (state.angles.get(s.id) ?? 0) + s.w * DT);
     }
   }
-  $("sweep-btn").classList.toggle("active", !!(sim && !sim.done && sim.canSweep() && (schedule ? false : sweepInput())));
+  const sweepActive = !!(sim && !sim.done && sim.canSweep() && (schedule ? false : sweepInput()));
+  $("sweep-btn").classList.toggle("active", sweepActive);
+  $("fab-sweep").classList.toggle("active", sweepActive);
   draw();
   if (sim.done) finishShot();
   else requestAnimationFrame(frame);
@@ -514,11 +521,18 @@ function setStatus(s: string): void {
 }
 function setBusy(b: boolean): void {
   for (const id of ["throw", "repeat", "retry", "clear", "load-file", "copy-scenario"]) $<HTMLButtonElement>(id).disabled = b;
+  // Barra flottante: «Tira» sparisce durante la corsa, «Spazza» compare solo per i tiri dal vivo.
+  $("fab-throw").hidden = b;
+  $("fab-sweep").hidden = !b || !!state.playback;
+  if (!b) {
+    $("fab-sweep").classList.remove("active");
+    $("sweep-btn").classList.remove("active");
+  }
 }
 
 // ——— Input ———
-function bindSweepButton(): void {
-  const btn = $("sweep-btn");
+/** Collega un pulsante di spazzata: attivo solo finché è tenuto premuto. */
+function bindSweepButton(btn: HTMLElement): void {
   const on = (ev: PointerEvent) => {
     ev.preventDefault();
     state.sweepButton = true;
@@ -534,6 +548,11 @@ function bindSweepButton(): void {
   btn.addEventListener("pointerdown", on);
   for (const e of ["pointerup", "pointercancel", "lostpointercapture", "pointerleave"]) btn.addEventListener(e, off);
   btn.addEventListener("contextmenu", (e) => e.preventDefault());
+}
+
+function bindSweepInputs(): void {
+  bindSweepButton($("sweep-btn"));
+  bindSweepButton($("fab-sweep"));
   window.addEventListener("blur", () => {
     state.sweepButton = false;
     state.sweepKey = false;
@@ -547,7 +566,7 @@ function bindSweepButton(): void {
   window.addEventListener("keydown", (e) => {
     if (e.code !== "Space") return;
     const tag = (e.target as HTMLElement).tagName;
-    if (tag === "TEXTAREA" || tag === "INPUT" || tag === "SELECT") return;
+    if (tag === "TEXTAREA" || tag === "INPUT" || tag === "SELECT" || tag === "SUMMARY") return;
     e.preventDefault();
     if (!state.sim && !e.repeat) {
       throwStone();
@@ -557,6 +576,33 @@ function bindSweepButton(): void {
   });
   window.addEventListener("keyup", (e) => {
     if (e.code === "Space") state.sweepKey = false;
+  });
+}
+
+// ——— Riquadri richiudibili ———
+const isNarrow = () => window.matchMedia("(max-width: 720px)").matches;
+
+function bindPanels(): void {
+  const panels = document.querySelectorAll<HTMLDetailsElement>("details.panel");
+  let saved: Record<string, boolean> = {};
+  try {
+    saved = JSON.parse(localStorage.getItem("curlsim.panels") ?? "{}");
+  } catch {
+    saved = {};
+  }
+  // Su telefono si parte con aperti solo Tiro e Registro.
+  const narrowOpen = new Set(["p-shot", "p-log"]);
+  panels.forEach((d) => {
+    if (d.id in saved) d.open = saved[d.id];
+    else if (isNarrow()) d.open = narrowOpen.has(d.id);
+    d.addEventListener("toggle", () => {
+      saved[d.id] = d.open;
+      try {
+        localStorage.setItem("curlsim.panels", JSON.stringify(saved));
+      } catch {
+        /* memoria del browser non disponibile */
+      }
+    });
   });
 }
 
@@ -609,7 +655,9 @@ function init(): void {
     if (f) loadReplayText(await f.text());
   });
   $("det-check").addEventListener("click", checkDeterminism);
-  bindSweepButton();
+  bindSweepInputs();
+  bindPanels();
+  $("fab-throw").addEventListener("click", throwStone);
   bindBroom();
   placement = new PlacementTool(houseR, {
     stones: () => state.stones,

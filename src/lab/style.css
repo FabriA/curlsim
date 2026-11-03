@@ -149,23 +149,36 @@ h1 {
   background: var(--surface);
   border: 1px solid var(--rule);
   border-radius: var(--radius);
-  padding: 12px 14px 14px;
   margin: 0;
-  display: grid;
-  gap: 10px;
   min-width: 0;
 }
-legend, h2 {
+.panel > summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 14px;
   font-family: var(--font-display);
   font-weight: 600;
   font-size: var(--step-1);
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  margin: 0;
-  padding: 0 4px;
 }
-fieldset.panel > legend { padding: 0 4px; margin-left: -4px; }
-h2 { padding: 0; }
+.panel > summary::-webkit-details-marker { display: none; }
+.panel > summary::after {
+  content: "";
+  width: 0.5em;
+  height: 0.5em;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(45deg) translateY(-2px);
+  transition: transform 0.15s;
+}
+.panel:not([open]) > summary::after { transform: rotate(-45deg); }
+.panel > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.panel-body { display: grid; gap: 10px; padding: 0 14px 14px; min-width: 0; }
 
 .field { display: grid; gap: 4px; }
 .field > span:first-child, .radio, .field.inline > span {
@@ -308,3 +321,33 @@ tbody tr:hover, tbody tr:focus-visible { background: var(--bg); }
 .dot.t0 { background: var(--team-0); }
 .dot.t1 { background: var(--team-1); }
 canvas[data-tool="place"] { cursor: grab; }
+
+/* Pulsanti flottanti per tirare e spazzare: solo su schermi stretti. */
+.fab { display: none; }
+@media (max-width: 720px) {
+  .inline-actions { display: none; }
+  body { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+  .fab {
+    display: flex;
+    gap: 10px;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 20;
+    padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(6px);
+    border-top: 1px solid var(--rule);
+  }
+  .fab button {
+    flex: 1 1 0;
+    min-height: 56px;
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .fab .sweep:not(.active) { background: var(--surface); }
+}

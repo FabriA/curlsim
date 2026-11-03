@@ -24,8 +24,9 @@
 
 <main class="lab">
   <section class="controls" aria-label="Comandi">
-    <fieldset class="panel">
-      <legend data-t="section.ice"></legend>
+    <details class="panel" id="p-ice" open>
+      <summary data-t="section.ice"></summary>
+      <div class="panel-body">
       <label class="field">
         <span data-t="ice.profile"></span>
         <select id="profile">
@@ -39,10 +40,12 @@
         <label class="field"><span data-t="ice.curl"></span><input id="curl" type="number" min="0" max="2.5" step="0.1" value="1.2"></label>
       </div>
       <p id="derived" class="hint mono"></p>
-    </fieldset>
+    </div>
+    </details>
 
-    <fieldset class="panel">
-      <legend data-t="section.place"></legend>
+    <details class="panel" id="p-place" open>
+      <summary data-t="section.place"></summary>
+      <div class="panel-body">
       <div class="field" role="radiogroup" aria-labelledby="tool-label">
         <span id="tool-label" data-t="place.tool"></span>
         <div class="seg">
@@ -65,10 +68,12 @@
       <div class="actions secondary">
         <button id="copy-scenario" type="button" data-t="scenario.copy"></button>
       </div>
-    </fieldset>
+    </div>
+    </details>
 
-    <fieldset class="panel">
-      <legend data-t="section.shot"></legend>
+    <details class="panel" id="p-shot" open>
+      <summary data-t="section.shot"></summary>
+      <div class="panel-body">
       <div class="field">
         <span data-t="shot.broom"></span>
         <p class="value" id="broom-value"></p>
@@ -99,7 +104,7 @@
       </label>
       <div id="weight-marks" class="marks"></div>
       <p id="weight-stop" class="hint"></p>
-      <div class="actions">
+      <div class="actions inline-actions">
         <button id="throw" class="primary" type="button" data-t="shot.throw"></button>
         <button id="sweep-btn" class="sweep" type="button" data-t="shot.sweep"></button>
       </div>
@@ -119,10 +124,12 @@
           <option value="10">10×</option>
         </select>
       </label>
-    </fieldset>
+    </div>
+    </details>
 
-    <fieldset class="panel">
-      <legend data-t="section.skill"></legend>
+    <details class="panel" id="p-skill" open>
+      <summary data-t="section.skill"></summary>
+      <div class="panel-body">
       <div class="pair">
         <label class="field"><span data-t="skill.line"></span><input id="sk-line" type="number" min="0" max="50" step="1" value="5"></label>
         <label class="field"><span data-t="skill.weight"></span><input id="sk-weight" type="number" min="0" max="15" step="0.5" value="2"></label>
@@ -131,7 +138,8 @@
         <label class="field"><span data-t="skill.seed"></span><input id="seed" type="number" step="1" value="1"></label>
         <button id="perfect" type="button" class="align-end" data-t="skill.perfect"></button>
       </div>
-    </fieldset>
+    </div>
+    </details>
   </section>
 
   <section id="views" class="views" aria-label="Pista">
@@ -146,8 +154,9 @@
   </section>
 
   <section class="data">
-    <div class="panel">
-      <h2 data-t="section.log"></h2>
+    <details class="panel" id="p-log" open>
+      <summary data-t="section.log"></summary>
+      <div class="panel-body">
       <p id="log-empty" class="hint" data-t="log.empty"></p>
       <div class="table-wrap">
         <table id="log-table" hidden>
@@ -163,10 +172,12 @@
         </table>
       </div>
       <p class="hint" data-t="log.legend"></p>
-    </div>
+      </div>
+    </details>
 
-    <div class="panel">
-      <h2 data-t="section.replay"></h2>
+    <details class="panel" id="p-replay" open>
+      <summary data-t="section.replay"></summary>
+      <div class="panel-body">
       <label class="field">
         <span data-t="replay.textLabel"></span>
         <textarea id="replay-text" rows="6" spellcheck="false"></textarea>
@@ -181,9 +192,14 @@
         <button id="det-check" type="button" data-t="replay.check"></button>
       </div>
       <p id="det-result" class="hint"></p>
-    </div>
+      </div>
+    </details>
   </section>
 </main>
+<div id="fab" class="fab" aria-label="Comandi di tiro">
+  <button id="fab-throw" class="primary" type="button" data-t="shot.throw"></button>
+  <button id="fab-sweep" class="sweep" type="button" data-t="shot.sweep" hidden></button>
+</div>
 <!--ARTIFACT-BODY-END-->
 <script type="module" src="/src/lab/main.ts"></script>
 </body>
