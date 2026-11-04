@@ -19,29 +19,44 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      # Sempre l'ultimo main, non il commit dell'evento: un'esecuzione rilanciata o rimasta in coda
+      # partirebbe altrimenti da un data.json vecchio e rielaborerebbe messaggi già valutati.
       - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 20
       - name: Installa le dipendenze
         run: npm install --no-audit --no-fund
-      - name: Leggi e valuta le segnalazioni
+      # L'agente è idempotente (salta i messaggi già in data.json): se main è cambiato nel frattempo
+      # non si fondono i rapporti, si riparte dall'ultimo main e si rielabora. Fino a tre tentativi.
+      - name: Leggi, valuta e pubblica le segnalazioni
         env:
           IMAP_HOST: ${{ secrets.IMAP_HOST }}
           IMAP_PORT: ${{ secrets.IMAP_PORT }}
           IMAP_USER: ${{ secrets.IMAP_USER }}
           IMAP_PASSWORD: ${{ secrets.IMAP_PASSWORD }}
           IMAP_MAILBOX: ${{ secrets.IMAP_MAILBOX }}
-        run: npm run agent
-      - name: Pubblica i rapporti
         run: |
           git config user.name "curlsim-feedback-agent"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add reports/feedback
-          if git diff --cached --quiet; then
-            echo "Nessuna novità da pubblicare."
-            exit 0
-          fi
-          git commit -m "Segnalazioni: aggiornamento automatico"
-          git pull --rebase
-          git push
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git reset --hard origin/main
+            npm run agent
+            git add reports/feedback
+            if git diff --cached --quiet; then
+              echo "Nessuna novità da pubblicare."
+              exit 0
+            fi
+            git commit -m "Segnalazioni: aggiornamento automatico"
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "main è cambiato durante la valutazione: nuovo tentativo ($attempt)."
+            sleep 5
+          done
+          echo "Impossibile pubblicare dopo tre tentativi."
+          exit 1
