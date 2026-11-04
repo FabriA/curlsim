@@ -37,6 +37,7 @@ src/core/        motore puro, senza grafica (usabile anche in Node e in un Web W
   rules.ts         pietre fuori gioco (R2 f–h), separate dalla fisica
   sim.ts           tiro, simulazione passo-passo, replay, hash dello stato
   placement.ts     posizionamento manuale delle pietre e scenari salvabili
+  delivery.ts      fase di consegna dalla back line al rilascio e intertempo back-to-hog
   calibrate.ts     calibrazione su tempo hog-to-hog e curva di un draw
   rng.ts           generatore con seme, solo operazioni intere
   reference.ts     replay di riferimento per il controllo di determinismo

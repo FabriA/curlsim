@@ -351,3 +351,26 @@ canvas[data-tool="place"] { cursor: grab; }
   }
   .fab .sweep:not(.active) { background: var(--surface); }
 }
+
+/* Intertempi sopra la casa, come un cronometro a bordo pista. */
+.house-wrap { position: relative; }
+.splits {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  display: grid;
+  gap: 2px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--fg) 82%, transparent);
+  color: var(--bg);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+.splits div { display: flex; justify-content: space-between; gap: 14px; }
+.splits span { opacity: 0.8; }
+.splits b { font-weight: 500; min-width: 4.5ch; text-align: right; }
+.splits b[data-state="running"] { color: var(--team-1); }
+.splits b[data-state="waiting"] { opacity: 0.5; }

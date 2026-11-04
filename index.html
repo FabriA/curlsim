@@ -166,7 +166,13 @@
 
   <section id="views" class="views" aria-label="Pista">
     <figure class="view house-view">
-      <canvas id="house" aria-label="Casa di gioco vista dall'alto"></canvas>
+      <div class="house-wrap">
+        <canvas id="house" aria-label="Casa di gioco vista dall'alto"></canvas>
+        <div id="splits" class="splits" hidden>
+          <div><span data-t="split.backHog"></span><b id="split-bh">—</b></div>
+          <div><span data-t="split.hogHog"></span><b id="split-hh">—</b></div>
+        </div>
+      </div>
       <figcaption data-t="view.house"></figcaption>
     </figure>
     <figure class="view sheet-view">
@@ -185,7 +191,7 @@
           <thead>
             <tr>
               <th data-t="log.n"></th><th data-t="log.rot"></th><th data-t="log.speed"></th>
-              <th data-t="log.hh"></th><th data-t="log.ht"></th><th data-t="log.stop"></th>
+              <th data-t="log.bh"></th><th data-t="log.hh"></th><th data-t="log.ht"></th><th data-t="log.stop"></th>
               <th data-t="log.curl"></th><th data-t="log.turns"></th><th data-t="log.sweep"></th>
               <th data-t="log.outcome"></th><th data-t="log.hash"></th>
             </tr>

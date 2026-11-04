@@ -1,5 +1,12 @@
 # Registro delle versioni
 
+## Non ancora rilasciato
+
+- **Intertempi in diretta** sopra la casa: back-to-hog durante la consegna e hog-to-hog durante la corsa,
+  con il tempo che scorre finché la pietra non attraversa la linea. Il back-to-hog entra anche nel registro dei tiri.
+- **Fase di consegna animata** dalla back line al rilascio, con decelerazione stimata della scivolata (0,1 m/s²,
+  `src/core/delivery.ts`). Non entra nella fisica né nei replay.
+
 ## 0.2.1 — 4 novembre 2026
 
 Motore fisico invariato (0.2.0): i replay della versione 0.2.0 si riproducono identici.

@@ -11,6 +11,7 @@ import { num, t } from "../i18n";
 import type { Key } from "../i18n/it";
 import { HOUSE_VIEW, Renderer, SHEET_VIEW, type DrawStone, type Scene } from "./render";
 import { PlacementTool } from "./placement-tool";
+import { deliveryPosition, planDelivery, type Delivery } from "../core/delivery";
 import { makeScenario, validateScenario, type PlacementCheck } from "../core/placement";
 import type { Team } from "../core/physics";
 
@@ -23,6 +24,7 @@ interface LogEntry {
   replay: Replay;
   speed: number;
   spin: 1 | -1;
+  bh: number;
   hh: number | null;
   ht: number | null;
   stop: { x: number; y: number } | null;
@@ -46,6 +48,10 @@ const state = {
   angles: new Map<number, number>(),
   lastFrame: 0,
   tickDebt: 0,
+  /** Fase di consegna in corso (animazione dalla back line al rilascio), o null. */
+  delivery: null as { plan: Delivery; t: number } | null,
+  /** Intertempi dell'ultimo tiro, mostrati sopra la casa. */
+  splits: { bh: null as number | null, hh: null as number | null, running: false },
   lastSetup: null as { stones: StonePlacement[] } | null,
   lastTraces: [] as Scene["traces"],
 };
@@ -243,6 +249,8 @@ function startSim(replay: Replay, playback: Replay | null): void {
   state.pendingReplay = replay;
   state.playback = playback;
   state.sim = new Sim(replay.params, replay.stonesBefore, replay.team, replay.release);
+  state.delivery = { plan: planDelivery(replay.release), t: 0 };
+  state.splits = { bh: null, hh: null, running: true };
   state.tickDebt = 0;
   state.lastFrame = performance.now();
   setStatus(playback ? t("status.replaying", { n: state.log.length }) : t("status.moving"));
@@ -265,7 +273,22 @@ function frame(now: number): void {
   const speed = Number($<HTMLSelectElement>("play-speed").value);
   const elapsed = Math.min(0.1, (now - state.lastFrame) / 1000);
   state.lastFrame = now;
-  state.tickDebt += (elapsed * speed) / DT;
+  let simTime = elapsed * speed;
+  // Prima del rilascio: la pietra è ancora in mano al tiratore.
+  const dl = state.delivery;
+  if (dl) {
+    dl.t += simTime;
+    if (dl.t < dl.plan.backToHog) {
+      updateSplits();
+      draw();
+      requestAnimationFrame(frame);
+      return;
+    }
+    simTime = dl.t - dl.plan.backToHog;
+    state.splits.bh = dl.plan.backToHog;
+    state.delivery = null;
+  }
+  state.tickDebt += simTime / DT;
   const ticks = Math.floor(state.tickDebt);
   state.tickDebt -= ticks;
   const schedule = state.playback?.sweep;
@@ -283,9 +306,40 @@ function frame(now: number): void {
   const sweepActive = !!(sim && !sim.done && sim.canSweep() && (schedule ? false : sweepInput()));
   $("sweep-btn").classList.toggle("active", sweepActive);
   $("fab-sweep").classList.toggle("active", sweepActive);
+  if (sim.metrics.hogToHog !== null) state.splits.hh = sim.metrics.hogToHog;
+  if (sim.done) state.splits.running = false;
+  updateSplits();
   draw();
   if (sim.done) finishShot();
   else requestAnimationFrame(frame);
+}
+
+/** Intertempi sopra la casa: back-to-hog e hog-to-hog, che scorrono durante la corsa. */
+function updateSplits(): void {
+  const box = $("splits");
+  box.hidden = false;
+  const sp = state.splits;
+  const dl = state.delivery;
+  const sim = state.sim;
+  const bh = $("split-bh");
+  const hh = $("split-hh");
+  if (dl) {
+    bh.textContent = num(dl.t, 2);
+    bh.dataset.state = "running";
+  } else {
+    bh.textContent = sp.bh === null ? "—" : num(sp.bh, 2);
+    bh.dataset.state = "done";
+  }
+  if (sp.hh !== null) {
+    hh.textContent = num(sp.hh, 2);
+    hh.dataset.state = "done";
+  } else if (!dl && sim && !sim.done) {
+    hh.textContent = num(sim.world.tick * DT, 2);
+    hh.dataset.state = "running";
+  } else {
+    hh.textContent = "—";
+    hh.dataset.state = dl ? "waiting" : "done";
+  }
 }
 
 function finishShot(): void {
@@ -325,6 +379,7 @@ function finishShot(): void {
     replay,
     speed: v0,
     spin: replay.shot.spin,
+    bh: planDelivery(replay.release).backToHog,
     hh: m.hogToHog,
     ht: m.hogToTee,
     stop: m.stop,
@@ -424,7 +479,10 @@ function scene(): Scene {
   const sim = state.sim;
   if (sim) {
     for (const s of sim.world.stones) {
-      if (s.inPlay) stones.push({ id: s.id, team: s.team, x: s.x, y: s.y, angle: state.angles.get(s.id) ?? 0, delivered: s.id === sim.deliveredId });
+      if (!s.inPlay) continue;
+      const isDelivered = s.id === sim.deliveredId;
+      const pos = isDelivered && state.delivery ? deliveryPosition(state.delivery.plan, state.delivery.t) : s;
+      stones.push({ id: s.id, team: s.team, x: pos.x, y: pos.y, angle: state.angles.get(s.id) ?? 0, delivered: isDelivered });
     }
     traces.push(...collectTraces(sim));
   } else {
@@ -474,6 +532,7 @@ function renderLog(): void {
       String(e.n),
       e.spin === 1 ? "↻" : "↺",
       num(e.speed, 2),
+      num(e.bh, 2),
       e.hh === null ? "—" : num(e.hh, 2),
       e.ht === null ? "—" : num(e.ht, 2),
       stop,
@@ -486,7 +545,7 @@ function renderLog(): void {
     cells.forEach((c, i) => {
       const td = document.createElement("td");
       td.textContent = c;
-      if (i === 10) td.className = "mono";
+      if (i === 11) td.className = "mono";
       tr.append(td);
     });
     tr.tabIndex = 0;
