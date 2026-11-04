@@ -1,6 +1,8 @@
 # Registro delle versioni
 
-## Non ancora rilasciato
+## 0.2.2 — 4 novembre 2026
+
+Motore fisico invariato (0.2.0): i replay delle versioni 0.2.x si riproducono identici.
 
 - **Precisione «Perfetto»** come primo livello e predefinito; tolto il pulsante «Tiratore perfetto».
 - **Questionario sul realismo** dopo ogni tiro, con domande scelte in base al tipo di tiro (draw, draw spazzato,
@@ -16,6 +18,7 @@
   con il tempo che scorre finché la pietra non attraversa la linea. Il back-to-hog entra anche nel registro dei tiri.
 - **Fase di consegna animata** dalla back line al rilascio, con decelerazione stimata della scivolata (0,1 m/s²,
   `src/core/delivery.ts`). Non entra nella fisica né nei replay.
+- 78 test automatici.
 
 ## 0.2.1 — 4 novembre 2026
 
