@@ -4,6 +4,8 @@
 
 Fase 2. Motore fisico invariato (0.2.0).
 
+- **Peso:** il cursore va da 1,6 a 3,8 m/s (prima fino a 4,6); 3,8 m/s resta il riferimento della pelata.
+
 - **Modalità «End a due»:** due giocatori sullo stesso dispositivo giocano un end standard da 16 pietre.
   Tabellone con pietre rimaste e ultima pietra (hammer), turno evidenziato, numero della pietra.
 - **Regole dell'end** in `src/core/end.ts`, senza interfaccia:
