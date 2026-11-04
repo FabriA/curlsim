@@ -1,7 +1,7 @@
 /** Stringhe dell'interfaccia in italiano. Per aggiungere una lingua, creare un file con le stesse chiavi. */
 export const it = {
   "app.title": "Laboratorio di curling",
-  "app.subtitle": "Fase 1 · modello empirico v{version}",
+  "app.subtitle": "Versione {app} · motore {version} · fase 1",
 
   "section.ice": "Ghiaccio",
   "section.shot": "Tiro",

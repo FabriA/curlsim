@@ -4,7 +4,7 @@
  */
 import { calibrate, spinRateForTurns, stopForSpeed, speedToStopAt, sweepFrictionForGain } from "../core/calibrate";
 import { BACK_LINE_OUTSIDE, FAR_HOG_INSIDE, HACK_Y, HOUSE_RADIUS, RELEASE_Y, STONE_RADIUS, TEE_Y } from "../core/geometry";
-import { DT, ENGINE_VERSION, PROFILES, SHOT_PRECISION, SPIN_TURNS, SWEEP_GAIN, type IceParams, type ProfileId, type SkillLevel, type SpinLevel } from "../core/params";
+import { APP_VERSION, DT, ENGINE_VERSION, PROFILES, SHOT_PRECISION, SPIN_TURNS, SWEEP_GAIN, type IceParams, type ProfileId, type SkillLevel, type SpinLevel } from "../core/params";
 import { REFERENCE_HASH, referenceReplay } from "../core/reference";
 import { makeReplay, runReplay, Sim, validateReplay, type Replay, type StonePlacement } from "../core/sim";
 import { num, t } from "../i18n";
@@ -53,7 +53,7 @@ const state = {
 // ——— Interfaccia: testi statici ———
 function applyTexts(): void {
   document.querySelectorAll<HTMLElement>("[data-t]").forEach((el) => {
-    el.textContent = t(el.dataset.t as Key, { version: ENGINE_VERSION });
+    el.textContent = t(el.dataset.t as Key, { version: ENGINE_VERSION, app: APP_VERSION });
   });
   document.title = t("app.title");
 }

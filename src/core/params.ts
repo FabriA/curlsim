@@ -6,6 +6,9 @@
  * di gioco e vanno sostituiti con misure reali quando saranno disponibili.
  */
 
+/** Versione dell'applicazione (allineata a package.json). */
+export const APP_VERSION = "0.2.1";
+
 /** Versione del motore: entra in ogni replay. Cambiarla quando cambia il comportamento fisico. */
 export const ENGINE_VERSION = "0.2.0";
 
