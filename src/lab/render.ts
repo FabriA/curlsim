@@ -30,11 +30,14 @@ export interface DrawStone {
   y: number;
   angle: number;
   delivered?: boolean;
+  /** Velocità, per disegnare la spazzata davanti alla pietra. */
+  vx?: number;
+  vy?: number;
 }
 
 export interface Scene {
   stones: DrawStone[];
-  traces: { team: 0 | 1; points: { x: number; y: number }[] }[];
+  traces: { team: 0 | 1; points: { x: number; y: number; swept?: boolean }[] }[];
   broom: { x: number; y: number };
   /** Punto d'arresto previsto (dritto, senza spazzata) per il peso scelto. */
   predictedStopY: number | null;
@@ -179,6 +182,18 @@ export class Renderer {
       ctx.moveTo(this.X(tr.points[0].x), this.Y(tr.points[0].y));
       for (const p of tr.points) ctx.lineTo(this.X(p.x), this.Y(p.y));
       ctx.stroke();
+      // Tratti spazzati: una banda del colore della spazzata sotto la traccia.
+      ctx.strokeStyle = pal.sweep;
+      ctx.globalAlpha = 0.45;
+      ctx.lineWidth = Math.max(3, this.scale * 0.11);
+      ctx.lineCap = "round";
+      for (let i = 1; i < tr.points.length; i++) {
+        if (!tr.points[i].swept) continue;
+        ctx.beginPath();
+        ctx.moveTo(this.X(tr.points[i - 1].x), this.Y(tr.points[i - 1].y));
+        ctx.lineTo(this.X(tr.points[i].x), this.Y(tr.points[i].y));
+        ctx.stroke();
+      }
       ctx.restore();
     }
 
@@ -327,8 +342,16 @@ export class Renderer {
       ctx.save();
       ctx.fillStyle = pal.sweep;
       ctx.globalAlpha = 0.35;
+      // Davanti alla pietra, nella direzione del moto: le scope lavorano sul ghiaccio che la pietra sta per attraversare.
+      const v = Math.hypot(s.vx ?? 0, s.vy ?? 0);
+      const ux = v > 1e-6 ? (s.vx ?? 0) / v : 0;
+      const uy = v > 1e-6 ? (s.vy ?? 0) / v : 1;
+      // In coordinate canvas l'asse y è invertito.
+      const ax = cx + ux * r * 2.2;
+      const ay = cy - uy * r * 2.2;
+      const rot = Math.atan2(-uy, ux) + Math.PI / 2;
       ctx.beginPath();
-      ctx.ellipse(cx, cy - r * 2.2, r * 1.3, r * 0.7, 0, 0, Math.PI * 2);
+      ctx.ellipse(ax, ay, r * 1.3, r * 0.7, rot, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     }

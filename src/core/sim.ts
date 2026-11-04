@@ -59,7 +59,11 @@ export interface Replay {
   release: Release;
   /** Intervalli [inizio, fine) in tick in cui il comando di spazzata era attivo. */
   sweep: [number, number][];
-  result?: { hash: string; ticks: number };
+  /**
+   * Esito, scritto a fine tiro. `sweepTime` e `swept` sono informativi: dicono quando la
+   * spazzata ha agito davvero (in secondi dal rilascio); per rieseguire il tiro conta `sweep`.
+   */
+  result?: { hash: string; ticks: number; sweepTime?: number; swept?: [number, number][] };
 }
 
 export interface ShotMetrics {
@@ -119,7 +123,10 @@ export class Sim {
   readonly sweep: [number, number][] = [];
   readonly metrics: ShotMetrics;
   /** Traccia della pietra tirata e delle altre in movimento, ogni 20 ms. */
-  readonly trace = new Map<number, { x: number; y: number }[]>();
+  readonly trace = new Map<number, { x: number; y: number; swept?: boolean }[]>();
+  /** Intervalli [inizio, fine) in tick in cui la spazzata ha agito davvero sulla pietra tirata. */
+  readonly swept: [number, number][] = [];
+  private sweptNow = false;
   done = false;
   private sweepOn = false;
   private impactLast: { shooter: { x: number; y: number }; target: { x: number; y: number } } | null = null;
@@ -154,6 +161,11 @@ export class Sim {
     return this.world.stones.find((s) => s.id === this.deliveredId)!;
   }
 
+  /** Intervalli di spazzata effettiva in secondi dal rilascio, arrotondati al centesimo. */
+  sweptSeconds(): [number, number][] {
+    return this.swept.map(([a, b]) => [Math.round(a * DT * 100) / 100, Math.round(b * DT * 100) / 100]);
+  }
+
   /** La pietra tirata può essere spazzata? Semplificazione v1: solo davanti alla tee line. */
   canSweep(): boolean {
     const d = this.delivered;
@@ -171,6 +183,11 @@ export class Sim {
     }
     const swept = sweepInput && this.canSweep();
     if (swept) this.metrics.sweepTime += DT;
+    if (swept !== this.sweptNow) {
+      if (swept) this.swept.push([w.tick, w.tick]);
+      else this.swept[this.swept.length - 1][1] = w.tick;
+      this.sweptNow = swept;
+    }
 
     const d = this.delivered;
     const yBefore = d.y;
@@ -195,7 +212,7 @@ export class Sim {
         if (!s.inPlay || !s.moving) continue;
         let tr = this.trace.get(s.id);
         if (!tr) this.trace.set(s.id, (tr = []));
-        tr.push({ x: s.x, y: s.y });
+        tr.push(s.id === this.deliveredId && this.sweptNow ? { x: s.x, y: s.y, swept: true } : { x: s.x, y: s.y });
       }
     }
 
@@ -249,6 +266,8 @@ export class Sim {
     const w = this.world;
     if (this.sweepOn) this.sweep[this.sweep.length - 1][1] = w.tick;
     this.sweepOn = false;
+    if (this.sweptNow) this.swept[this.swept.length - 1][1] = w.tick;
+    this.sweptNow = false;
     this.metrics.removals.push(...applyHogRule(w, this.deliveredId));
     const d = this.delivered;
     this.metrics.stop = d.inPlay ? { x: d.x, y: d.y } : null;

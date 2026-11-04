@@ -311,7 +311,7 @@ function frame(now: number): void {
       if (s.moving) state.angles.set(s.id, (state.angles.get(s.id) ?? 0) + s.w * DT);
     }
   }
-  const sweepActive = !!(sim && !sim.done && sim.canSweep() && (schedule ? false : sweepInput()));
+  const sweepActive = !!(sim && !sim.done && sim.canSweep() && (schedule ? playbackSweeping(sim) : sweepInput()));
   $("sweep-btn").classList.toggle("active", sweepActive);
   $("fab-sweep").classList.toggle("active", sweepActive);
   if (sim.metrics.hogToHog !== null) state.splits.hh = sim.metrics.hogToHog;
@@ -355,7 +355,7 @@ function finishShot(): void {
   const replay = state.pendingReplay!;
   replay.sweep = state.playback ? state.playback.sweep.map((x) => [...x] as [number, number]) : sim.sweep.map((x) => [...x] as [number, number]);
   const hash = runReplay(replay).hash;
-  replay.result = { hash, ticks: sim.metrics.ticks };
+  replay.result = { hash, ticks: sim.metrics.ticks, sweepTime: Math.round(sim.metrics.sweepTime * 100) / 100, swept: sim.sweptSeconds() };
   state.stones = sim.placements();
   state.lastTraces = collectTraces(sim);
   state.sim = null;
@@ -510,7 +510,7 @@ function scene(): Scene {
       if (!s.inPlay) continue;
       const isDelivered = s.id === sim.deliveredId;
       const pos = isDelivered && state.delivery ? deliveryPosition(state.delivery.plan, state.delivery.t) : s;
-      stones.push({ id: s.id, team: s.team, x: pos.x, y: pos.y, angle: state.angles.get(s.id) ?? 0, delivered: isDelivered });
+      stones.push({ id: s.id, team: s.team, x: pos.x, y: pos.y, vx: s.vx, vy: s.vy, angle: state.angles.get(s.id) ?? 0, delivered: isDelivered });
     }
     traces.push(...collectTraces(sim));
   } else {
@@ -526,8 +526,14 @@ function scene(): Scene {
     predictedStopY: state.params && !sim ? stopForSpeed(state.params, currentSpeed()) : null,
     highlight,
     ...(endMode?.active && !sim ? endMode.sceneExtras() : endMode?.active ? { fgz: endMode.sceneExtras().fgz } : {}),
-    sweeping: !!sim && !sim.done && sim.canSweep() && (state.playback ? false : sweepInput()),
+    sweeping: !!sim && !sim.done && sim.canSweep() && (state.playback ? playbackSweeping(sim) : sweepInput()),
   };
+}
+
+/** Nella riproduzione la spazzata segue il programma registrato nel replay. */
+function playbackSweeping(sim: Sim): boolean {
+  const tk = sim.world.tick;
+  return !!state.playback?.sweep.some(([a, b]) => tk >= a && tk < b);
 }
 
 function collectTraces(sim: Sim): Scene["traces"] {

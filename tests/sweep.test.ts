@@ -41,6 +41,29 @@ describe("livelli degli sweeper", () => {
   });
 });
 
+describe("registrazione della spazzata", () => {
+  it("gli intervalli di spazzata effettiva corrispondono al tempo spazzato e si fermano alla tee line", () => {
+    const ice = calibrate(PROFILES.normal);
+    const sim = new Sim(ice, [], 0, { x: 0, y: RELEASE_Y, vx: 0, vy: 2.0, w: 0 });
+    sim.runToEnd([[1000, 4000], [8000, 60000]]);
+    const total = sim.swept.reduce((a, [x, y]) => a + (y - x), 0) / 1000;
+    expect(Math.abs(total - sim.metrics.sweepTime)).toBeLessThan(0.002);
+    expect(sim.swept[0]).toEqual([1000, 4000]);
+    expect(sim.sweptSeconds()[0]).toEqual([1, 4]);
+    // il secondo intervallo finisce quando la pietra supera la tee line, prima della fine del comando
+    expect(sim.swept[1][1]).toBeLessThan(60000);
+  });
+
+  it("la traccia della pietra tirata segna i tratti spazzati", () => {
+    const ice = calibrate(PROFILES.normal);
+    const sim = new Sim(ice, [], 0, { x: 0, y: RELEASE_Y, vx: 0, vy: 2.0, w: 0 });
+    sim.runToEnd([[2000, 5000]]);
+    const pts = sim.trace.get(sim.deliveredId)!;
+    expect(pts.some((p) => p.swept)).toBe(true);
+    expect(pts.some((p) => !p.swept)).toBe(true);
+  });
+});
+
 describe("precisione del tiro per livello", () => {
   it("la dispersione dei tiri si riduce da principiante a élite", () => {
     const shot = { broomX: 0, broomY: 17.375, speed: 2, spin: 1 as const, spinRate: 1.5 };

@@ -13,6 +13,10 @@ Fase 2. Motore fisico invariato (0.2.0).
 - Zona FGZ evidenziata sulla pista finché è in vigore; pietre che contano segnate a fine end.
 - Nuovo end con l'ultima pietra secondo R5 a: tira per prima la squadra che ha segnato; con un end nullo l'hammer non cambia.
 - 22 nuovi test sulle regole dell'end, compreso un peel annullato dalla FGZ con la fisica vera.
+- **Spazzata leggibile nei replay:** la riproduzione mostra la spazzata registrata (ombra e pulsante attivo);
+  la traccia segna in blu i tratti spazzati; `result.swept` riporta gli intervalli di spazzata effettiva in secondi
+  dal rilascio e `result.sweepTime` il totale. Il comando registrato resta in `sweep` (tick), come prima.
+- **Ombra della spazzata** sempre davanti alla pietra, nella direzione del moto.
 
 ## 0.2.2 — 4 novembre 2026
 
