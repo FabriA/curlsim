@@ -3,7 +3,7 @@
  * La stessa classe Sim serve al gioco interattivo (input di spazzata a ogni tick)
  * e alla riesecuzione dei replay senza interfaccia.
  */
-import { DT, ENGINE_VERSION, MAX_TICKS, type IceParams } from "./params";
+import { DT, ENGINE_VERSION, G, MAX_TICKS, STOP_MIXTURE, TAKEOUT_SPEED, type IceParams, type Precision } from "./params";
 import { FAR_HOG_OUTSIDE, HACK_POINT, RELEASE_Y, STONE_RADIUS, TEE_Y } from "./geometry";
 import { createStone, isAtRest, stepWorld, type Team, type World } from "./physics";
 import { applyBoundaryRules, applyHogRule, type Removal } from "./rules";
@@ -30,11 +30,30 @@ export interface ShotInput {
   spinTurns?: number;
 }
 
+/** Miscela di gaussiane per l'errore sulla distanza d'arresto: probabilità e σ (m) di ogni componente. */
+export interface StopNoise {
+  p: number[];
+  sigma: number[];
+}
+
 export interface Skill {
-  /** Deviazione standard dell'errore di linea, misurata alla scopa (m). */
+  /** Deviazione standard dell'errore di linea, misurata alla scopa (m), nei tiri a peso da draw. */
   lineSigma: number;
-  /** Deviazione standard dell'errore di peso (frazione della velocità). */
-  weightSigma: number;
+  /** Errore di linea nelle bocciate (m); se assente vale lineSigma. */
+  lineSigmaTakeout?: number;
+  /** Errore sulla distanza d'arresto (dalla 0.2.3). */
+  stopNoise?: StopNoise;
+  /** Formato precedente: errore di peso come frazione della velocità. Resta valido per i vecchi replay. */
+  weightSigma?: number;
+}
+
+/** Abilità del tiratore da un livello di precisione, con la miscela di Brunner sul peso. */
+export function skillFromPrecision(pr: Precision): Skill {
+  return {
+    lineSigma: pr.lineDraw,
+    lineSigmaTakeout: pr.lineTakeout,
+    stopNoise: { p: [...STOP_MIXTURE.p], sigma: STOP_MIXTURE.factor.map((f) => f * pr.stopTypical) },
+  };
 }
 
 /** Stato effettivo al rilascio, dopo l'errore del tiratore. */
@@ -99,10 +118,37 @@ export interface ImpactMetrics {
   targetOut: boolean;
 }
 
-export function computeRelease(shot: ShotInput, skill: Skill, seed: number): Release {
+/**
+ * Rilascio effettivo dopo l'errore del tiratore. Con `stopNoise` l'errore di peso è una distanza
+ * all'arresto (serve μ, da `params`); senza, vale il formato precedente in frazione della velocità.
+ * L'ordine dei numeri casuali è quello di sempre, quindi i vecchi replay restano identici.
+ */
+export function computeRelease(shot: ShotInput, skill: Skill, seed: number, params?: Pick<IceParams, "mu">): Release {
   const rng = createRng(seed);
-  const lineErr = gaussian(rng) * skill.lineSigma;
-  const weightErr = gaussian(rng) * skill.weightSigma;
+  const takeout = shot.speed >= TAKEOUT_SPEED;
+  const lineG = gaussian(rng);
+  const weightG = gaussian(rng);
+  const lineErr = lineG * (takeout && skill.lineSigmaTakeout !== undefined ? skill.lineSigmaTakeout : skill.lineSigma);
+  let speed: number;
+  if (skill.stopNoise && params) {
+    // Sceglie la componente della miscela, poi sposta la distanza d'arresto di δ metri.
+    const u = rng();
+    const { p, sigma } = skill.stopNoise;
+    let k = p.length - 1;
+    let acc = 0;
+    for (let i = 0; i < p.length; i++) {
+      acc += p[i];
+      if (u < acc) {
+        k = i;
+        break;
+      }
+    }
+    const delta = weightG * sigma[k];
+    const a = params.mu * G;
+    speed = Math.sqrt(Math.max(0, shot.speed * shot.speed + 2 * a * delta));
+  } else {
+    speed = shot.speed * (1 + weightG * (skill.weightSigma ?? 0));
+  }
   // Linea di tiro: dalla staffa alla scopa (spostata dall'errore di linea).
   const tx = shot.broomX + lineErr;
   const ty = shot.broomY;
@@ -113,7 +159,7 @@ export function computeRelease(shot: ShotInput, skill: Skill, seed: number): Rel
   const uy = dy / d;
   // Punto della linea in cui la pietra raggiunge la hog line di consegna.
   const s = (RELEASE_Y - HACK_POINT.y) / uy;
-  const v = shot.speed * (1 + weightErr);
+  const v = speed;
   return { x: HACK_POINT.x + ux * s, y: RELEASE_Y, vx: ux * v, vy: uy * v, w: shot.spin * shot.spinRate };
 }
 
@@ -315,7 +361,7 @@ export function makeReplay(
     shot: { ...shot },
     skill: { ...skill },
     seed,
-    release: computeRelease(shot, skill, seed),
+    release: computeRelease(shot, skill, seed, params),
     sweep: [],
   };
 }

@@ -93,6 +93,6 @@ describe("questionario sul realismo", () => {
 
   it("il livello «Perfetto» è il primo e non ha errori", () => {
     expect(Object.keys(SHOT_PRECISION)[0]).toBe("perfect");
-    expect(SHOT_PRECISION.perfect).toEqual({ lineSigma: 0, weightSigma: 0 });
+    expect(SHOT_PRECISION.perfect).toEqual({ lineDraw: 0, lineTakeout: 0, stopTypical: 0 });
   });
 });

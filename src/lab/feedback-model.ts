@@ -31,7 +31,8 @@ export interface ShotFacts {
 }
 
 /** Velocità oltre la quale un tiro è un colpo (bocciata) e non un draw (m/s). */
-export const TAKEOUT_SPEED = 2.6;
+export { TAKEOUT_SPEED } from "../core/params";
+import { TAKEOUT_SPEED } from "../core/params";
 /** Tempo minimo di spazzata per chiedere un giudizio sulla spazzata (s). */
 export const SWEEP_MIN_TIME = 1;
 

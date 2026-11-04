@@ -22,6 +22,10 @@ Fase 2. Motore fisico invariato (0.2.0).
 - **Comandi su telefono:** nella barra in basso, accanto a «Tira», un pulsante per passare da in-turn a out-turn;
   subito sotto, il cursore del peso con velocità e punto d'arresto previsto. Durante la corsa restano solo «Spazza».
 - Nuovo indirizzo per i giudizi sui tiri: curlsim@albonico.ch.
+- **Precisione del tiro come distanza all'arresto**, con la miscela di Brunner (2024, Università di Berna):
+  30% dei tiri ±⅓ del valore tipico, 63% ± il valore tipico, 7% ± 10/3 del valore tipico. Errore di linea separato
+  per draw e bocciate. Livelli: élite 10/5 cm e 30 cm (valori di Brunner), club 20/10 cm e 60 cm, principiante 35/18 cm
+  e 105 cm. Il vecchio formato dell'abilità resta valido: i replay salvati e l'hash di riferimento non cambiano.
 - **Agente delle segnalazioni** (`tools/feedback-agent/`): legge la casella via IMAP in sola lettura, riesegue i replay,
   aggrega i giudizi (anche il rotolamento per pienezza del colpo) e pubblica i rapporti in `reports/feedback/`.
   GitHub Actions lo esegue ogni due ore; Vercel ignora i commit dei soli rapporti.

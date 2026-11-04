@@ -58,8 +58,10 @@ tests/           calibrazione, plausibilità, urti, regole, determinismo
   come metri guadagnati spazzando una guardia a 1,9 m/s dal rilascio all'arresto: principianti 1,0–1,7 m
   (predefinito 1,35), club 1,8–2,5 m (2,15), élite 2,6–3,1 m (2,85), oppure un valore a scelta. Il fattore d'attrito
   si ricava da quel guadagno per ogni profilo di ghiaccio.
-- **Precisione del tiro:** errore di linea alla scopa ed errore di peso, con livelli principiante (40 cm, 5%),
-  club (20 cm, 2,4%) ed élite (8 cm, 0,8%) oppure valori a scelta; valori proposti, da affinare con i test di gioco. Preset «World Curling 2026 — adattamento v1»:
+- **Precisione del tiro:** errore di linea alla scopa (distinto per draw e bocciate, da 2,6 m/s) ed errore di peso
+  espresso come distanza all'arresto, con la miscela di Brunner (2024): 30% dei tiri con un terzo del valore tipico,
+  63% con il valore tipico, 7% con 10/3 del valore tipico. Livelli: perfetto (nessun errore), élite (linea 10/5 cm,
+  peso 30 cm, valori di Brunner), club (20/10 cm, 60 cm), principiante (35/18 cm, 105 cm), oppure valori a scelta.
   spazza solo chi tira, solo la pietra appena consegnata, solo davanti alla tee line.
 - **Urti:** impulso normale con restituzione e impulso tangenziale con attrito di Coulomb tra le pietre
   (scambio di rotazione); più passate per le catene.

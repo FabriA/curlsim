@@ -81,18 +81,36 @@ export const REF_GUARD_SPEED = 1.9;
 export const SWEEP_GAIN: Record<SkillLevel, number> = { beginner: 1.35, club: 2.15, elite: 2.85 };
 export const SWEEP_GAIN_RANGE: Record<SkillLevel, [number, number]> = { beginner: [1.0, 1.7], club: [1.8, 2.5], elite: [2.6, 3.1] };
 
+/** Velocità di rilascio da cui un tiro è un colpo (bocciata) e non un tiro a peso da draw (m/s). */
+export const TAKEOUT_SPEED = 2.6;
+
 /**
- * Precisione del tiratore per livello («perfetto» = nessun errore, il predefinito del laboratorio): deviazione standard dell'errore di linea alla scopa (m)
- * e dell'errore di peso (frazione della velocità di rilascio). Valori proposti, da affinare con i test di gioco.
- * Con un errore di peso dell'1% la distanza d'arresto di un draw varia di circa il 2% (circa 55 cm).
+ * Forma della dispersione del peso, da Brunner (2024, Università di Berna): l'errore sulla distanza
+ * d'arresto è una miscela di gaussiane. Nel 30% dei tiri σ è un terzo del valore tipico, nel 63% è il
+ * valore tipico, nel 7% (errori grossi) è 10/3 del valore tipico. Per l'élite il valore tipico è 30 cm.
  */
+export const STOP_MIXTURE = { p: [0.3, 0.63, 0.07], factor: [1 / 3, 1, 10 / 3] } as const;
+
+export interface Precision {
+  /** Errore di linea alla scopa nei tiri a peso da draw (σ, m). */
+  lineDraw: number;
+  /** Errore di linea alla scopa nelle bocciate (σ, m). */
+  lineTakeout: number;
+  /** Errore tipico sulla distanza d'arresto (σ della componente principale, m). */
+  stopTypical: number;
+}
+
 export type ShotLevel = "perfect" | SkillLevel;
 
-export const SHOT_PRECISION: Record<ShotLevel, { lineSigma: number; weightSigma: number }> = {
-  perfect: { lineSigma: 0, weightSigma: 0 },
-  beginner: { lineSigma: 0.4, weightSigma: 0.05 },
-  club: { lineSigma: 0.2, weightSigma: 0.024 },
-  elite: { lineSigma: 0.08, weightSigma: 0.008 },
+/**
+ * Precisione del tiratore per livello. L'élite riprende i valori di Brunner (2024): linea 10 cm nei draw
+ * e 5 cm nelle bocciate, peso con valore tipico 30 cm. Club e principiante sono proposte da affinare.
+ */
+export const SHOT_PRECISION: Record<ShotLevel, Precision> = {
+  perfect: { lineDraw: 0, lineTakeout: 0, stopTypical: 0 },
+  beginner: { lineDraw: 0.35, lineTakeout: 0.18, stopTypical: 1.05 },
+  club: { lineDraw: 0.2, lineTakeout: 0.1, stopTypical: 0.6 },
+  elite: { lineDraw: 0.1, lineTakeout: 0.05, stopTypical: 0.3 },
 };
 
 export type SpinLevel = "low" | "normal" | "high";

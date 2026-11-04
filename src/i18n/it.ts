@@ -184,8 +184,11 @@ export const it = {
   "sweep.beginner": "Principianti (1,0–1,7 m)",
   "sweep.club": "Club (1,8–2,5 m)",
   "sweep.elite": "Élite (2,6–3,1 m)",
-  "skill.line": "Errore di linea (σ, cm alla scopa)",
-  "skill.weight": "Errore di peso (σ, %)",
+  "skill.line": "Errore di linea nei draw (σ, cm alla scopa)",
+  "skill.lineTakeout": "Errore di linea nelle bocciate (σ, cm)",
+  "skill.stop": "Errore di peso tipico (σ, cm all'arresto)",
+  "skill.mix": "Peso: 30% dei tiri ±{a} cm, 63% ±{b} cm, 7% ±{c} m (miscela di Brunner, 2024).",
+  "skill.mixNone": "Nessun errore di peso.",
   "skill.seed": "Seme",
 
   "log.empty": "Nessun tiro ancora. Scegli peso e rotazione, poi premi Tira.",

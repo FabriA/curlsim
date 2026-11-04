@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { calibrate, stopForSpeed, sweepFrictionForGain } from "../src/core/calibrate";
+import { calibrate, speedToStopAt, stopForSpeed, sweepFrictionForGain } from "../src/core/calibrate";
 import { RELEASE_Y } from "../src/core/geometry";
-import { PROFILES, REF_GUARD_SPEED, SHOT_PRECISION, SWEEP_GAIN, SWEEP_GAIN_RANGE, type SkillLevel } from "../src/core/params";
-import { computeRelease, Sim } from "../src/core/sim";
+import { PROFILES, REF_GUARD_SPEED, SHOT_PRECISION, SWEEP_GAIN, SWEEP_GAIN_RANGE, type ShotLevel, type SkillLevel } from "../src/core/params";
+import { computeRelease, runReplay, Sim, skillFromPrecision } from "../src/core/sim";
+import { REFERENCE_HASH, referenceReplay } from "../src/core/reference";
 
 const levels: SkillLevel[] = ["beginner", "club", "elite"];
 
@@ -65,24 +66,51 @@ describe("registrazione della spazzata", () => {
 });
 
 describe("precisione del tiro per livello", () => {
-  it("la dispersione dei tiri si riduce da principiante a élite", () => {
-    const shot = { broomX: 0, broomY: 17.375, speed: 2, spin: 1 as const, spinRate: 1.5 };
-    const spread = (level: SkillLevel) => {
-      let sx = 0;
-      let sv = 0;
-      for (let seed = 1; seed <= 400; seed++) {
-        const r = computeRelease(shot, SHOT_PRECISION[level], seed);
-        sx += r.x * r.x;
-        sv += (Math.hypot(r.vx, r.vy) - 2) ** 2;
+  const ice = calibrate(PROFILES.normal);
+  const draw = { broomX: 0, broomY: 17.375, speed: speedToStopAt(ice, 17.375), spin: 1 as const, spinRate: 1.5 };
+  const stopOf = (r: { vx: number; vy: number }) => stopForSpeed(ice, Math.hypot(r.vx, r.vy));
+  const N = 4000;
+  const errors = (level: ShotLevel) => {
+    const out: number[] = [];
+    for (let seed = 1; seed <= N; seed++) out.push(stopOf(computeRelease(draw, skillFromPrecision(SHOT_PRECISION[level]), seed, ice)) - stopOf({ vx: 0, vy: draw.speed }));
+    return out;
+  };
+
+  it("perfetto: nessun errore", () => {
+    expect(errors("perfect").every((e) => Math.abs(e) < 1e-9)).toBe(true);
+  });
+
+  it("élite: errore sull'arresto con la miscela di Brunner (σ complessiva circa 36 cm, errori oltre 1 m rari)", () => {
+    const e = errors("elite");
+    const rms = Math.sqrt(e.reduce((a, x) => a + x * x, 0) / N);
+    expect(rms).toBeGreaterThan(0.3);
+    expect(rms).toBeLessThan(0.42);
+    const big = e.filter((x) => Math.abs(x) > 1).length / N;
+    expect(big).toBeGreaterThan(0.01);
+    expect(big).toBeLessThan(0.05);
+  });
+
+  it("la dispersione si riduce da principiante a club a élite", () => {
+    const rms = (l: ShotLevel) => Math.sqrt(errors(l).reduce((a, x) => a + x * x, 0) / N);
+    expect(rms("beginner")).toBeGreaterThan(rms("club"));
+    expect(rms("club")).toBeGreaterThan(rms("elite"));
+  });
+
+  it("nelle bocciate l'errore di linea è quello delle bocciate", () => {
+    const sk = skillFromPrecision(SHOT_PRECISION.elite);
+    const lateral = (speed: number) => {
+      let s2 = 0;
+      for (let seed = 1; seed <= N; seed++) {
+        const r = computeRelease({ ...draw, speed }, sk, seed, ice);
+        // direzione rispetto alla scopa: x alla scopa = x al rilascio scalata sulla distanza staffa → scopa
+        s2 += ((r.vx / r.vy) * (17.375 + 21.033)) ** 2;
       }
-      return { x: Math.sqrt(sx / 400), v: Math.sqrt(sv / 400) };
+      return Math.sqrt(s2 / N);
     };
-    const b = spread("beginner");
-    const c = spread("club");
-    const e = spread("elite");
-    expect(b.x).toBeGreaterThan(c.x);
-    expect(c.x).toBeGreaterThan(e.x);
-    expect(b.v).toBeGreaterThan(c.v);
-    expect(c.v).toBeGreaterThan(e.v);
+    expect(lateral(2.0)).toBeGreaterThan(lateral(3.0) * 1.7);
+  });
+
+  it("il formato precedente dell'abilità resta valido: il replay di riferimento dà lo stesso hash", () => {
+    expect(runReplay(referenceReplay()).hash).toBe(REFERENCE_HASH);
   });
 });

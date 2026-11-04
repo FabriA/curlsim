@@ -4,9 +4,9 @@
  */
 import { calibrate, spinRateForTurns, stopForSpeed, speedToStopAt, sweepFrictionForGain } from "../core/calibrate";
 import { BACK_LINE_OUTSIDE, FAR_HOG_INSIDE, HACK_Y, HOUSE_RADIUS, RELEASE_Y, STONE_RADIUS, TEE_Y } from "../core/geometry";
-import { APP_VERSION, DT, ENGINE_VERSION, PROFILES, SHOT_PRECISION, SPIN_TURNS, SWEEP_GAIN, type IceParams, type ProfileId, type ShotLevel, type SkillLevel, type SpinLevel } from "../core/params";
+import { APP_VERSION, DT, ENGINE_VERSION, PROFILES, SHOT_PRECISION, SPIN_TURNS, SWEEP_GAIN, type IceParams, type Precision, type ProfileId, type ShotLevel, type SkillLevel, type SpinLevel } from "../core/params";
 import { REFERENCE_HASH, referenceReplay } from "../core/reference";
-import { makeReplay, runReplay, Sim, validateReplay, type Replay, type StonePlacement } from "../core/sim";
+import { makeReplay, runReplay, Sim, skillFromPrecision, validateReplay, type Replay, type Skill, type StonePlacement } from "../core/sim";
 import { num, t } from "../i18n";
 import type { Key } from "../i18n/it";
 import { HOUSE_VIEW, Renderer, SHEET_VIEW, type DrawStone, type Scene } from "./render";
@@ -190,15 +190,31 @@ function updateShotReadout(): void {
 function applyShotLevel(level: ShotLevel | "custom"): void {
   if (level === "custom") return;
   const p = SHOT_PRECISION[level];
-  $<HTMLInputElement>("sk-line").value = String(Math.round(p.lineSigma * 100));
-  $<HTMLInputElement>("sk-weight").value = String(Math.round(p.weightSigma * 1000) / 10);
+  $<HTMLInputElement>("sk-line").value = String(Math.round(p.lineDraw * 100));
+  $<HTMLInputElement>("sk-line-to").value = String(Math.round(p.lineTakeout * 100));
+  $<HTMLInputElement>("sk-stop").value = String(Math.round(p.stopTypical * 100));
+  updateMixReadout();
+}
+
+function readPrecision(): Precision {
+  const cm = (id: string) => Math.max(0, Number($<HTMLInputElement>(id).value) || 0) / 100;
+  return { lineDraw: cm("sk-line"), lineTakeout: cm("sk-line-to"), stopTypical: cm("sk-stop") };
+}
+
+function updateMixReadout(): void {
+  const s = readPrecision().stopTypical;
+  $("sk-mix").textContent =
+    s === 0 ? t("skill.mixNone") : t("skill.mix", { a: num((s * 100) / 3, 0), b: num(s * 100, 0), c: num((s * 10) / 3, 1) });
 }
 function syncShotLevel(): void {
-  const s = skill();
-  const match = (Object.keys(SHOT_PRECISION) as ShotLevel[]).find(
-    (k) => Math.abs(SHOT_PRECISION[k].lineSigma - s.lineSigma) < 1e-9 && Math.abs(SHOT_PRECISION[k].weightSigma - s.weightSigma) < 1e-9,
-  );
+  const s = readPrecision();
+  const close = (a: number, b: number) => Math.abs(a - b) < 1e-9;
+  const match = (Object.keys(SHOT_PRECISION) as ShotLevel[]).find((k) => {
+    const p = SHOT_PRECISION[k];
+    return close(p.lineDraw, s.lineDraw) && close(p.lineTakeout, s.lineTakeout) && close(p.stopTypical, s.stopTypical);
+  });
   $<HTMLSelectElement>("shot-level").value = match ?? "custom";
+  updateMixReadout();
 }
 
 function sweepGain(): number {
@@ -230,11 +246,8 @@ function updateSweepReadout(): void {
 }
 
 // ——— Tiro ———
-function skill() {
-  return {
-    lineSigma: Number($<HTMLInputElement>("sk-line").value) / 100,
-    weightSigma: Number($<HTMLInputElement>("sk-weight").value) / 100,
-  };
+function skill(): Skill {
+  return skillFromPrecision(readPrecision());
 }
 
 function throwStone(): void {
@@ -821,7 +834,8 @@ function init(): void {
   $("retry").addEventListener("click", retryFromSame);
   $("clear").addEventListener("click", clearSheet);
   $<HTMLSelectElement>("shot-level").addEventListener("change", (e) => applyShotLevel((e.target as HTMLSelectElement).value as ShotLevel | "custom"));
-  for (const id of ["sk-line", "sk-weight"]) $(id).addEventListener("input", syncShotLevel);
+  for (const id of ["sk-line", "sk-line-to", "sk-stop"]) $(id).addEventListener("input", syncShotLevel);
+  updateMixReadout();
   $<HTMLSelectElement>("sweep-level").addEventListener("change", (e) => applySweepLevel((e.target as HTMLSelectElement).value as SkillLevel | "custom"));
   $("sweep-gain").addEventListener("input", syncSweepLevel);
   $("copy-replay").addEventListener("click", copyReplay);
