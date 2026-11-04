@@ -63,6 +63,11 @@ function applyTexts(): void {
   document.querySelectorAll<HTMLElement>("[data-t]").forEach((el) => {
     el.textContent = t(el.dataset.t as Key, { version: ENGINE_VERSION, app: APP_VERSION });
   });
+  document.querySelectorAll<HTMLElement>("[data-t-label]").forEach((el) => {
+    const label = t(el.dataset.tLabel as Key);
+    el.setAttribute("aria-label", label);
+    el.title = label;
+  });
   document.title = t("app.title");
 }
 
@@ -819,6 +824,10 @@ function init(): void {
     redraw: draw,
     status: setStatus,
     busy: () => !!state.sim,
+    clearTraces: () => {
+      state.lastTraces = [];
+      state.angles.clear();
+    },
   });
   document.body.dataset.mode = "lab";
   $("mode-lab").addEventListener("change", () => setMode("lab"));

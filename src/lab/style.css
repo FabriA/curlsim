@@ -429,15 +429,8 @@ body:not([data-mode="end"]) .end-only { display: none !important; }
 }
 .sb-row.turn { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
 .sb-name { font-weight: 600; }
-.sb-hammer {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--muted);
-  border: 1px solid var(--rule);
-  border-radius: 99px;
-  padding: 1px 6px;
-}
+.sb-hammer { display: inline-flex; align-items: center; color: var(--fg); }
+.sb-hammer svg { display: block; }
 .sb-points { font-family: var(--font-display); font-size: var(--step-2); line-height: 1; min-width: 1ch; text-align: right; }
 .pips { display: inline-flex; gap: 3px; justify-self: end; }
 .pip { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--granite-edge); }

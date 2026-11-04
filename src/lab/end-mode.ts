@@ -33,6 +33,8 @@ export interface EndHost {
   status(msg: string): void;
   /** true mentre una pietra è in corsa. */
   busy(): boolean;
+  /** Cancella dal ghiaccio le traiettorie dell'ultimo tiro. */
+  clearTraces(): void;
 }
 
 export class EndMode {
@@ -135,6 +137,7 @@ export class EndMode {
     this.state = startEnd(hammer, this.readRules());
     this.lastRuling = null;
     this.host.setStones([]);
+    this.host.clearTraces();
     this.hideSheet();
     this.message("");
     this.host.status(t("end.started", { team: teamName(nextTeam(this.state)), hammer: teamName(hammer) }));

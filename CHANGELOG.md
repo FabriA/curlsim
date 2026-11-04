@@ -17,6 +17,8 @@ Fase 2. Motore fisico invariato (0.2.0).
   la traccia segna in blu i tratti spazzati; `result.swept` riporta gli intervalli di spazzata effettiva in secondi
   dal rilascio e `result.sweepTime` il totale. Il comando registrato resta in `sweep` (tick), come prima.
 - **Ombra della spazzata** sempre davanti alla pietra, nella direzione del moto.
+- **Icona del martello** (hammer) nel tabellone dell'end al posto della scritta «Ultima pietra».
+- **Nuovo end** cancella dal ghiaccio le traiettorie dell'ultimo tiro.
 
 ## 0.2.2 — 4 novembre 2026
 
