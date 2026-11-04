@@ -3,6 +3,7 @@
  * predefinite e testo del rapporto da inviare allo sviluppatore. Nessun accesso al DOM.
  */
 import type { Key } from "../i18n/it";
+import type { ImpactMetrics, Replay } from "../core/sim";
 
 export const DEVELOPER_EMAIL = "curlsim@albonico.ch";
 
@@ -23,6 +24,10 @@ export interface ShotFacts {
   hash: string;
   ice: { hogToHog: number; curl: number };
   sweepGain: number;
+  /** Primo urto della pietra tirata, se c'è stato. */
+  impact?: ImpactMetrics | null;
+  /** Replay completo del tiro: entra sempre nel rapporto, per riprodurre il tiro identico. */
+  replay?: Replay;
 }
 
 /** Velocità oltre la quale un tiro è un colpo (bocciata) e non un draw (m/s). */
@@ -30,9 +35,13 @@ export const TAKEOUT_SPEED = 2.6;
 /** Tempo minimo di spazzata per chiedere un giudizio sulla spazzata (s). */
 export const SWEEP_MIN_TIME = 1;
 
+/**
+ * Il peso decide il tipo: da TAKEOUT_SPEED in su è un colpo (bocciata), sotto è un tiro a peso
+ * da draw. Un tiro a peso da draw che colpisce è un raise o un freeze, anche se toglie una pietra.
+ */
 export function classify(f: ShotFacts): ShotKind {
-  if (f.hit) return f.speed >= TAKEOUT_SPEED || f.removedOthers > 0 ? "takeout" : "raise";
   if (f.speed >= TAKEOUT_SPEED) return "takeout";
+  if (f.hit) return "raise";
   if (f.sweepTime >= SWEEP_MIN_TIME) return "sweptDraw";
   return "draw";
 }
@@ -73,6 +82,11 @@ export function questionsFor(kind: ShotKind, f: ShotFacts, fmt: (n: number, d: n
       q.push({ id: "raise.shooter", text: "fb.q.raiseShooter", answers: ["fb.a.tooFarBack", "fb.a.right", "fb.a.tooFarForward", "fb.a.dontKnow"] });
       break;
   }
+  // Spazzata: domande anche sui tiri con urto, se si è spazzato abbastanza.
+  if (kind !== "sweptDraw" && f.sweepTime >= SWEEP_MIN_TIME) {
+    q.push({ id: "sweep.length", text: "fb.q.sweepLength", params: { s: fmt(f.sweepTime, 1) }, answers: SCALE_TOO_MUCH });
+    q.push({ id: "sweep.curl", text: "fb.q.sweepCurl", answers: SCALE_TOO_MUCH });
+  }
   // Rotazione bassa o alta, solo sui tiri senza urti: la curva dipende poco dalla rotazione nel modello.
   if (!f.hit && (f.spinTurns <= 2 || f.spinTurns >= 5)) {
     q.push({
@@ -83,6 +97,21 @@ export function questionsFor(kind: ShotKind, f: ShotFacts, fmt: (n: number, d: n
     });
   }
   return q;
+}
+
+/** Descrizione breve dell'urto: pienezza del colpo, velocità all'urto e strada dopo l'urto. */
+export function describeImpact(imp: ImpactMetrics, fmt: (n: number, d: number) => string, outLabel: string): string {
+  const out = (o: boolean) => (o ? ` (${outLabel})` : "");
+  return (
+    `colpo pieno al ${Math.round(imp.fullness * 100)}% · velocità all'urto ${fmt(imp.speed, 2)} m/s` +
+    ` · tirata dopo l'urto ${fmt(imp.shooterTravel, 2)} m${out(imp.shooterOut)}` +
+    ` · colpita ${fmt(imp.targetTravel, 2)} m${out(imp.targetOut)}`
+  );
+}
+
+/** Etichetta del tipo di tiro, con l'indicazione di una pietra rimossa nei raise. */
+export function shotLabel(kind: ShotKind, f: ShotFacts, label: (k: ShotKind) => string, removedLabel: string): string {
+  return kind === "raise" && f.removedOthers > 0 ? `${label(kind)} · ${removedLabel}` : label(kind);
 }
 
 export interface FeedbackRecord {
@@ -99,18 +128,25 @@ export function formatReport(
   header: { app: string; engine: string },
   label: (k: ShotKind) => string,
   fmt: (n: number, d: number) => string,
+  words: { removed: string; out: string } = { removed: "pietra rimossa", out: "fuori gioco" },
 ): string {
   const lines = [`CurlSim – giudizi sui tiri (versione ${header.app}, motore ${header.engine})`, `Tiri valutati: ${records.length}`, ""];
   for (const r of records) {
     const f = r.facts;
     lines.push(
-      `Tiro ${f.n} · ${label(r.kind)} · ${fmt(f.speed, 2)} m/s · rotazione ${fmt(f.spinTurns, 1)} giri · spazzata ${fmt(f.sweepTime, 1)} s` +
+      `Tiro ${f.n} · ${shotLabel(r.kind, f, label, words.removed)} · ${fmt(f.speed, 2)} m/s · rotazione ${fmt(f.spinTurns, 1)} giri · spazzata ${fmt(f.sweepTime, 1)} s` +
         ` · ghiaccio hog-to-hog ${fmt(f.ice.hogToHog, 1)} s, curva ${fmt(f.ice.curl, 1)} m · sweeper ${fmt(f.sweepGain, 2)} m` +
         ` · esito: ${f.outcome} · hash ${f.hash}`,
     );
+    if (f.impact) lines.push(`  Urto: ${describeImpact(f.impact, fmt, words.out)}`);
     for (const a of r.answers) lines.push(`  - ${a.question} → ${a.answer}`);
     if (r.comment.trim()) lines.push(`  Commento: ${r.comment.trim()}`);
     lines.push("");
+  }
+  const withReplay = records.filter((r) => r.facts.replay);
+  if (withReplay.length) {
+    lines.push("Replay (da incollare in «Carica replay o posizione» per rivedere il tiro identico):", "");
+    for (const r of withReplay) lines.push(`Tiro ${r.facts.n}: ${JSON.stringify(r.facts.replay)}`, "");
   }
   return lines.join("\n");
 }

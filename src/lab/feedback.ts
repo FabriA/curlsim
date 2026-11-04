@@ -7,6 +7,8 @@ import type { Key } from "../i18n/it";
 import { APP_VERSION, ENGINE_VERSION } from "../core/params";
 import {
   classify,
+  describeImpact,
+  shotLabel,
   DEVELOPER_EMAIL,
   formatReport,
   MAILTO_MAX,
@@ -56,8 +58,14 @@ export class FeedbackPanel {
 
     const intro = document.createElement("p");
     intro.className = "fb-intro";
-    intro.textContent = t("fb.intro", { n: facts.n, kind: kindLabel(kind) });
+    intro.textContent = t("fb.intro", { n: facts.n, kind: shotLabel(kind, facts, kindLabel, t("fb.removed")) });
     box.append(intro);
+    if (facts.impact) {
+      const imp = document.createElement("p");
+      imp.className = "hint";
+      imp.textContent = t("fb.impact", { text: describeImpact(facts.impact, fmt, t("fb.out")) });
+      box.append(imp);
+    }
 
     const form = document.createElement("form");
     form.className = "fb-form";
@@ -149,7 +157,7 @@ export class FeedbackPanel {
   }
 
   private report(): string {
-    return formatReport(this.records, { app: APP_VERSION, engine: ENGINE_VERSION }, kindLabel, fmt);
+    return formatReport(this.records, { app: APP_VERSION, engine: ENGINE_VERSION }, kindLabel, fmt, { removed: t("fb.removed"), out: t("fb.out") });
   }
 
   private async copy(): Promise<boolean> {

@@ -6,6 +6,12 @@
 - **Questionario sul realismo** dopo ogni tiro, con domande scelte in base al tipo di tiro (draw, draw spazzato,
   bocciata, raise o freeze, rotazione bassa o alta) e risposte selezionabili. Le risposte restano nel browser,
   si copiano o si inviano per e-mail allo sviluppatore. Su telefono un pulsante «Valuta» porta alle domande.
+- **Classificazione dei tiri corretta:** il tipo dipende dal peso. Da 2,6 m/s è una bocciata; sotto, un tiro che colpisce
+  è un raise o freeze, anche se toglie una pietra («pietra rimossa»). Le domande sulla spazzata compaiono anche
+  nei tiri con urto spazzati per almeno 1 s.
+- **Misure dell'urto** nel rapporto e sopra le domande: pienezza del colpo, velocità della tirata all'urto,
+  strada percorsa dopo l'urto dalla tirata e dalla colpita. Sono solo osservazioni: hash e replay non cambiano.
+- **Replay sempre allegati** al rapporto, uno per ogni tiro valutato, da incollare in «Carica replay o posizione».
 - **Intertempi in diretta** sopra la casa: back-to-hog durante la consegna e hog-to-hog durante la corsa,
   con il tempo che scorre finché la pietra non attraversa la linea. Il back-to-hog entra anche nel registro dei tiri.
 - **Fase di consegna animata** dalla back line al rilascio, con decelerazione stimata della scivolata (0,1 m/s²,

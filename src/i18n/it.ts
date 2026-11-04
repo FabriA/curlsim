@@ -99,6 +99,9 @@ export const it = {
   "fb.a.similarOk": "Simile va bene",
   "fb.a.shouldCurlLess": "Dovrebbe curvare di meno",
   "fb.a.dontKnow": "Non so",
+  "fb.removed": "pietra rimossa",
+  "fb.out": "fuori gioco",
+  "fb.impact": "Urto: {text}.",
   "fb.comment": "Commento (facoltativo)",
   "fb.save": "Salva il giudizio",
   "fb.skip": "Salta",
@@ -114,7 +117,7 @@ export const it = {
   "fb.tooLong": "Le risposte sono molte: le ho copiate negli appunti. Incollale nel corpo della mail al posto del promemoria.",
   "fb.pasteHere": "Incolla qui le risposte copiate dal laboratorio.",
   "fb.nothing": "Non ci sono ancora risposte da inviare.",
-  "fb.mailHint": "Se il pulsante non apre la posta, copia le risposte e incollale in una mail all'indirizzo indicato.",
+  "fb.mailHint": "Il rapporto include il replay di ogni tiro valutato, quindi di solito è lungo: il pulsante lo copia negli appunti e apre la mail, dove va incollato. Se il pulsante non apre la posta, copia le risposte e incollale in una mail all'indirizzo indicato.",
   "fb.subject": "CurlSim – giudizi sui tiri",
   "fb.rate": "Valuta",
 

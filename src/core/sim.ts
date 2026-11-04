@@ -4,7 +4,7 @@
  * e alla riesecuzione dei replay senza interfaccia.
  */
 import { DT, ENGINE_VERSION, MAX_TICKS, type IceParams } from "./params";
-import { FAR_HOG_OUTSIDE, HACK_POINT, RELEASE_Y, TEE_Y } from "./geometry";
+import { FAR_HOG_OUTSIDE, HACK_POINT, RELEASE_Y, STONE_RADIUS, TEE_Y } from "./geometry";
 import { createStone, isAtRest, stepWorld, type Team, type World } from "./physics";
 import { applyBoundaryRules, applyHogRule, type Removal } from "./rules";
 import { createRng, gaussian } from "./rng";
@@ -77,6 +77,22 @@ export interface ShotMetrics {
   sweepTime: number;
   removals: Removal[];
   ticks: number;
+  /** Primo urto della pietra tirata, o null se non ha colpito nulla. Solo misura: non cambia il tiro. */
+  impact: ImpactMetrics | null;
+}
+
+export interface ImpactMetrics {
+  /** Pietra colpita per prima. */
+  targetId: number;
+  /** Pienezza del colpo: 1 = pieno, 0,5 = mezza pietra, vicino a 0 = sottile. */
+  fullness: number;
+  /** Velocità della pietra tirata subito prima dell'urto (m/s). */
+  speed: number;
+  /** Strada percorsa dopo l'urto dalla pietra tirata e da quella colpita (m), finché restano in gioco. */
+  shooterTravel: number;
+  targetTravel: number;
+  shooterOut: boolean;
+  targetOut: boolean;
 }
 
 export function computeRelease(shot: ShotInput, skill: Skill, seed: number): Release {
@@ -106,6 +122,7 @@ export class Sim {
   readonly trace = new Map<number, { x: number; y: number }[]>();
   done = false;
   private sweepOn = false;
+  private impactLast: { shooter: { x: number; y: number }; target: { x: number; y: number } } | null = null;
   private rotAccum = 0;
 
   constructor(params: IceParams, stonesBefore: StonePlacement[], team: Team, release: Release) {
@@ -128,6 +145,7 @@ export class Sim {
       sweepTime: 0,
       removals: [],
       ticks: 0,
+      impact: null,
     };
     this.trace.set(id, [{ x: d.x, y: d.y }]);
   }
@@ -156,7 +174,11 @@ export class Sim {
 
     const d = this.delivered;
     const yBefore = d.y;
+    const wasHit = d.hitStone;
+    const pre = wasHit ? null : { x: d.x, y: d.y, vx: d.vx, vy: d.vy, others: w.stones.map((s) => ({ id: s.id, x: s.x, y: s.y, hit: s.hitStone })) };
     stepWorld(w, swept ? this.deliveredId : null);
+    if (pre && d.hitStone) this.recordImpact(pre);
+    else if (this.metrics.impact) this.trackImpact();
     this.metrics.removals.push(...applyBoundaryRules(w));
 
     if (d.inPlay) {
@@ -180,6 +202,49 @@ export class Sim {
     if (isAtRest(w) || w.tick >= MAX_TICKS) this.finish();
   }
 
+  /** Primo urto della pietra tirata: pienezza del colpo misurata con le posizioni prima del tick. */
+  private recordImpact(pre: { x: number; y: number; vx: number; vy: number; others: { id: number; x: number; y: number; hit: boolean }[] }): void {
+    const v = Math.sqrt(pre.vx * pre.vx + pre.vy * pre.vy);
+    if (v === 0) return;
+    const ux = pre.vx / v;
+    const uy = pre.vy / v;
+    let best: { id: number; x: number; y: number } | null = null;
+    let bestD = Infinity;
+    for (const o of pre.others) {
+      if (o.id === this.deliveredId) continue;
+      const now = this.world.stones.find((s) => s.id === o.id)!;
+      if (o.hit || !now.hitStone) continue; // solo le pietre toccate in questo tick
+      const dd = (o.x - pre.x) ** 2 + (o.y - pre.y) ** 2;
+      if (dd < bestD) {
+        bestD = dd;
+        best = o;
+      }
+    }
+    if (!best) return;
+    // Distanza tra la traiettoria della tirata e il centro della colpita.
+    const offset = Math.abs(ux * (best.y - pre.y) - uy * (best.x - pre.x));
+    const fullness = Math.max(0, Math.min(1, 1 - offset / (2 * STONE_RADIUS)));
+    const target = this.world.stones.find((s) => s.id === best!.id)!;
+    const d = this.delivered;
+    this.metrics.impact = { targetId: best.id, fullness, speed: v, shooterTravel: 0, targetTravel: 0, shooterOut: false, targetOut: false };
+    this.impactLast = { shooter: { x: d.x, y: d.y }, target: { x: target.x, y: target.y } };
+  }
+
+  private trackImpact(): void {
+    const imp = this.metrics.impact!;
+    const last = this.impactLast!;
+    const d = this.delivered;
+    const tg = this.world.stones.find((s) => s.id === imp.targetId)!;
+    if (d.inPlay) {
+      imp.shooterTravel += Math.hypot(d.x - last.shooter.x, d.y - last.shooter.y);
+      last.shooter = { x: d.x, y: d.y };
+    }
+    if (tg.inPlay) {
+      imp.targetTravel += Math.hypot(tg.x - last.target.x, tg.y - last.target.y);
+      last.target = { x: tg.x, y: tg.y };
+    }
+  }
+
   private finish(): void {
     const w = this.world;
     if (this.sweepOn) this.sweep[this.sweep.length - 1][1] = w.tick;
@@ -189,6 +254,11 @@ export class Sim {
     this.metrics.stop = d.inPlay ? { x: d.x, y: d.y } : null;
     this.metrics.rotations = this.rotAccum / (2 * Math.PI);
     this.metrics.ticks = w.tick;
+    const imp = this.metrics.impact;
+    if (imp) {
+      imp.shooterOut = !this.delivered.inPlay;
+      imp.targetOut = !this.world.stones.find((s) => s.id === imp.targetId)!.inPlay;
+    }
     this.done = true;
   }
 

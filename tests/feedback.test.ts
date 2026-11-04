@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { classify, DEVELOPER_EMAIL, formatReport, mailtoHref, questionsFor, type ShotFacts } from "../src/lab/feedback-model";
+import { classify, DEVELOPER_EMAIL, formatReport, mailtoHref, questionsFor, shotLabel, type ShotFacts } from "../src/lab/feedback-model";
 import { SHOT_PRECISION } from "../src/core/params";
+import { REFERENCE_HASH, referenceReplay } from "../src/core/reference";
+import { runReplay, validateReplay } from "../src/core/sim";
 
 const base: ShotFacts = {
   n: 1, speed: 2.03, hit: false, removedOthers: 0, sweepTime: 0, spinTurns: 3.5, stopped: true,
@@ -13,8 +15,20 @@ describe("questionario sul realismo", () => {
     expect(classify(base)).toBe("draw");
     expect(classify({ ...base, sweepTime: 3 })).toBe("sweptDraw");
     expect(classify({ ...base, speed: 3 })).toBe("takeout");
-    expect(classify({ ...base, hit: true, removedOthers: 1 })).toBe("takeout");
+    expect(classify({ ...base, speed: 3, hit: true, removedOthers: 1 })).toBe("takeout");
     expect(classify({ ...base, hit: true })).toBe("raise");
+  });
+
+  it("un tiro a peso da draw che toglie una pietra è un raise, non una bocciata", () => {
+    const f = { ...base, speed: 2.15, hit: true, removedOthers: 1, sweepTime: 14 };
+    expect(classify(f)).toBe("raise");
+    expect(shotLabel("raise", f, () => "Raise o freeze", "pietra rimossa")).toBe("Raise o freeze · pietra rimossa");
+  });
+
+  it("un tiro con urto e spazzata chiede anche della spazzata", () => {
+    const f = { ...base, speed: 2.15, hit: true, removedOthers: 1, sweepTime: 14 };
+    const ids = questionsFor(classify(f), f, fmt).map((q) => q.id);
+    expect(ids).toEqual(["raise.target", "raise.shooter", "sweep.length", "sweep.curl"]);
   });
 
   it("un draw chiede punto di curva, chiusura e peso", () => {
@@ -53,6 +67,22 @@ describe("questionario sul realismo", () => {
     expect(text.includes("hash abcd1234")).toBe(true);
     expect(text.includes("Chiusura → Giusto")).toBe(true);
     expect(text.includes("Commento: Ok")).toBe(true);
+  });
+
+  it("per i tiri con urto il rapporto riporta pienezza, velocità all'urto e strada dopo l'urto", () => {
+    const impact = { targetId: 0, fullness: 0.5, speed: 2.8, shooterTravel: 1.34, targetTravel: 4.2, shooterOut: false, targetOut: true };
+    const f = { ...base, n: 2, speed: 3, hit: true, removedOthers: 1, impact };
+    const text = formatReport([{ facts: f, kind: "takeout", answers: [], comment: "", at: "" }], { app: "x", engine: "y" }, () => "Bocciata", fmt);
+    expect(text.includes("Urto: colpo pieno al 50% · velocità all'urto 2.80 m/s · tirata dopo l'urto 1.34 m · colpita 4.20 m (fuori gioco)")).toBe(true);
+  });
+
+  it("il rapporto contiene sempre il replay completo di ogni tiro valutato", () => {
+    const replay = referenceReplay();
+    const text = formatReport([{ facts: { ...base, replay }, kind: "draw", answers: [], comment: "", at: "" }], { app: "x", engine: "y" }, () => "Draw", fmt);
+    const line = text.split("\n").find((l) => l.startsWith("Tiro 1: {"))!;
+    const back = JSON.parse(line.slice("Tiro 1: ".length));
+    expect(validateReplay(back)).toBe(true);
+    expect(runReplay(back).hash).toBe(REFERENCE_HASH);
   });
 
   it("il link e-mail va allo sviluppatore con oggetto e testo codificati", () => {

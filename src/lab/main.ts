@@ -407,6 +407,8 @@ function finishShot(): void {
     hash,
     ice: readTargets(),
     sweepGain: sweepGain(),
+    impact: m.impact,
+    replay,
   });
   draw();
 }
