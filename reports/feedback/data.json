@@ -2,7 +2,8 @@
  "version": 1,
  "engine": "0.2.0",
  "processed": [
-  "91dfda604e18"
+  "91dfda604e18",
+  "da8a94fc0dcd"
  ],
  "shots": [
   {
@@ -112,7 +113,109 @@
     }
    },
    "warnings": []
+  },
+  {
+   "message": "da8a94fc0dcd",
+   "date": "2026-11-04T13:08:47.000Z",
+   "app": "0.2.2",
+   "engine": "0.2.0",
+   "n": 1,
+   "kind": "Bocciata",
+   "speed": 3.8,
+   "spinTurns": 3.5,
+   "sweepTime": 0,
+   "collisions": null,
+   "outcome": "",
+   "hash": null,
+   "answers": [
+    {
+     "question": "La curva di questo colpo è…",
+     "answer": "Giusto"
+    },
+    {
+     "question": "Dopo l'urto, la direzione della pietra tirata è…",
+     "answer": "Credibile"
+    },
+    {
+     "question": "Dopo l'urto, la distanza percorsa dalla pietra tirata è…",
+     "answer": "Giusto"
+    }
+   ],
+   "comment": "",
+   "replayCheck": "assente",
+   "rerunHash": null,
+   "impact": null,
+   "replay": null,
+   "warnings": []
+  },
+  {
+   "message": "da8a94fc0dcd",
+   "date": "2026-11-04T13:08:47.000Z",
+   "app": "0.2.2",
+   "engine": "0.2.0",
+   "n": 2,
+   "kind": "Bocciata",
+   "speed": 3,
+   "spinTurns": 3.5,
+   "sweepTime": 0,
+   "collisions": null,
+   "outcome": "",
+   "hash": null,
+   "answers": [
+    {
+     "question": "La curva di questo colpo è…",
+     "answer": "Giusto"
+    },
+    {
+     "question": "Dopo l'urto, la direzione della pietra tirata è…",
+     "answer": "Credibile"
+    },
+    {
+     "question": "Dopo l'urto, la distanza percorsa dalla pietra tirata è…",
+     "answer": "Troppo lungo"
+    }
+   ],
+   "comment": "",
+   "replayCheck": "assente",
+   "rerunHash": null,
+   "impact": null,
+   "replay": null,
+   "warnings": []
+  },
+  {
+   "message": "da8a94fc0dcd",
+   "date": "2026-11-04T13:08:47.000Z",
+   "app": "0.2.2",
+   "engine": "0.2.0",
+   "n": 3,
+   "kind": "Bocciata",
+   "speed": 3,
+   "spinTurns": 3.5,
+   "sweepTime": 0,
+   "collisions": null,
+   "outcome": "",
+   "hash": null,
+   "answers": [
+    {
+     "question": "La curva di questo colpo è…",
+     "answer": "Giusto"
+    },
+    {
+     "question": "Dopo l'urto, la direzione della pietra tirata è…",
+     "answer": "Credibile"
+    },
+    {
+     "question": "Dopo l'urto, la distanza percorsa dalla pietra tirata è…",
+     "answer": "Troppo lungo"
+    }
+   ],
+   "comment": "",
+   "replayCheck": "assente",
+   "rerunHash": null,
+   "impact": null,
+   "replay": null,
+   "warnings": []
   }
  ],
- "updated": "2026-11-04 09:57 UTC"
+ "updated": "2026-11-04 15:03 UTC"
 }
