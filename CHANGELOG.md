@@ -2,6 +2,10 @@
 
 ## Non ancora rilasciato
 
+- **Precisione «Perfetto»** come primo livello e predefinito; tolto il pulsante «Tiratore perfetto».
+- **Questionario sul realismo** dopo ogni tiro, con domande scelte in base al tipo di tiro (draw, draw spazzato,
+  bocciata, raise o freeze, rotazione bassa o alta) e risposte selezionabili. Le risposte restano nel browser,
+  si copiano o si inviano per e-mail allo sviluppatore. Su telefono un pulsante «Valuta» porta alle domande.
 - **Intertempi in diretta** sopra la casa: back-to-hog durante la consegna e hog-to-hog durante la corsa,
   con il tempo che scorre finché la pietra non attraversa la linea. Il back-to-hog entra anche nel registro dei tiri.
 - **Fase di consegna animata** dalla back line al rilascio, con decelerazione stimata della scivolata (0,1 m/s²,

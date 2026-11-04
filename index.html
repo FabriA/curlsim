@@ -133,19 +133,19 @@
       <label class="field">
         <span data-t="skill.shotLevel"></span>
         <select id="shot-level">
+          <option value="perfect" selected data-t="level.perfect"></option>
           <option value="beginner" data-t="level.beginner"></option>
-          <option value="club" selected data-t="level.club"></option>
+          <option value="club" data-t="level.club"></option>
           <option value="elite" data-t="level.elite"></option>
           <option value="custom" data-t="level.custom"></option>
         </select>
       </label>
       <div class="pair">
-        <label class="field"><span data-t="skill.line"></span><input id="sk-line" type="number" min="0" max="80" step="1" value="20"></label>
-        <label class="field"><span data-t="skill.weight"></span><input id="sk-weight" type="number" min="0" max="15" step="0.1" value="2.4"></label>
+        <label class="field"><span data-t="skill.line"></span><input id="sk-line" type="number" min="0" max="80" step="1" value="0"></label>
+        <label class="field"><span data-t="skill.weight"></span><input id="sk-weight" type="number" min="0" max="15" step="0.1" value="0"></label>
       </div>
       <div class="pair">
         <label class="field"><span data-t="skill.seed"></span><input id="seed" type="number" step="1" value="1"></label>
-        <button id="perfect" type="button" class="align-end" data-t="skill.perfect"></button>
       </div>
       <div class="pair">
         <label class="field">
@@ -182,6 +182,25 @@
   </section>
 
   <section class="data">
+    <details class="panel" id="p-feedback" open>
+      <summary data-t="section.feedback"></summary>
+      <div class="panel-body">
+      <div id="fb-current" class="fb-current"></div>
+      <p id="fb-empty" class="hint" data-t="fb.none"></p>
+      <div class="fb-collected">
+        <p id="fb-count" class="value"></p>
+        <div class="actions secondary">
+          <button id="fb-copy" type="button" data-t="fb.copy"></button>
+          <a id="fb-send" class="button-link" href="#" data-t="fb.send"></a>
+          <button id="fb-clear" type="button" data-t="fb.clear"></button>
+        </div>
+        <p id="fb-to" class="hint mono"></p>
+        <p class="hint" data-t="fb.mailHint"></p>
+        <p id="fb-msg" class="hint" role="status"></p>
+      </div>
+      </div>
+    </details>
+
     <details class="panel" id="p-log" open>
       <summary data-t="section.log"></summary>
       <div class="panel-body">
@@ -227,6 +246,7 @@
 <div id="fab" class="fab" aria-label="Comandi di tiro">
   <button id="fab-throw" class="primary" type="button" data-t="shot.throw"></button>
   <button id="fab-sweep" class="sweep" type="button" data-t="shot.sweep" hidden></button>
+  <button id="fab-rate" type="button" data-t="fb.rate" hidden></button>
 </div>
 <!--ARTIFACT-BODY-END-->
 <script type="module" src="/src/lab/main.ts"></script>

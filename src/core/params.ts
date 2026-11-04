@@ -82,11 +82,14 @@ export const SWEEP_GAIN: Record<SkillLevel, number> = { beginner: 1.35, club: 2.
 export const SWEEP_GAIN_RANGE: Record<SkillLevel, [number, number]> = { beginner: [1.0, 1.7], club: [1.8, 2.5], elite: [2.6, 3.1] };
 
 /**
- * Precisione del tiratore per livello: deviazione standard dell'errore di linea alla scopa (m)
+ * Precisione del tiratore per livello («perfetto» = nessun errore, il predefinito del laboratorio): deviazione standard dell'errore di linea alla scopa (m)
  * e dell'errore di peso (frazione della velocità di rilascio). Valori proposti, da affinare con i test di gioco.
  * Con un errore di peso dell'1% la distanza d'arresto di un draw varia di circa il 2% (circa 55 cm).
  */
-export const SHOT_PRECISION: Record<SkillLevel, { lineSigma: number; weightSigma: number }> = {
+export type ShotLevel = "perfect" | SkillLevel;
+
+export const SHOT_PRECISION: Record<ShotLevel, { lineSigma: number; weightSigma: number }> = {
+  perfect: { lineSigma: 0, weightSigma: 0 },
   beginner: { lineSigma: 0.4, weightSigma: 0.05 },
   club: { lineSigma: 0.2, weightSigma: 0.024 },
   elite: { lineSigma: 0.08, weightSigma: 0.008 },

@@ -4,13 +4,14 @@
  */
 import { calibrate, spinRateForTurns, stopForSpeed, speedToStopAt, sweepFrictionForGain } from "../core/calibrate";
 import { BACK_LINE_OUTSIDE, FAR_HOG_INSIDE, HACK_Y, HOUSE_RADIUS, RELEASE_Y, STONE_RADIUS, TEE_Y } from "../core/geometry";
-import { APP_VERSION, DT, ENGINE_VERSION, PROFILES, SHOT_PRECISION, SPIN_TURNS, SWEEP_GAIN, type IceParams, type ProfileId, type SkillLevel, type SpinLevel } from "../core/params";
+import { APP_VERSION, DT, ENGINE_VERSION, PROFILES, SHOT_PRECISION, SPIN_TURNS, SWEEP_GAIN, type IceParams, type ProfileId, type ShotLevel, type SkillLevel, type SpinLevel } from "../core/params";
 import { REFERENCE_HASH, referenceReplay } from "../core/reference";
 import { makeReplay, runReplay, Sim, validateReplay, type Replay, type StonePlacement } from "../core/sim";
 import { num, t } from "../i18n";
 import type { Key } from "../i18n/it";
 import { HOUSE_VIEW, Renderer, SHEET_VIEW, type DrawStone, type Scene } from "./render";
 import { PlacementTool } from "./placement-tool";
+import { FeedbackPanel } from "./feedback";
 import { deliveryPosition, planDelivery, type Delivery } from "../core/delivery";
 import { makeScenario, validateScenario, type PlacementCheck } from "../core/placement";
 import type { Team } from "../core/physics";
@@ -174,7 +175,7 @@ function updateShotReadout(): void {
 }
 
 // ——— Abilità: precisione del tiro e livello degli sweeper ———
-function applyShotLevel(level: SkillLevel | "custom"): void {
+function applyShotLevel(level: ShotLevel | "custom"): void {
   if (level === "custom") return;
   const p = SHOT_PRECISION[level];
   $<HTMLInputElement>("sk-line").value = String(Math.round(p.lineSigma * 100));
@@ -182,7 +183,7 @@ function applyShotLevel(level: SkillLevel | "custom"): void {
 }
 function syncShotLevel(): void {
   const s = skill();
-  const match = (Object.keys(SHOT_PRECISION) as SkillLevel[]).find(
+  const match = (Object.keys(SHOT_PRECISION) as ShotLevel[]).find(
     (k) => Math.abs(SHOT_PRECISION[k].lineSigma - s.lineSigma) < 1e-9 && Math.abs(SHOT_PRECISION[k].weightSigma - s.weightSigma) < 1e-9,
   );
   $<HTMLSelectElement>("shot-level").value = match ?? "custom";
@@ -394,6 +395,19 @@ function finishShot(): void {
   renderLog();
   showReplay(replay);
   setStatus(t("status.done", { n: entry.n }));
+  feedback?.ask({
+    n: entry.n,
+    speed: v0,
+    hit: sim.delivered.hitStone,
+    removedOthers: others,
+    sweepTime: m.sweepTime,
+    spinTurns: replay.shot.spinTurns ?? SPIN_TURNS.normal,
+    stopped: !!m.stop,
+    outcome,
+    hash,
+    ice: readTargets(),
+    sweepGain: sweepGain(),
+  });
   draw();
 }
 
@@ -435,6 +449,7 @@ function clearSheet(): void {
 let houseR: Renderer;
 let sheetR: Renderer;
 let placement: PlacementTool | null = null;
+let feedback: FeedbackPanel | null = null;
 
 // ——— Squadre e posizionamento ———
 function nextTeam(): Team {
@@ -626,6 +641,7 @@ function setBusy(b: boolean): void {
   for (const id of ["throw", "repeat", "retry", "clear", "load-file", "copy-scenario"]) $<HTMLButtonElement>(id).disabled = b;
   // Barra flottante: «Tira» sparisce durante la corsa, «Spazza» compare solo per i tiri dal vivo.
   $("fab-throw").hidden = b;
+  $("fab-rate").hidden = b || !feedback?.hasPending;
   $("fab-sweep").hidden = !b || !!state.playback;
   if (!b) {
     $("fab-sweep").classList.remove("active");
@@ -694,7 +710,7 @@ function bindPanels(): void {
     saved = {};
   }
   // Su telefono si parte con aperti solo Tiro e Registro.
-  const narrowOpen = new Set(["p-shot", "p-log"]);
+  const narrowOpen = new Set(["p-shot", "p-log", "p-feedback"]);
   panels.forEach((d) => {
     if (d.id in saved) d.open = saved[d.id];
     else if (isNarrow()) d.open = narrowOpen.has(d.id);
@@ -747,15 +763,10 @@ function init(): void {
   $("repeat").addEventListener("click", repeatLast);
   $("retry").addEventListener("click", retryFromSame);
   $("clear").addEventListener("click", clearSheet);
-  $<HTMLSelectElement>("shot-level").addEventListener("change", (e) => applyShotLevel((e.target as HTMLSelectElement).value as SkillLevel | "custom"));
+  $<HTMLSelectElement>("shot-level").addEventListener("change", (e) => applyShotLevel((e.target as HTMLSelectElement).value as ShotLevel | "custom"));
   for (const id of ["sk-line", "sk-weight"]) $(id).addEventListener("input", syncShotLevel);
   $<HTMLSelectElement>("sweep-level").addEventListener("change", (e) => applySweepLevel((e.target as HTMLSelectElement).value as SkillLevel | "custom"));
   $("sweep-gain").addEventListener("input", syncSweepLevel);
-  $("perfect").addEventListener("click", () => {
-    $<HTMLInputElement>("sk-line").value = "0";
-    $<HTMLInputElement>("sk-weight").value = "0";
-    syncShotLevel();
-  });
   $("copy-replay").addEventListener("click", copyReplay);
   $("load-text").addEventListener("click", () => loadReplayText($<HTMLTextAreaElement>("replay-text").value));
   $<HTMLInputElement>("load-file").addEventListener("change", async (e) => {
@@ -766,6 +777,10 @@ function init(): void {
   bindSweepInputs();
   bindPanels();
   $("fab-throw").addEventListener("click", throwStone);
+  feedback = new FeedbackPanel((pending) => {
+    $("fab-rate").hidden = !pending || !!state.sim;
+  });
+  $("fab-rate").addEventListener("click", () => feedback?.reveal());
   bindBroom();
   placement = new PlacementTool(houseR, {
     stones: () => state.stones,

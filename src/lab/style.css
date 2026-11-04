@@ -374,3 +374,37 @@ canvas[data-tool="place"] { cursor: grab; }
 .splits b { font-weight: 500; min-width: 4.5ch; text-align: right; }
 .splits b[data-state="running"] { color: var(--team-1); }
 .splits b[data-state="waiting"] { opacity: 0.5; }
+
+/* Questionario sul realismo. */
+.fb-current { display: grid; gap: 12px; }
+.fb-intro { margin: 0; font-weight: 600; }
+.fb-form { display: grid; gap: 12px; }
+.fb-q { border: 0; padding: 0; margin: 0; display: grid; gap: 6px; min-width: 0; }
+.fb-q legend { padding: 0; margin-bottom: 6px; font-size: var(--step-0); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips label { position: relative; }
+.chips input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.chips span {
+  display: inline-block;
+  padding: 6px 10px;
+  border: 1px solid var(--rule);
+  border-radius: 99px;
+  font-size: var(--step--1);
+  background: var(--bg);
+}
+.chips input:checked + span { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+.chips input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+.fb-collected { display: grid; gap: 8px; border-top: 1px solid var(--rule); padding-top: 10px; }
+.button-link {
+  font-size: var(--step--1);
+  font-weight: 500;
+  color: var(--accent-fg);
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  padding: 7px 10px;
+  text-decoration: none;
+  text-align: center;
+}
+.button-link[aria-disabled="true"] { opacity: 0.45; }
+.button-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
