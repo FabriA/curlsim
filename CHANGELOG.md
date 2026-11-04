@@ -19,6 +19,8 @@ Fase 2. Motore fisico invariato (0.2.0).
 - **Ombra della spazzata** sempre davanti alla pietra, nella direzione del moto.
 - **Icona del martello** (hammer) nel tabellone dell'end al posto della scritta «Ultima pietra».
 - **Nuovo end** cancella dal ghiaccio le traiettorie dell'ultimo tiro.
+- **Comandi su telefono:** nella barra in basso, accanto a «Tira», un pulsante per passare da in-turn a out-turn;
+  subito sotto, il cursore del peso con velocità e punto d'arresto previsto. Durante la corsa restano solo «Spazza».
 
 ## 0.2.2 — 4 novembre 2026
 

@@ -173,7 +173,13 @@ function updateShotReadout(): void {
   $("spin-rate").textContent = t("shot.spinRate", { w: num(w, 2), rps: num(w / (2 * Math.PI), 2) });
   const v = currentSpeed();
   $("weight-value").textContent = t("shot.weightValue", { v: num(v, 2) });
-  $("weight-stop").textContent = t("shot.weightStop", { where: describeStop(stopForSpeed(state.params, v)) });
+  const where = describeStop(stopForSpeed(state.params, v));
+  $("weight-stop").textContent = t("shot.weightStop", { where });
+  // Comandi flottanti su telefono: stesso peso e stessa rotazione dei comandi del riquadro Tiro.
+  $<HTMLInputElement>("fab-weight").value = String(v);
+  $("fab-weight-value").textContent = `${num(v, 2)} m/s`;
+  $("fab-weight-stop").textContent = `· ${where}`;
+  $("fab-spin").textContent = t(currentSpin() === 1 ? "fab.spinCw" : "fab.spinCcw");
   const bx = state.broom.x;
   $("broom-value").textContent = t("shot.broomValue", {
     x: `${num(Math.abs(bx) * 100, 0)} cm ${bx < -0.005 ? "a sinistra" : bx > 0.005 ? "a destra" : ""}`.trim(),
@@ -666,6 +672,8 @@ function setBusy(b: boolean): void {
   for (const id of ["throw", "repeat", "retry", "clear", "load-file", "copy-scenario"]) $<HTMLButtonElement>(id).disabled = b;
   // Barra flottante: «Tira» sparisce durante la corsa, «Spazza» compare solo per i tiri dal vivo.
   $("fab-throw").hidden = b;
+  $("fab-spin").hidden = b;
+  $("fab-weight-row").hidden = b;
   $("fab-rate").hidden = b || !feedback?.hasPending;
   $("fab-sweep").hidden = !b || !!state.playback;
   if (!b) {
@@ -797,6 +805,15 @@ function init(): void {
     draw();
   });
   for (const id of ["spin-cw", "spin-ccw"]) $(id).addEventListener("change", updateShotReadout);
+  $("fab-spin").addEventListener("click", () => {
+    $<HTMLInputElement>(currentSpin() === 1 ? "spin-ccw" : "spin-cw").checked = true;
+    updateShotReadout();
+  });
+  $<HTMLInputElement>("fab-weight").addEventListener("input", (e) => {
+    weightSlider().value = (e.target as HTMLInputElement).value;
+    updateShotReadout();
+    draw();
+  });
   $<HTMLSelectElement>("spin-level").addEventListener("change", (e) => applySpinLevel((e.target as HTMLSelectElement).value as SpinLevel | "custom"));
   $("spin-turns").addEventListener("input", syncSpinLevel);
   $("throw").addEventListener("click", throwStone);

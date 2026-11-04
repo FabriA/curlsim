@@ -153,6 +153,10 @@ export const it = {
   "fb.mailHint": "Il rapporto include il replay di ogni tiro valutato, quindi di solito è lungo: il pulsante lo copia negli appunti e apre la mail, dove va incollato. Se il pulsante non apre la posta, copia le risposte e incollale in una mail all'indirizzo indicato.",
   "fb.subject": "CurlSim – giudizi sui tiri",
   "fb.rate": "Valuta",
+  "fab.spinCw": "↻ In-turn",
+  "fab.spinCcw": "↺ Out-turn",
+  "fab.spinLabel": "Rotazione: tocca per passare da in-turn a out-turn",
+  "fab.weightLabel": "Peso: velocità al rilascio",
 
   "weight.guard": "Guardia",
   "weight.tee": "Tee",

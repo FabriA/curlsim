@@ -288,9 +288,16 @@
   </div>
 </div>
 <div id="fab" class="fab" aria-label="Comandi di tiro">
-  <button id="fab-throw" class="primary" type="button" data-t="shot.throw"></button>
-  <button id="fab-sweep" class="sweep" type="button" data-t="shot.sweep" hidden></button>
-  <button id="fab-rate" type="button" data-t="fb.rate" hidden></button>
+  <div class="fab-row">
+    <button id="fab-spin" class="fab-spin" type="button" data-t-label="fab.spinLabel"></button>
+    <button id="fab-throw" class="primary" type="button" data-t="shot.throw"></button>
+    <button id="fab-sweep" class="sweep" type="button" data-t="shot.sweep" hidden></button>
+    <button id="fab-rate" type="button" data-t="fb.rate" hidden></button>
+  </div>
+  <label id="fab-weight-row" class="fab-weight">
+    <span class="fab-weight-label"><b id="fab-weight-value"></b> <span id="fab-weight-stop"></span></span>
+    <input id="fab-weight" type="range" min="1.6" max="4.6" step="0.01" value="2.03" data-t-label="fab.weightLabel">
+  </label>
 </div>
 <!--ARTIFACT-BODY-END-->
 <script type="module" src="/src/lab/main.ts"></script>
