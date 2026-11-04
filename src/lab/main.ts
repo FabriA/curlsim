@@ -12,6 +12,7 @@ import type { Key } from "../i18n/it";
 import { HOUSE_VIEW, Renderer, SHEET_VIEW, type DrawStone, type Scene } from "./render";
 import { PlacementTool } from "./placement-tool";
 import { FeedbackPanel } from "./feedback";
+import { EndMode } from "./end-mode";
 import { deliveryPosition, planDelivery, type Delivery } from "../core/delivery";
 import { makeScenario, validateScenario, type PlacementCheck } from "../core/placement";
 import type { Team } from "../core/physics";
@@ -227,13 +228,19 @@ function skill() {
 
 function throwStone(): void {
   if (state.sim || !state.params) return;
-  if (state.stones.length >= MAX_STONES) {
+  if (endMode?.active) {
+    const reason = endMode.canThrow();
+    if (reason) {
+      setStatus(reason);
+      return;
+    }
+  } else if (state.stones.length >= MAX_STONES) {
     setStatus(t("status.full"));
     return;
   }
   const n = state.log.length + 1;
   const seed = Number($<HTMLInputElement>("seed").value) + n;
-  const team = nextTeam();
+  const team = endMode?.active ? endMode.team() : nextTeam();
   const replay = makeReplay(
     shotParams(),
     team,
@@ -355,6 +362,8 @@ function finishShot(): void {
   setBusy(false);
 
   if (state.playback) {
+    // Nell'end la riproduzione non cambia la partita: tornano le pietre decise dalle regole.
+    if (endMode?.active) state.stones = endMode.stones().map((s) => ({ ...s }));
     const expected = state.playback.result?.hash;
     setStatus(expected === hash || !expected ? t("status.same", { hash }) : t("status.different", { a: hash, b: expected }));
     state.playback = null;
@@ -410,6 +419,7 @@ function finishShot(): void {
     impact: m.impact,
     replay,
   });
+  if (endMode?.active) endMode.afterShot(replay.stonesBefore, sim.placements(), replay.team);
   draw();
 }
 
@@ -452,6 +462,7 @@ let houseR: Renderer;
 let sheetR: Renderer;
 let placement: PlacementTool | null = null;
 let feedback: FeedbackPanel | null = null;
+let endMode: EndMode | null = null;
 
 // ——— Squadre e posizionamento ———
 function nextTeam(): Team {
@@ -514,6 +525,7 @@ function scene(): Scene {
     broom: state.broom,
     predictedStopY: state.params && !sim ? stopForSpeed(state.params, currentSpeed()) : null,
     highlight,
+    ...(endMode?.active && !sim ? endMode.sceneExtras() : endMode?.active ? { fgz: endMode.sceneExtras().fgz } : {}),
     sweeping: !!sim && !sim.done && sim.canSweep() && (state.playback ? false : sweepInput()),
   };
 }
@@ -649,6 +661,21 @@ function setBusy(b: boolean): void {
     $("fab-sweep").classList.remove("active");
     $("sweep-btn").classList.remove("active");
   }
+  endMode?.render();
+}
+
+function setMode(mode: "lab" | "end"): void {
+  if (state.sim) return;
+  if (mode === "end") {
+    $<HTMLInputElement>("tool-broom").checked = true;
+    setTool("broom");
+    state.lastTraces = [];
+    endMode!.enter();
+  } else {
+    endMode!.exit();
+    setStatus(t("status.ready", { n: state.stones.length }));
+  }
+  draw();
 }
 
 // ——— Input ———
@@ -712,7 +739,7 @@ function bindPanels(): void {
     saved = {};
   }
   // Su telefono si parte con aperti solo Tiro e Registro.
-  const narrowOpen = new Set(["p-shot", "p-log", "p-feedback"]);
+  const narrowOpen = new Set(["p-end", "p-shot", "p-log", "p-feedback"]);
   panels.forEach((d) => {
     if (d.id in saved) d.open = saved[d.id];
     else if (isNarrow()) d.open = narrowOpen.has(d.id);
@@ -779,6 +806,17 @@ function init(): void {
   bindSweepInputs();
   bindPanels();
   $("fab-throw").addEventListener("click", throwStone);
+  endMode = new EndMode({
+    setStones: (s) => {
+      state.stones = s.map((p) => ({ ...p }));
+    },
+    redraw: draw,
+    status: setStatus,
+    busy: () => !!state.sim,
+  });
+  document.body.dataset.mode = "lab";
+  $("mode-lab").addEventListener("change", () => setMode("lab"));
+  $("mode-end").addEventListener("change", () => setMode("end"));
   feedback = new FeedbackPanel((pending) => {
     $("fab-rate").hidden = !pending || !!state.sim;
   });

@@ -41,6 +41,10 @@ export interface Scene {
   sweeping: boolean;
   /** Pietra trascinata: anello verde se la posizione è valida, rosso se no. */
   highlight?: { id: number; ok: boolean } | null;
+  /** Free guard zone in vigore: si evidenzia l'area tra hog line e tee line, casa esclusa. */
+  fgz?: boolean;
+  /** Pietre che contano a fine end. */
+  counting?: number[];
 }
 
 export const HOUSE_VIEW: ViewRect = { y0: FAR_HOG_INSIDE - 0.6, y1: HACK_Y + 0.4 };
@@ -62,6 +66,7 @@ interface Palette {
   sweep: string;
   ok: string;
   bad: string;
+  fgz: string;
 }
 
 function palette(): Palette {
@@ -83,6 +88,7 @@ function palette(): Palette {
     sweep: g("--sweep"),
     ok: g("--ok"),
     bad: g("--bad"),
+    fgz: g("--fgz"),
   };
 }
 
@@ -142,6 +148,10 @@ export class Renderer {
     ctx.clearRect(0, 0, W, H);
 
     this.drawIce(pal, W, H);
+    if (scene.fgz) {
+      ctx.fillStyle = pal.fgz;
+      ctx.fillRect(0, this.Y(TEE_Y), W, (TEE_Y - FAR_HOG_INSIDE) * this.scale);
+    }
     this.drawHouse(pal, TEE_Y);
     if (this.view.y0 < -TEE_Y + 2) this.drawHouse(pal, -TEE_Y);
     this.drawLines(pal);
@@ -174,6 +184,17 @@ export class Renderer {
 
     this.drawBroom(pal, scene.broom.x, scene.broom.y);
     for (const s of scene.stones) this.drawStone(pal, s, scene.sweeping && !!s.delivered);
+    for (const id of scene.counting ?? []) {
+      const s = scene.stones.find((x) => x.id === id);
+      if (!s) continue;
+      ctx.save();
+      ctx.strokeStyle = pal.ok;
+      ctx.lineWidth = Math.max(2, this.scale * 0.035);
+      ctx.beginPath();
+      ctx.arc(this.X(s.x), this.Y(s.y), STONE_RADIUS * this.scale * 1.3, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
     const hl = scene.highlight;
     if (hl) {
       const s = scene.stones.find((x) => x.id === hl.id);

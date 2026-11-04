@@ -19,11 +19,44 @@
     <h1 data-t="app.title">Laboratorio di curling</h1>
     <p class="sub" data-t="app.subtitle"></p>
   </div>
+  <div class="seg mode" role="radiogroup" aria-label="Modalità">
+    <label><input type="radio" name="mode" id="mode-lab" checked><span data-t="mode.lab"></span></label>
+    <label><input type="radio" name="mode" id="mode-end"><span data-t="mode.end"></span></label>
+  </div>
   <p id="status" class="status" role="status" aria-live="polite"></p>
 </header>
 
 <main class="lab">
   <section class="controls" aria-label="Comandi">
+    <details class="panel end-only" id="p-end" open>
+      <summary data-t="section.end"></summary>
+      <div class="panel-body">
+      <div class="scoreboard">
+        <div class="sb-row" id="end-row-0"><i class="dot t0"></i><span class="sb-name" data-t="team.0"></span><span class="sb-hammer" id="end-hammer-0" data-t="end.hammer"></span><span class="pips" id="end-pips-0"></span><b class="sb-points" id="end-points-0"></b></div>
+        <div class="sb-row" id="end-row-1"><i class="dot t1"></i><span class="sb-name" data-t="team.1"></span><span class="sb-hammer" id="end-hammer-1" data-t="end.hammer"></span><span class="pips" id="end-pips-1"></span><b class="sb-points" id="end-points-1"></b></div>
+      </div>
+      <p id="end-line" class="value"></p>
+      <p id="end-fgz-state" class="hint"></p>
+      <p id="end-msg" class="hint end-msg" role="status"></p>
+      <div class="actions secondary">
+        <button id="end-undo" type="button" data-t="end.undo"></button>
+        <button id="end-new" type="button" data-t="end.new"></button>
+      </div>
+      <details class="sub-panel">
+        <summary data-t="end.settings"></summary>
+        <div class="pair">
+          <label class="field"><span data-t="end.hammerFirst"></span>
+            <select id="end-hammer"><option value="1" selected data-t="team.1"></option><option value="0" data-t="team.0"></option></select>
+          </label>
+          <label class="field"><span data-t="end.fgzStonesLabel"></span><input id="end-fgz-stones" type="number" min="0" max="15" step="1" value="5"></label>
+        </div>
+        <label class="radio"><input type="checkbox" id="end-fgz" checked> <span data-t="end.fgzLabel"></span></label>
+        <label class="radio"><input type="checkbox" id="end-notick" checked> <span data-t="end.noTickLabel"></span></label>
+        <p class="hint" data-t="end.settingsHint"></p>
+      </details>
+      </div>
+    </details>
+
     <details class="panel" id="p-ice" open>
       <summary data-t="section.ice"></summary>
       <div class="panel-body">
@@ -43,7 +76,7 @@
     </div>
     </details>
 
-    <details class="panel" id="p-place" open>
+    <details class="panel lab-only" id="p-place" open>
       <summary data-t="section.place"></summary>
       <div class="panel-body">
       <div class="field" role="radiogroup" aria-labelledby="tool-label">
@@ -112,8 +145,8 @@
       <p class="hint" data-t="shot.sweepOff"></p>
       <div class="actions secondary">
         <button id="repeat" type="button" data-t="shot.repeat"></button>
-        <button id="retry" type="button" data-t="shot.retry"></button>
-        <button id="clear" type="button" data-t="shot.clear"></button>
+        <button id="retry" class="lab-only" type="button" data-t="shot.retry"></button>
+        <button id="clear" class="lab-only" type="button" data-t="shot.clear"></button>
       </div>
       <label class="field inline">
         <span data-t="shot.speed"></span>
@@ -231,8 +264,8 @@
       </label>
       <div class="actions secondary">
         <button id="copy-replay" type="button" data-t="replay.save"></button>
-        <button id="load-text" type="button" data-t="replay.load"></button>
-        <label class="file"><input id="load-file" type="file" accept="application/json,.json"><span data-t="replay.fromFile"></span></label>
+        <button id="load-text" class="lab-only" type="button" data-t="replay.load"></button>
+        <label class="file lab-only"><input id="load-file" type="file" accept="application/json,.json"><span data-t="replay.fromFile"></span></label>
       </div>
       <p id="replay-msg" class="hint" role="status"></p>
       <div class="actions secondary">
@@ -243,6 +276,17 @@
     </details>
   </section>
 </main>
+<div id="decision" class="sheet" role="dialog" aria-labelledby="decision-text" hidden>
+  <p id="decision-text"></p>
+  <div id="decision-choice" class="actions secondary">
+    <button id="decision-leave" type="button" data-t="end.choiceLeave"></button>
+    <button id="decision-restore" class="primary-plain" type="button" data-t="end.choiceRestore"></button>
+  </div>
+  <div id="decision-result" class="actions secondary" hidden>
+    <button id="decision-new" type="button" class="primary-plain" data-t="end.new"></button>
+    <button id="decision-close" type="button" data-t="end.close"></button>
+  </div>
+</div>
 <div id="fab" class="fab" aria-label="Comandi di tiro">
   <button id="fab-throw" class="primary" type="button" data-t="shot.throw"></button>
   <button id="fab-sweep" class="sweep" type="button" data-t="shot.sweep" hidden></button>

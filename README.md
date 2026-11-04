@@ -37,6 +37,7 @@ src/core/        motore puro, senza grafica (usabile anche in Node e in un Web W
   rules.ts         pietre fuori gioco (R2 f–h), separate dalla fisica
   sim.ts           tiro, simulazione passo-passo, replay, hash dello stato
   placement.ts     posizionamento manuale delle pietre e scenari salvabili
+  end.ts           regole dell'end: ordine di tiro, hammer, FGZ, no-tick, punteggio, annulla
   delivery.ts      fase di consegna dalla back line al rilascio e intertempo back-to-hog
   calibrate.ts     calibrazione su tempo hog-to-hog e curva di un draw
   rng.ts           generatore con seme, solo operazioni intere
@@ -64,6 +65,19 @@ tests/           calibrazione, plausibilità, urti, regole, determinismo
   (scambio di rotazione); più passate per le catene.
 
 I valori sono approssimazioni su valori tipici di gioco, da validare con misure su ghiaccio.
+
+## End a due (fase 2)
+
+Nell'intestazione si passa da **Laboratorio** a **End a due**: due giocatori sullo stesso dispositivo giocano un end
+standard da 16 pietre con il preset «World Curling 2026 — adattamento v1».
+
+- Tira per prima la squadra senza l'ultima pietra; il tabellone mostra pietre rimaste, hammer e turno.
+- **Free guard zone (R6):** prima della sesta pietra una guardia avversaria nella FGZ non può essere portata fuori gioco;
+  altrimenti la pietra tirata è rimossa e le pietre spostate tornano al loro posto. La zona è evidenziata sulla pista.
+- **No-tick (R7):** una guardia avversaria nella FGZ che tocca la linea centrale non può esserne spostata; la squadra
+  che subisce sceglie se lasciare le pietre o ripristinarle. Se la guardia esce dal gioco vale la FGZ.
+- **Punteggio (R12):** a fine end le pietre che contano sono segnate e **Nuovo end** assegna l'ultima pietra secondo R5 a.
+- **Annulla l'ultimo tiro** riporta le pietre a prima della consegna. FGZ, pietre protette e no-tick sono configurabili.
 
 ## Posizionamento delle pietre
 

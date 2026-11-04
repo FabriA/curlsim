@@ -1,5 +1,19 @@
 # Registro delle versioni
 
+## Non ancora rilasciato
+
+Fase 2. Motore fisico invariato (0.2.0).
+
+- **Modalità «End a due»:** due giocatori sullo stesso dispositivo giocano un end standard da 16 pietre.
+  Tabellone con pietre rimaste e ultima pietra (hammer), turno evidenziato, numero della pietra.
+- **Regole dell'end** in `src/core/end.ts`, senza interfaccia:
+  ordine di tiro e hammer (R5 a), free guard zone (R6) con rimozione della pietra tirata e ripristino delle pietre spostate,
+  no-tick (R7) con la scelta della squadra che subisce, punteggio (R12) con end nullo, annullamento dell'ultimo tiro.
+  FGZ, numero di pietre protette e no-tick si attivano e disattivano.
+- Zona FGZ evidenziata sulla pista finché è in vigore; pietre che contano segnate a fine end.
+- Nuovo end con l'ultima pietra secondo R5 a: tira per prima la squadra che ha segnato; con un end nullo l'hammer non cambia.
+- 22 nuovi test sulle regole dell'end, compreso un peel annullato dalla FGZ con la fisica vera.
+
 ## 0.2.2 — 4 novembre 2026
 
 Motore fisico invariato (0.2.0): i replay delle versioni 0.2.x si riproducono identici.
