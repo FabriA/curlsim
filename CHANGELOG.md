@@ -22,6 +22,9 @@ Fase 2. Motore fisico invariato (0.2.0).
 - **Comandi su telefono:** nella barra in basso, accanto a «Tira», un pulsante per passare da in-turn a out-turn;
   subito sotto, il cursore del peso con velocità e punto d'arresto previsto. Durante la corsa restano solo «Spazza».
 - Nuovo indirizzo per i giudizi sui tiri: curlsim@albonico.ch.
+- **Agente delle segnalazioni** (`tools/feedback-agent/`): legge la casella via IMAP in sola lettura, riesegue i replay,
+  aggrega i giudizi (anche il rotolamento per pienezza del colpo) e pubblica i rapporti in `reports/feedback/`.
+  GitHub Actions lo esegue ogni due ore; Vercel ignora i commit dei soli rapporti.
 
 ## 0.2.2 — 4 novembre 2026
 

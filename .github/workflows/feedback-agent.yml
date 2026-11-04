@@ -1,0 +1,47 @@
+# Agente delle segnalazioni: legge la casella dei giudizi via IMAP (sola lettura),
+# valuta i nuovi rapporti e pubblica i risultati in reports/feedback/.
+name: Agente segnalazioni
+
+on:
+  schedule:
+    - cron: "17 */2 * * *" # ogni due ore, al minuto 17 (UTC)
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: feedback-agent
+  cancel-in-progress: false
+
+jobs:
+  valuta:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Installa le dipendenze
+        run: npm install --no-audit --no-fund
+      - name: Leggi e valuta le segnalazioni
+        env:
+          IMAP_HOST: ${{ secrets.IMAP_HOST }}
+          IMAP_PORT: ${{ secrets.IMAP_PORT }}
+          IMAP_USER: ${{ secrets.IMAP_USER }}
+          IMAP_PASSWORD: ${{ secrets.IMAP_PASSWORD }}
+          IMAP_MAILBOX: ${{ secrets.IMAP_MAILBOX }}
+        run: npm run agent
+      - name: Pubblica i rapporti
+        run: |
+          git config user.name "curlsim-feedback-agent"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/feedback
+          if git diff --cached --quiet; then
+            echo "Nessuna novità da pubblicare."
+            exit 0
+          fi
+          git commit -m "Segnalazioni: aggiornamento automatico"
+          git pull --rebase
+          git push

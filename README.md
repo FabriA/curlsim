@@ -92,6 +92,32 @@ Nel pannello **Pietre in gioco** si sceglie lo strumento attivo sulla casa:
 La logica sta in `src/core/placement.ts` e lo strumento d'interfaccia in `src/lab/placement-tool.ts`,
 pronti per la modalità di allenamento.
 
+## Agente delle segnalazioni
+
+`tools/feedback-agent/` legge la casella dei giudizi via IMAP, **in sola lettura** (nessun messaggio viene
+spostato, cancellato o segnato come letto), riconosce i rapporti «CurlSim – giudizi sui tiri», riesegue i replay
+con il motore attuale, aggrega le risposte e scrive i risultati in `reports/feedback/`
+(`SUMMARY.md`, una scheda per messaggio in `messages/`, `data.json`). Ogni messaggio è elaborato una sola volta.
+Le indicazioni sul modello sono proposte da verificare: l'agente non modifica mai i parametri.
+
+GitHub Actions lo esegue ogni due ore (`.github/workflows/feedback-agent.yml`) e pubblica i rapporti nuovi con un commit.
+Vercel ignora i commit che toccano solo `reports/` (`vercel.json`), quindi non parte un deploy a ogni aggiornamento.
+
+**Configurazione (una volta):** in GitHub, **Settings → Secrets and variables → Actions → New repository secret**:
+
+| Segreto | Valore |
+| --- | --- |
+| `IMAP_HOST` | server IMAP del provider (per esempio `mail.example.ch`) |
+| `IMAP_PORT` | facoltativo, predefinito `993` (TLS) |
+| `IMAP_USER` | `curlsim@albonico.ch` |
+| `IMAP_PASSWORD` | password della casella, meglio una password per applicazioni se il provider la offre |
+| `IMAP_MAILBOX` | facoltativo, predefinito `INBOX` |
+
+In **Settings → Actions → General → Workflow permissions** serve «Read and write permissions» perché l'agente
+possa pubblicare i rapporti. Per una prima prova: **Actions → Agente segnalazioni → Run workflow**.
+
+In locale: `npm run agent -- --file messaggio.txt` (o `.eml`) elabora un messaggio salvato, senza IMAP.
+
 ## Determinismo
 
 Passo fisso di 1 ms, ordine stabile di risoluzione degli urti, input di spazzata registrati per tick,
