@@ -17,6 +17,12 @@ export const it = {
   "ice.curl": "Curva di un draw (m)",
   "ice.derived": "μ = {mu} · K = {k}",
   "ice.calibrating": "Calibrazione in corso…",
+  "ice.collisions": "Urti tra pietre",
+  "ice.collisions.normal": "Normali",
+  "ice.collisions.lively": "Vivaci",
+  "ice.collisionsHint": "«Vivaci» trasmette più energia da pietra a pietra, soprattutto nelle catene (come fino alla versione 0.2.2).",
+  "fb.collisions.normal": "normali",
+  "fb.collisions.lively": "vivaci",
 
   "shot.broom": "Scopa dello skip",
   "shot.broomHint": "Tocca la casa per spostare la scopa. La linea di tiro parte dalla staffa.",

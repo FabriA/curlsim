@@ -34,6 +34,13 @@ describe("agente delle segnalazioni: lettura", () => {
     expect(s.answers[0].answer).toBe("Troppo lungo");
     expect(s.comment).toBe("Rotola troppo");
     expect(s.replay?.seed).toBe(replay.seed);
+    expect(s.collisions).toBeNull(); // rapporto senza l'indicazione: versioni fino alla 0.2.2
+  });
+
+  it("legge la vivacità degli urti", () => {
+    const r = parseReport(report([{ ...roll(1, 1, "Giusto"), facts: { ...roll(1, 1, "x").facts, collisions: "normali" } }]))!;
+    expect(r.shots[0].collisions).toBe("normali");
+    expect(r.shots[0].outcome).toBe("In gioco");
   });
 
   it("riunisce un replay spezzato su più righe e ignora le citazioni di una risposta", () => {

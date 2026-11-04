@@ -32,8 +32,13 @@ export interface IceParams {
   sweepFriction: number;
   /** Fattore sulla deriva durante la spazzata (< 1). */
   sweepCurl: number;
-  /** Coefficiente di restituzione negli urti tra pietre. */
+  /** Coefficiente di restituzione negli urti in cui una delle due pietre è quella tirata. */
   restitution: number;
+  /**
+   * Coefficiente di restituzione negli urti tra due pietre che non sono quella tirata (pietre
+   * colpite che ne colpiscono altre). Se manca vale `restitution`, come nei replay precedenti.
+   */
+  restitutionSecondary?: number;
   /** Attrito tra le pietre al contatto. */
   stoneFriction: number;
   /** Momento d'inerzia come frazione di m·r². */
@@ -64,6 +69,18 @@ export const BASE_PARAMS: Omit<IceParams, "mu" | "curlK"> = {
   restitution: 0.9,
   stoneFriction: 0.2,
   inertiaK: 0.5,
+};
+
+/** Vivacità degli urti tra pietre: quanta energia passa da una pietra all'altra. */
+export type CollisionLevel = "normal" | "lively";
+
+/**
+ * «Vivaci» sono i valori fino alla versione 0.2.2. «Normali» riducono l'energia trasmessa, più
+ * nettamente nelle catene di pietre (urti tra pietre colpite), dove i primi test la trovavano eccessiva.
+ */
+export const COLLISIONS: Record<CollisionLevel, Pick<IceParams, "restitution" | "restitutionSecondary">> = {
+  normal: { restitution: 0.85, restitutionSecondary: 0.6 },
+  lively: { restitution: 0.9, restitutionSecondary: 0.9 },
 };
 
 /** Livelli di abilità usati per sweeper e tiratori. */

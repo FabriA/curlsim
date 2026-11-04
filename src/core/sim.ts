@@ -187,7 +187,7 @@ export class Sim {
     d.w = release.w;
     d.moving = true;
     stones.push(d);
-    this.world = { params, stones, tick: 0 };
+    this.world = { params, stones, tick: 0, deliveredId: id };
     this.deliveredId = id;
     this.metrics = {
       hogToHog: null,

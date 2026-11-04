@@ -29,6 +29,8 @@ export interface World {
   params: IceParams;
   stones: Stone[];
   tick: number;
+  /** Pietra tirata: gli urti tra altre pietre usano `restitutionSecondary`. */
+  deliveredId?: number;
 }
 
 const STOP_SPEED = 1e-4;
@@ -82,6 +84,7 @@ function resolveCollisions(world: World): void {
   const minDist2 = minDist * minDist;
   const stones = world.stones;
   const k = p.inertiaK;
+  const eSecondary = p.restitutionSecondary ?? p.restitution;
 
   for (let pass = 0; pass < 4; pass++) {
     let any = false;
@@ -112,7 +115,8 @@ function resolveCollisions(world: World): void {
         any = true;
 
         // Impulso normale per masse uguali (m = 1).
-        const jn = ((1 + p.restitution) * vn) / 2;
+        const e = a.id === world.deliveredId || b.id === world.deliveredId ? p.restitution : eSecondary;
+        const jn = ((1 + e) * vn) / 2;
         a.vx -= jn * nx;
         a.vy -= jn * ny;
         b.vx += jn * nx;

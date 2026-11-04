@@ -16,6 +16,8 @@ export interface ParsedShot {
   sweepTime: number | null;
   ice: { hogToHog: number | null; curl: number | null };
   sweepGain: number | null;
+  /** Vivacità degli urti («normali», «vivaci»); null nei rapporti fino alla versione 0.2.2 (urti vivaci). */
+  collisions: string | null;
   outcome: string;
   hash: string | null;
   impact: { fullness: number; speed: number; shooterTravel: number; targetTravel: number; shooterOut: boolean; targetOut: boolean } | null;
@@ -138,6 +140,7 @@ function parseShotLine(n: number, rest: string): ParsedShot {
     sweepTime: num(field(/spazzata\s+(\d+(?:,\d+)?)\s+s/)),
     ice: { hogToHog: num(field(/hog-to-hog\s+(\d+(?:,\d+)?)\s+s/)), curl: num(field(/curva\s+(\d+(?:,\d+)?)\s+m/)) },
     sweepGain: num(field(/sweeper\s+(\d+(?:,\d+)?)\s+m/)),
+    collisions: field(/·\s+urti\s+(\p{L}+)/u) ?? null,
     outcome: field(/esito:\s+(.+?)\s+·\s+hash/) ?? "",
     hash: field(/hash\s+([0-9a-f]{8})/) ?? null,
     impact: null,

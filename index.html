@@ -72,6 +72,14 @@
         <label class="field"><span data-t="ice.hogToHog"></span><input id="hh" type="number" min="11" max="18" step="0.1" value="14.5"></label>
         <label class="field"><span data-t="ice.curl"></span><input id="curl" type="number" min="0" max="2.5" step="0.1" value="1.2"></label>
       </div>
+      <label class="field">
+        <span data-t="ice.collisions"></span>
+        <select id="collisions">
+          <option value="normal" selected data-t="ice.collisions.normal"></option>
+          <option value="lively" data-t="ice.collisions.lively"></option>
+        </select>
+      </label>
+      <p class="hint" data-t="ice.collisionsHint"></p>
       <p id="derived" class="hint mono"></p>
     </div>
     </details>

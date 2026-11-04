@@ -19,6 +19,8 @@ export interface ShotRecord {
   speed: number | null;
   spinTurns: number | null;
   sweepTime: number | null;
+  /** Vivacità degli urti; null nei rapporti precedenti, che avevano urti vivaci. */
+  collisions?: string | null;
   outcome: string;
   hash: string | null;
   answers: { question: string; answer: string }[];
@@ -82,6 +84,7 @@ export function checkShot(shot: ParsedShot, message: string, date: string, repor
     speed: shot.speed,
     spinTurns: shot.spinTurns,
     sweepTime: shot.sweepTime,
+    collisions: shot.collisions,
     outcome: shot.outcome,
     hash: shot.hash,
     answers: shot.answers,

@@ -4,7 +4,7 @@
  */
 import { calibrate, spinRateForTurns, stopForSpeed, speedToStopAt, sweepFrictionForGain } from "../core/calibrate";
 import { BACK_LINE_OUTSIDE, FAR_HOG_INSIDE, HACK_Y, HOUSE_RADIUS, RELEASE_Y, STONE_RADIUS, TEE_Y } from "../core/geometry";
-import { APP_VERSION, DT, ENGINE_VERSION, PROFILES, SHOT_PRECISION, SPIN_TURNS, SWEEP_GAIN, type IceParams, type Precision, type ProfileId, type ShotLevel, type SkillLevel, type SpinLevel } from "../core/params";
+import { APP_VERSION, COLLISIONS, DT, ENGINE_VERSION, PROFILES, SHOT_PRECISION, SPIN_TURNS, SWEEP_GAIN, type CollisionLevel, type IceParams, type Precision, type ProfileId, type ShotLevel, type SkillLevel, type SpinLevel } from "../core/params";
 import { REFERENCE_HASH, referenceReplay } from "../core/reference";
 import { makeReplay, runReplay, Sim, skillFromPrecision, validateReplay, type Replay, type Skill, type StonePlacement } from "../core/sim";
 import { num, t } from "../i18n";
@@ -234,7 +234,11 @@ function syncSweepLevel(): void {
 /** Parametri del tiro: ghiaccio calibrato più l'effetto della spazzata del livello scelto. */
 function shotParams(): IceParams {
   const ice = state.params!;
-  return { ...ice, sweepFriction: sweepFrictionForGain(ice, sweepGain()) };
+  return { ...ice, sweepFriction: sweepFrictionForGain(ice, sweepGain()), ...COLLISIONS[collisionLevel()] };
+}
+
+function collisionLevel(): CollisionLevel {
+  return $<HTMLSelectElement>("collisions").value === "lively" ? "lively" : "normal";
 }
 
 function updateSweepReadout(): void {
@@ -440,6 +444,7 @@ function finishShot(): void {
     hash,
     ice: readTargets(),
     sweepGain: sweepGain(),
+    collisions: t(replay.params.restitutionSecondary !== undefined && replay.params.restitutionSecondary < replay.params.restitution ? "fb.collisions.normal" : "fb.collisions.lively"),
     impact: m.impact,
     replay,
   });

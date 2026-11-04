@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { calibrate, speedToStopAt } from "../src/core/calibrate";
 import { FAR_HOG_INSIDE, HALF_WIDTH, RELEASE_Y, STONE_RADIUS, TEE_Y } from "../src/core/geometry";
-import { PROFILES } from "../src/core/params";
+import { COLLISIONS, PROFILES } from "../src/core/params";
 import { createStone, stepWorld, type World } from "../src/core/physics";
 import { Sim } from "../src/core/sim";
 
@@ -136,5 +136,46 @@ describe("uscita dal gioco (R2)", () => {
     expect(sim.metrics.removals.find((r) => r.id === sim.deliveredId)).toBeUndefined();
     expect(sim.delivered.inPlay).toBe(true);
     expect(sim.delivered.y).toBeLessThan(TEE_Y);
+  });
+});
+
+describe("vivacità degli urti", () => {
+  /** Distanza percorsa da ogni pietra: tirata (id 0) contro le pietre in `layout`. */
+  function travel(p: typeof params, layout: [number, number][], v = 2.5): number[] {
+    const st = [createStone(0, 0, 0, 0), ...layout.map(([x, y], i) => createStone(i + 1, 1, x, y))];
+    st[0].vy = v;
+    st[0].moving = true;
+    const start = st.map((s) => [s.x, s.y]);
+    const w: World = { params: p, stones: st, tick: 0, deliveredId: 0 };
+    runUntil(w, 60000);
+    return st.map((s, i) => Math.hypot(s.x - start[i][0], s.y - start[i][1]));
+  }
+  const lively = { ...params, ...COLLISIONS.lively };
+  const normal = { ...params, ...COLLISIONS.normal };
+  const chain: [number, number][] = [[0, 1], [0, 1 + 2 * STONE_RADIUS]];
+
+  it("«vivaci» riproduce esattamente gli urti fino alla 0.2.2 (senza restituzione secondaria)", () => {
+    const legacy = { ...params, restitution: 0.9 };
+    delete (legacy as { restitutionSecondary?: number }).restitutionSecondary;
+    expect(travel(lively, chain)).toEqual(travel(legacy, chain));
+  });
+
+  it("«normali» riduce poco il colpo singolo e molto la catena", () => {
+    const single = travel(normal, [[0, 1]])[1] / travel(lively, [[0, 1]])[1];
+    const last = travel(normal, chain)[2] / travel(lively, chain)[2];
+    expect(single).toBeGreaterThan(0.9);
+    expect(single).toBeLessThan(1);
+    expect(last).toBeLessThan(0.75);
+  });
+
+  it("la restituzione della pietra tirata vale solo per gli urti in cui c'è lei", () => {
+    // Senza pietra tirata dichiarata ogni urto è secondario.
+    const a = createStone(5, 0, 0, 0);
+    const b = createStone(6, 1, 0, 1);
+    a.vy = 2;
+    a.moving = true;
+    const w: World = { params: { ...noFriction, restitution: 0.9, restitutionSecondary: 0.5 }, stones: [a, b], tick: 0 };
+    runUntil(w, 1000);
+    expect(b.vy).toBeCloseTo(1.5, 6);
   });
 });

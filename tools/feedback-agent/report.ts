@@ -83,7 +83,7 @@ export function messageMarkdown(id: string, list: ShotRecord[]): string {
   out.push(`Ricevuta il ${first.date} · laboratorio ${first.app} · motore ${first.engine} · tiri: ${list.length}`, "");
   for (const s of list) {
     out.push(`## Tiro ${s.n} · ${s.kind}`, "");
-    out.push(`- Velocità ${n2(s.speed)} m/s · rotazione ${n2(s.spinTurns, 1)} giri · spazzata ${n2(s.sweepTime, 1)} s · esito: ${s.outcome || "—"}`);
+    out.push(`- Velocità ${n2(s.speed)} m/s · rotazione ${n2(s.spinTurns, 1)} giri · spazzata ${n2(s.sweepTime, 1)} s · urti ${s.collisions ?? "vivaci (versione precedente)"} · esito: ${s.outcome || "—"}`);
     if (s.impact) {
       const i = s.impact;
       out.push(
