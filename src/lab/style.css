@@ -293,8 +293,10 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
   aspect-ratio: 4.75 / 45.72;
 }
 @media (max-width: 720px) {
-  .house-view canvas { height: auto; width: min(68vw, 330px); }
-  .sheet-view canvas { height: auto; width: calc(min(68vw, 330px) * 0.241); }
+  /* Casa e pista alte uguali; abbastanza basse da lasciare in vista i comandi sotto la casa. */
+  .views { --view-h: min(calc(min(68vw, 330px) * 11.022 / 4.75), calc(100svh - 200px)); }
+  .house-view canvas { height: var(--view-h); width: calc(var(--view-h) * 4.75 / 11.022); }
+  .sheet-view canvas { height: var(--view-h); width: calc(var(--view-h) * 4.75 / 45.72); }
 }
 
 .table-wrap { overflow-x: auto; }
@@ -324,23 +326,17 @@ tbody tr:hover, tbody tr:focus-visible { background: var(--bg); }
 .dot.t1 { background: var(--team-1); }
 canvas[data-tool="place"] { cursor: grab; }
 
-/* Comandi flottanti su schermi stretti: rotazione e tiro (o spazzata) affiancati, peso subito sotto. */
+/* Comandi su schermi stretti, subito sotto la casa: rotazione e tiro (o spazzata) affiancati, peso sotto. */
 .fab { display: none; }
 @media (max-width: 720px) {
   .inline-actions { display: none; }
-  body { padding-bottom: calc(160px + env(safe-area-inset-bottom, 0px)); }
+  /* Casa e pista affiancate, comandi su tutta la larghezza sotto. */
+  .views { display: grid; grid-template-columns: auto minmax(0, auto); justify-content: center; column-gap: 10px; row-gap: 8px; }
+  .sheet-view figcaption { text-align: center; overflow-wrap: anywhere; }
   .fab {
     display: grid;
     gap: 8px;
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 20;
-    padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
-    background: color-mix(in srgb, var(--bg) 90%, transparent);
-    backdrop-filter: blur(6px);
-    border-top: 1px solid var(--rule);
+    grid-column: 1 / -1;
   }
   .fab-row { display: flex; gap: 10px; }
   .fab-row button {

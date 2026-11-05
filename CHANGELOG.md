@@ -4,6 +4,7 @@
 
 Fase 2. Motore fisico invariato (0.2.0).
 
+- **Telefono:** i comandi (rotazione, Tira, Spazza, Valuta e peso) non sono più fissati in fondo allo schermo sopra la casa: stanno subito sotto la casa e la pista, che si rimpiccioliscono quanto basta per lasciarli in vista insieme.
 - **Urti tra pietre, «Normali» o «Vivaci»** (pannello Ghiaccio). «Normali», ora predefinito, trasmette meno energia: restituzione 0,85 negli urti con la pietra tirata e 0,6 negli urti tra pietre già colpite, quindi colpo singolo circa −5% di strada per la colpita e catene circa −33%. «Vivaci» è il comportamento fino alla 0.2.2 (0,9 per tutti gli urti). Il replay registra i valori: i replay precedenti si rivedono identici. Il rapporto dei giudizi indica gli urti usati.
 - **Peso:** il cursore va da 1,6 a 3,8 m/s (prima fino a 4,6); 3,8 m/s resta il riferimento della pelata.
 

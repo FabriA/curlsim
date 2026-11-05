@@ -224,6 +224,19 @@
       <canvas id="sheet" aria-label="Pista intera vista dall'alto"></canvas>
       <figcaption data-t="view.sheet"></figcaption>
     </figure>
+    <!-- Comandi di tiro su telefono: subito sotto la casa, nel flusso della pagina. -->
+    <div id="fab" class="fab" aria-label="Comandi di tiro">
+      <div class="fab-row">
+        <button id="fab-spin" class="fab-spin" type="button" data-t-label="fab.spinLabel"></button>
+        <button id="fab-throw" class="primary" type="button" data-t="shot.throw"></button>
+        <button id="fab-sweep" class="sweep" type="button" data-t="shot.sweep" hidden></button>
+        <button id="fab-rate" type="button" data-t="fb.rate" hidden></button>
+      </div>
+      <label id="fab-weight-row" class="fab-weight">
+        <span class="fab-weight-label"><b id="fab-weight-value"></b> <span id="fab-weight-stop"></span></span>
+        <input id="fab-weight" type="range" min="1.6" max="3.8" step="0.01" value="2.03" data-t-label="fab.weightLabel">
+      </label>
+    </div>
   </section>
 
   <section class="data">
@@ -298,18 +311,6 @@
     <button id="decision-new" type="button" class="primary-plain" data-t="end.new"></button>
     <button id="decision-close" type="button" data-t="end.close"></button>
   </div>
-</div>
-<div id="fab" class="fab" aria-label="Comandi di tiro">
-  <div class="fab-row">
-    <button id="fab-spin" class="fab-spin" type="button" data-t-label="fab.spinLabel"></button>
-    <button id="fab-throw" class="primary" type="button" data-t="shot.throw"></button>
-    <button id="fab-sweep" class="sweep" type="button" data-t="shot.sweep" hidden></button>
-    <button id="fab-rate" type="button" data-t="fb.rate" hidden></button>
-  </div>
-  <label id="fab-weight-row" class="fab-weight">
-    <span class="fab-weight-label"><b id="fab-weight-value"></b> <span id="fab-weight-stop"></span></span>
-    <input id="fab-weight" type="range" min="1.6" max="3.8" step="0.01" value="2.03" data-t-label="fab.weightLabel">
-  </label>
 </div>
 <!--ARTIFACT-BODY-END-->
 <script type="module" src="/src/lab/main.ts"></script>
