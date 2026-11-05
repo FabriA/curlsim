@@ -1,0 +1,25 @@
+CurlSim – giudizi sui tiri (versione 0.3.0, motore 0.2.0)
+Tiri valutati: 3
+
+Tiro 4 · Raise o freeze · pietra rimossa · 2,56 m/s · rotazione 3,5 giri · spazzata 0,0 s · ghiaccio hog-to-hog 14,5 s, curva 1,2 m · sweeper 2,15 m · urti vivaci · esito: In gioco · pietre rimosse: 1 · hash e2031a50
+  Urto: colpo pieno al 81% · velocità all'urto 1,59 m/s · tirata dopo l'urto 0,53 m · colpita 2,31 m (fuori gioco)
+  - La pietra colpita è avanzata… → Giusto
+  - Dopo l'urto, la pietra tirata è rimasta… → Giusto
+
+Tiro 4 · Raise o freeze · 2,56 m/s · rotazione 3,5 giri · spazzata 0,0 s · ghiaccio hog-to-hog 14,5 s, curva 1,2 m · sweeper 2,15 m · urti vivaci · esito: Fuori: back line · hash 08533990
+  Urto: colpo pieno al 6% · velocità all'urto 1,58 m/s · tirata dopo l'urto 2,49 m (fuori gioco) · colpita 2,06 m
+  - La pietra colpita è avanzata… → Troppo
+  - Dopo l'urto, la pietra tirata è rimasta… → Giusto
+
+Tiro 4 · Raise o freeze · pietra rimossa · 2,56 m/s · rotazione 3,5 giri · spazzata 0,0 s · ghiaccio hog-to-hog 14,5 s, curva 1,2 m · sweeper 2,15 m · urti vivaci · esito: In gioco · pietre rimosse: 2 · hash d6d85df5
+  Urto: colpo pieno al 26% · velocità all'urto 1,59 m/s · tirata dopo l'urto 1,35 m · colpita 1,13 m
+  - La pietra colpita è avanzata… → Giusto
+  - Dopo l'urto, la pietra tirata è rimasta… → Giusto
+
+Replay (da incollare in «Carica replay o posizione» per rivedere il tiro identico):
+
+Tiro 4: {"format":"curling-replay","version":1,"engineVersion":"0.2.0","params":{"curlV0":0.1,"spinRatioRef":0.1,"sweepFriction":0.9202966120205112,"sweepCurl":0.85,"restitution":0.95,"stoneFriction":0.2,"inertiaK":0.5,"mu":0.007411714778538704,"curlK":0.007008407567627729,"restitutionSecondary":0.97},"team":0,"stonesBefore":[{"id":1,"team":0,"x":1.222485132823086,"y":18.078219076290665},{"id":2,"team":1,"x":0.05174702940115215,"y":17.08480604991067},{"id":3,"team":0,"x":-0.6636312675921952,"y":17.8629651734173}],"shot":{"broomX":0.4676124707790654,"broomY":17.05079018176614,"speed":2.56,"spin":-1,"spinRate":1.5778677450762377,"spinTurns":3.5},"skill":{"lineSigma":0,"lineSigmaTakeout":0,"stopNoise":{"p":[0.3,0.63,0.07],"sigma":[0,0,0]}},"seed":5,"release":{"x":0.12476201273320157,"y":-10.872,"vx":0.03143063471383742,"vy":2.5598070464785985,"w":-1.5778677450762377},"sweep":[],"result":{"hash":"e2031a50","ticks":17154,"sweepTime":0,"swept":[]}}
+
+Tiro 4: {"format":"curling-replay","version":1,"engineVersion":"0.2.0","params":{"curlV0":0.1,"spinRatioRef":0.1,"sweepFriction":0.9202966120205112,"sweepCurl":0.85,"restitution":0.95,"stoneFriction":0.2,"inertiaK":0.5,"mu":0.007411714778538704,"curlK":0.007008407567627729,"restitutionSecondary":0.97},"team":1,"stonesBefore":[{"id":1,"team":0,"x":1.222485132823086,"y":18.078219076290665},{"id":2,"team":1,"x":0.05174702940115215,"y":17.08480604991067},{"id":3,"team":0,"x":-0.6636312675921952,"y":17.8629651734173}],"shot":{"broomX":0.6851593435427694,"broomY":17.079796431467965,"speed":2.56,"spin":-1,"spinRate":1.5778677450762377,"spinTurns":3.5},"skill":{"lineSigma":0,"lineSigmaTakeout":0,"stopNoise":{"p":[0.3,0.63,0.07],"sigma":[0,0,0]}},"seed":5,"release":{"x":0.18266579053721596,"y":-10.872,"vx":0.04601406152603665,"vy":2.5595864326374835,"w":-1.5778677450762377},"sweep":[],"result":{"hash":"08533990","ticks":20982,"sweepTime":0,"swept":[]}}
+
+Tiro 4: {"format":"curling-replay","version":1,"engineVersion":"0.2.0","params":{"curlV0":0.1,"spinRatioRef":0.1,"sweepFriction":0.9202966120205112,"sweepCurl":0.85,"restitution":0.95,"stoneFriction":0.2,"inertiaK":0.5,"mu":0.007411714778538704,"curlK":0.007008407567627729,"restitutionSecondary":0.97},"team":1,"stonesBefore":[{"id":1,"team":0,"x":1.222485132823086,"y":18.078219076290665},{"id":2,"team":1,"x":0.05174702940115215,"y":17.08480604991067},{"id":3,"team":0,"x":-0.6636312675921952,"y":17.8629651734173}],"shot":{"broomX":0.6271468441391153,"broomY":17.05079018176614,"speed":2.56,"spin":-1,"spinRate":1.5778677450762377,"spinTurns":3.5},"skill":{"lineSigma":0,"lineSigmaTakeout":0,"stopNoise":{"p":[0.3,0.63,0.07],"sigma":[0,0,0]}},"seed":5,"release":{"x":0.1673268089358544,"y":-10.872,"vx":0.042151221508088574,"vy":2.559652959782903,"w":-1.5778677450762377},"sweep":[],"result":{"hash":"d6d85df5","ticks":17270,"sweepTime":0,"swept":[]}}
