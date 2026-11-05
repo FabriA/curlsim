@@ -7,7 +7,7 @@
  */
 
 /** Versione dell'applicazione (allineata a package.json). */
-export const APP_VERSION = "0.2.2";
+export const APP_VERSION = "0.3.0";
 
 /** Versione del motore: entra in ogni replay. Cambiarla quando cambia il comportamento fisico. */
 export const ENGINE_VERSION = "0.2.0";

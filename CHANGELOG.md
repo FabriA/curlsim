@@ -1,8 +1,8 @@
 # Registro delle versioni
 
-## Non ancora rilasciato
+## 0.3.0 — 5 novembre 2026
 
-Fase 2. Motore fisico invariato (0.2.0).
+Fase 2. Motore fisico 0.2.0: i replay delle versioni 0.2.x si riproducono identici (i nuovi parametri degli urti viaggiano nel replay).
 
 - **Comandi di tiro sotto la casa**, su telefono e su desktop: rotazione, Tira, Spazza, Valuta e peso stanno subito sotto la casa e la pista, dimensionate per restare in vista insieme ai comandi. Nel pannello Tiro restano le impostazioni.
 - **Ferma:** durante un tiro o una riproduzione, accanto a Spazza, ferma la simulazione e riporta le pietre alla posizione di partenza. Il tiro fermato non entra nel registro né, nell'end a due, nel conteggio delle pietre.
