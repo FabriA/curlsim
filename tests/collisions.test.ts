@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { calibrate, speedToStopAt } from "../src/core/calibrate";
 import { FAR_HOG_INSIDE, HALF_WIDTH, RELEASE_Y, STONE_RADIUS, TEE_Y } from "../src/core/geometry";
-import { COLLISIONS, PROFILES } from "../src/core/params";
+import { COLLISIONS, collisionLevelOf, PROFILES } from "../src/core/params";
 import { createStone, stepWorld, type World } from "../src/core/physics";
 import { Sim } from "../src/core/sim";
 
@@ -182,5 +182,14 @@ describe("vivacità degli urti", () => {
     const w: World = { params: { ...noFriction, restitution: 0.9, restitutionSecondary: 0.5 }, stones: [a, b], tick: 0 };
     runUntil(w, 1000);
     expect(b.vy).toBeCloseTo(1.5, 6); // (1 + 0,5) / 2 · 2
+  });
+});
+
+describe("riconoscimento dell'impostazione degli urti", () => {
+  it("riconosce Normali, Vivaci e i replay fino alla 0.2.2", () => {
+    expect(collisionLevelOf(COLLISIONS.normal)).toBe("normal");
+    expect(collisionLevelOf(COLLISIONS.lively)).toBe("lively");
+    expect(collisionLevelOf({ restitution: 0.9 })).toBe("lively");
+    expect(collisionLevelOf({ restitution: 0.85, restitutionSecondary: 0.6 })).toBeNull();
   });
 });

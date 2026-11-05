@@ -2,9 +2,11 @@
 
 Aggiornato il 2026-11-05 12:26 UTC · motore 0.2.0 · messaggi elaborati: 5 · tiri valutati: 11
 
+Tiri per impostazione degli urti: normali 5 · vivaci 6. Le statistiche sono separate per impostazione.
+
 ## Indicazioni
 
-Nessun segnale netto: servono almeno 3 risposte informative su una domanda, con almeno il 60% che chiede la stessa correzione.
+- [urti vivaci] «Dopo l'urto, la distanza percorsa dalla pietra tirata è…»: 80% di 5 risposte dice «Troppo lungo». Da verificare rivedendo i replay di quei tiri.
 
 ## Replay
 
@@ -17,24 +19,24 @@ Nessun segnale netto: servono almeno 3 risposte informative su una domanda, con 
 
 ## Rotolamento dopo l'urto, per pienezza del colpo
 
-| Colpo | Tiri | Tirata dopo l'urto, media (m) | Troppo corto | Giusto | Troppo lungo | Non so |
-| --- | --- | --- | --- | --- | --- | --- |
-| pieno | 2 | 0,09 | 0 | 0 | 2 | 0 |
+| Urti | Colpo | Tiri | Tirata dopo l'urto, media (m) | Troppo corto | Giusto | Troppo lungo | Non so |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| vivaci | pieno | 2 | 0,09 | 0 | 0 | 2 | 0 |
 
 ## Risposte per domanda
 
-| Domanda | Risposte | Distribuzione | Segnale |
-| --- | --- | --- | --- |
-| La curva di questo colpo è… | 5 | Giusto 5 | — |
-| Dopo l'urto, la direzione della pietra tirata è… | 5 | Credibile 5 | — |
-| Dopo l'urto, la distanza percorsa dalla pietra tirata è… | 5 | Troppo lungo 4 · Giusto 1 | Troppo lungo (80%) |
-| La pietra colpita è avanzata… | 3 | Giusto 3 | — |
-| Dopo l'urto, la pietra tirata è rimasta… | 3 | Giusto 3 | — |
-| Spazzata per # s: l'allungamento del tiro è… | 1 | Giusto 1 | — |
-| La riduzione della curva dovuta alla spazzata è… | 1 | Giusto 1 | — |
-| Il punto in cui la pietra inizia a curvare davvero arriva… | 1 | Troppo presto 1 | — |
-| La chiusura finale della curva è… | 1 | Giusto 1 | — |
-| Con un hog-to-hog di # s, per questo peso il tiro è risultato… | 1 | Giusto 1 | — |
+| Domanda | Urti | Risposte | Distribuzione | Segnale |
+| --- | --- | --- | --- | --- |
+| La curva di questo colpo è… | vivaci | 5 | Giusto 5 | — |
+| Dopo l'urto, la direzione della pietra tirata è… | vivaci | 5 | Credibile 5 | — |
+| Dopo l'urto, la distanza percorsa dalla pietra tirata è… | vivaci | 5 | Troppo lungo 4 · Giusto 1 | Troppo lungo (80%) |
+| La pietra colpita è avanzata… | normali | 3 | Giusto 3 | — |
+| Dopo l'urto, la pietra tirata è rimasta… | normali | 3 | Giusto 3 | — |
+| Spazzata per # s: l'allungamento del tiro è… | normali | 1 | Giusto 1 | — |
+| La riduzione della curva dovuta alla spazzata è… | normali | 1 | Giusto 1 | — |
+| Il punto in cui la pietra inizia a curvare davvero arriva… | normali | 1 | Troppo presto 1 | — |
+| La chiusura finale della curva è… | normali | 1 | Giusto 1 | — |
+| Con un hog-to-hog di # s, per questo peso il tiro è risultato… | normali | 1 | Giusto 1 | — |
 
 ## Commenti
 

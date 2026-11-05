@@ -2,7 +2,7 @@
  * Rapporti in Markdown: un riepilogo complessivo e una scheda per ogni messaggio elaborato.
  */
 import { ENGINE_VERSION } from "../../src/core/params";
-import { questionStats, recommendations, rollStats, type Dataset, type ShotRecord } from "./evaluate";
+import { collisionsOf, questionStats, recommendations, rollStats, type Dataset, type ShotRecord } from "./evaluate";
 
 const n2 = (v: number | null | undefined, d = 2) => (v === null || v === undefined ? "—" : v.toFixed(d).replace(".", ","));
 const pct = (v: number) => `${Math.round(v * 100)}%`;
@@ -20,6 +20,10 @@ export function summaryMarkdown(ds: Dataset): string {
   out.push("# Segnalazioni sul realismo", "");
   out.push(`Aggiornato il ${ds.updated} · motore ${ENGINE_VERSION} · messaggi elaborati: ${ds.processed.length} · tiri valutati: ${shots.length}`, "");
 
+  const byColl = new Map<string, number>();
+  for (const s of shots) byColl.set(collisionsOf(s), (byColl.get(collisionsOf(s)) ?? 0) + 1);
+  out.push(`Tiri per impostazione degli urti: ${[...byColl.entries()].sort().map(([k, v]) => `${k} ${v}`).join(" · ")}. Le statistiche sono separate per impostazione.`, "");
+
   out.push("## Indicazioni", "");
   if (rec.length) for (const r of rec) out.push(`- ${r}`);
   else out.push(`Nessun segnale netto: servono almeno ${3} risposte informative su una domanda, con almeno il 60% che chiede la stessa correzione.`);
@@ -35,23 +39,23 @@ export function summaryMarkdown(ds: Dataset): string {
 
   out.push("## Rotolamento dopo l'urto, per pienezza del colpo", "");
   if (rs.length) {
-    out.push("| Colpo | Tiri | Tirata dopo l'urto, media (m) | Troppo corto | Giusto | Troppo lungo | Non so |", "| --- | --- | --- | --- | --- | --- | --- |");
+    out.push("| Urti | Colpo | Tiri | Tirata dopo l'urto, media (m) | Troppo corto | Giusto | Troppo lungo | Non so |", "| --- | --- | --- | --- | --- | --- | --- | --- |");
     for (const r of rs) {
       const c = (k: string) => r.counts[k] ?? 0;
-      out.push(`| ${r.band} | ${r.n} | ${n2(r.meanShooterTravel)} | ${c("Troppo corto")} | ${c("Giusto")} | ${c("Troppo lungo")} | ${c("Non so")} |`);
+      out.push(`| ${esc(r.collisions)} | ${r.band} | ${r.n} | ${n2(r.meanShooterTravel)} | ${c("Troppo corto")} | ${c("Giusto")} | ${c("Troppo lungo")} | ${c("Non so")} |`);
     }
   } else out.push("Ancora nessun giudizio sul rotolamento con le misure dell'urto.");
   out.push("");
 
   out.push("## Risposte per domanda", "");
   if (qs.length) {
-    out.push("| Domanda | Risposte | Distribuzione | Segnale |", "| --- | --- | --- | --- |");
+    out.push("| Domanda | Urti | Risposte | Distribuzione | Segnale |", "| --- | --- | --- | --- | --- |");
     for (const q of qs) {
       const dist = Object.entries(q.counts)
         .sort((a, b) => b[1] - a[1])
         .map(([k, v]) => `${esc(k)} ${v}`)
         .join(" · ");
-      out.push(`| ${esc(q.question)} | ${q.total} | ${dist} | ${q.signal ? `${esc(q.signal.answer)} (${pct(q.signal.share)})` : "—"} |`);
+      out.push(`| ${esc(q.question)} | ${esc(q.collisions)} | ${q.total} | ${dist} | ${q.signal ? `${esc(q.signal.answer)} (${pct(q.signal.share)})` : "—"} |`);
     }
   } else out.push("Nessuna risposta ancora.");
   out.push("");
@@ -84,7 +88,7 @@ export function messageMarkdown(id: string, list: ShotRecord[]): string {
   out.push(`Ricevuta ${via} il ${first.date} · laboratorio ${first.app} · motore ${first.engine} · tiri: ${list.length}`, "");
   for (const s of list) {
     out.push(`## Tiro ${s.n} · ${s.kind}`, "");
-    out.push(`- Velocità ${n2(s.speed)} m/s · rotazione ${n2(s.spinTurns, 1)} giri · spazzata ${n2(s.sweepTime, 1)} s · urti ${s.collisions ?? "vivaci (versione precedente)"} · esito: ${s.outcome || "—"}`);
+    out.push(`- Velocità ${n2(s.speed)} m/s · rotazione ${n2(s.spinTurns, 1)} giri · spazzata ${n2(s.sweepTime, 1)} s · urti ${collisionsOf(s)} · esito: ${s.outcome || "—"}`);
     if (s.impact) {
       const i = s.impact;
       out.push(

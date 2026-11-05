@@ -4,7 +4,7 @@
  */
 import { calibrate, spinRateForTurns, stopForSpeed, speedToStopAt, sweepFrictionForGain } from "../core/calibrate";
 import { BACK_LINE_OUTSIDE, FAR_HOG_INSIDE, HACK_Y, HOUSE_RADIUS, RELEASE_Y, STONE_RADIUS, TEE_Y } from "../core/geometry";
-import { APP_VERSION, COLLISIONS, DT, ENGINE_VERSION, PROFILES, SHOT_PRECISION, SPIN_TURNS, SWEEP_GAIN, type CollisionLevel, type IceParams, type Precision, type ProfileId, type ShotLevel, type SkillLevel, type SpinLevel } from "../core/params";
+import { APP_VERSION, COLLISIONS, collisionLevelOf, DT, ENGINE_VERSION, PROFILES, SHOT_PRECISION, SPIN_TURNS, SWEEP_GAIN, type CollisionLevel, type IceParams, type Precision, type ProfileId, type ShotLevel, type SkillLevel, type SpinLevel } from "../core/params";
 import { REFERENCE_HASH, referenceReplay } from "../core/reference";
 import { makeReplay, runReplay, Sim, skillFromPrecision, validateReplay, type Replay, type Skill, type StonePlacement } from "../core/sim";
 import { num, t } from "../i18n";
@@ -237,6 +237,13 @@ function shotParams(): IceParams {
   return { ...ice, sweepFriction: sweepFrictionForGain(ice, sweepGain()), ...COLLISIONS[collisionLevel()] };
 }
 
+/** Etichetta degli urti per il rapporto, ricavata dai valori usati davvero nel tiro. */
+function collisionsLabel(p: IceParams): string {
+  const lvl = collisionLevelOf(p);
+  if (lvl) return t(lvl === "normal" ? "fb.collisions.normal" : "fb.collisions.lively");
+  return t("fb.collisions.custom", { e: num(p.restitution, 2), e2: num(p.restitutionSecondary ?? p.restitution, 2) });
+}
+
 function collisionLevel(): CollisionLevel {
   return $<HTMLSelectElement>("collisions").value === "lively" ? "lively" : "normal";
 }
@@ -444,7 +451,7 @@ function finishShot(): void {
     hash,
     ice: readTargets(),
     sweepGain: sweepGain(),
-    collisions: t(replay.params.restitutionSecondary !== undefined && replay.params.restitutionSecondary < replay.params.restitution ? "fb.collisions.normal" : "fb.collisions.lively"),
+    collisions: collisionsLabel(replay.params),
     impact: m.impact,
     replay,
   });
@@ -569,13 +576,37 @@ function scene(): Scene {
   }
   return {
     stones,
-    traces,
+    traces: showTrails() ? traces : [],
     broom: state.broom,
     predictedStopY: state.params && !sim ? stopForSpeed(state.params, currentSpeed()) : null,
     highlight,
     ...(endMode?.active && !sim ? endMode.sceneExtras() : endMode?.active ? { fgz: endMode.sceneExtras().fgz } : {}),
     sweeping: !!sim && !sim.done && sim.canSweep() && (state.playback ? playbackSweeping(sim) : sweepInput()),
   };
+}
+
+const TRAILS_KEY = "curlsim.showTrails";
+
+/** Scia delle pietre sulla casa e sulla pista: si può nascondere dal riquadro Tiro. */
+function showTrails(): boolean {
+  return $<HTMLInputElement>("show-trails").checked;
+}
+
+function bindTrails(): void {
+  const box = $<HTMLInputElement>("show-trails");
+  try {
+    if (localStorage.getItem(TRAILS_KEY) === "0") box.checked = false;
+  } catch {
+    /* memoria del browser non disponibile: scia visibile */
+  }
+  box.addEventListener("change", () => {
+    try {
+      localStorage.setItem(TRAILS_KEY, box.checked ? "1" : "0");
+    } catch {
+      /* niente */
+    }
+    draw();
+  });
 }
 
 /** Nella riproduzione la spazzata segue il programma registrato nel replay. */
@@ -873,6 +904,7 @@ function init(): void {
   $("det-check").addEventListener("click", checkDeterminism);
   bindSweepInputs();
   bindPanels();
+  bindTrails();
   $("fab-throw").addEventListener("click", throwStone);
   $("stop").addEventListener("click", stopShot);
   $("fab-stop").addEventListener("click", stopShot);

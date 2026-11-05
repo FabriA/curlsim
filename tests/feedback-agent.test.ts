@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { formatReport, type FeedbackRecord, type ShotFacts } from "../src/lab/feedback-model";
 import { REFERENCE_HASH, referenceReplay } from "../src/core/reference";
 import { parseReport } from "../tools/feedback-agent/parse";
-import { addReport, band, emptyDataset, questionKey, questionStats, recommendations, rollStats } from "../tools/feedback-agent/evaluate";
+import { addReport, band, collisionsOf, emptyDataset, questionKey, questionStats, recommendations, rollStats } from "../tools/feedback-agent/evaluate";
 import { messageMarkdown, summaryMarkdown } from "../tools/feedback-agent/report";
 
 const fmt = (n: number, d: number) => n.toFixed(d).replace(".", ",");
@@ -93,6 +93,24 @@ describe("agente delle segnalazioni: valutazione", () => {
     expect(recommendations(questionStats(ds.shots), rollStats(ds.shots))).toEqual([]);
   });
 
+  it("ricava gli urti dai valori del replay, non dall'etichetta del rapporto", () => {
+    const rep = referenceReplay();
+    const normal = { ...rep, params: { ...rep.params, restitution: 0.95, restitutionSecondary: 0.97 } };
+    expect(collisionsOf({ replay: normal, collisions: "vivaci" })).toBe("normali");
+    expect(collisionsOf({ replay: { ...rep, params: { ...rep.params, restitution: 0.9 } }, collisions: null })).toBe("vivaci");
+    expect(collisionsOf({ replay: { ...rep, params: { ...rep.params, restitution: 0.85, restitutionSecondary: 0.6 } }, collisions: null })).toMatch(/prima versione/);
+    expect(collisionsOf({ replay: null, collisions: null })).toBe("vivaci");
+  });
+
+  it("segnala un giudizio netto anche senza misure dell'urto, separato per impostazione degli urti", () => {
+    const noImpact = (n: number, answer: string, collisions?: string): FeedbackRecord => ({ ...roll(n, 1, answer), facts: { ...facts({ n, collisions }), impact: null } });
+    const ds = addReport(emptyDataset(), "m1", "2026-11-04T08:00:00Z", parseReport(report([noImpact(1, "Troppo lungo"), noImpact(2, "Troppo lungo"), noImpact(3, "Troppo lungo"), noImpact(4, "Giusto", "normali")]))!);
+    const rec = recommendations(questionStats(ds.shots), rollStats(ds.shots));
+    expect(rec.length).toBe(1);
+    expect(rec[0].startsWith("[urti vivaci] «Dopo l'urto, la distanza")).toBe(true);
+    expect(rec[0].includes("100% di 3 risposte")).toBe(true);
+  });
+
   it("le fasce di pienezza seguono le soglie 75% e 35%", () => {
     expect(band(0.8)).toBe("pieno");
     expect(band(0.5)).toBe("mezza pietra");
@@ -103,7 +121,7 @@ describe("agente delle segnalazioni: valutazione", () => {
     const ds = { ...addReport(emptyDataset(), "m1", "2026-11-04T08:00:00Z", parseReport(report([roll(1, 0.5, "Troppo lungo"), roll(2, 0.5, "Troppo lungo"), roll(3, 0.5, "Troppo lungo")]))!), updated: "2026-11-04 08:00 UTC" };
     const md = summaryMarkdown(ds);
     expect(md.includes("## Indicazioni")).toBe(true);
-    expect(md.includes("| mezza pietra | 3 |")).toBe(true);
+    expect(md.includes("| vivaci | mezza pietra | 3 |")).toBe(true);
     expect(md.includes("@")).toBe(false);
     expect(messageMarkdown("m1", ds.shots).includes("## Tiro 1 · Bocciata")).toBe(true);
   });

@@ -3,7 +3,7 @@
  * e individua i segnali che suggeriscono un intervento sul modello fisico.
  * Non modifica mai i parametri: propone dove guardare.
  */
-import { ENGINE_VERSION } from "../../src/core/params";
+import { collisionLevelOf, ENGINE_VERSION } from "../../src/core/params";
 import { runReplay } from "../../src/core/sim";
 import type { ParsedReport, ParsedShot } from "./parse";
 
@@ -106,6 +106,23 @@ export function addReport(ds: Dataset, message: string, date: string, report: Pa
 
 // ——— Aggregazione ———
 
+/**
+ * Impostazione degli urti di un tiro. Si ricava dai valori del replay, che sono quelli usati
+ * davvero (l'etichetta nel testo dei rapporti 0.3.0 era sbagliata: «vivaci» anche per «Normali»).
+ * Senza replay vale l'etichetta del rapporto; senza etichetta (fino alla 0.2.2) gli urti erano vivaci.
+ */
+export function collisionsOf(s: Pick<ShotRecord, "replay" | "collisions">): string {
+  const p = s.replay?.params;
+  if (p) {
+    const lvl = collisionLevelOf(p);
+    if (lvl) return lvl === "normal" ? "normali" : "vivaci";
+    const e2 = p.restitutionSecondary ?? p.restitution;
+    if (p.restitution === 0.85 && e2 === 0.6) return "normali (prima versione, 0,85/0,6)";
+    return `personalizzati (${String(p.restitution).replace(".", ",")}/${String(e2).replace(".", ",")})`;
+  }
+  return s.collisions ?? "vivaci";
+}
+
 /** Domanda senza i numeri del tiro, per raggruppare «Spazzata per 16,6 s…» con «Spazzata per 3,2 s…». */
 export function questionKey(q: string): string {
   return q.replace(/\d+(?:[.,]\d+)?/g, "#").replace(/\s+/g, " ").trim();
@@ -116,6 +133,8 @@ const NEUTRAL = new Set(["Giusto", "Credibile", "Simile va bene", "Non so"]);
 
 export interface QuestionStats {
   question: string;
+  /** Impostazione degli urti dei tiri raggruppati: le risposte si contano separatamente. */
+  collisions: string;
   total: number;
   counts: Record<string, number>;
   /** Risposta prevalente che chiede una correzione, se supera la soglia. */
@@ -129,9 +148,11 @@ export function questionStats(shots: ShotRecord[]): QuestionStats[] {
   const map = new Map<string, QuestionStats>();
   for (const s of shots) {
     for (const a of s.answers) {
-      const key = questionKey(a.question);
+      const q = questionKey(a.question);
+      const c = collisionsOf(s);
+      const key = `${q}\u0000${c}`;
       let st = map.get(key);
-      if (!st) map.set(key, (st = { question: key, total: 0, counts: {}, signal: null }));
+      if (!st) map.set(key, (st = { question: q, collisions: c, total: 0, counts: {}, signal: null }));
       st.total++;
       st.counts[a.answer] = (st.counts[a.answer] ?? 0) + 1;
     }
@@ -155,6 +176,7 @@ export function band(fullness: number): FullnessBand {
 
 export interface RollStats {
   band: FullnessBand;
+  collisions: string;
   n: number;
   meanShooterTravel: number;
   counts: Record<string, number>;
@@ -164,24 +186,38 @@ const ROLL_QUESTION = "Dopo l'urto, la distanza percorsa dalla pietra tirata è�
 
 /** Giudizi sul rotolamento della tirata dopo l'urto, raggruppati per pienezza del colpo. */
 export function rollStats(shots: ShotRecord[]): RollStats[] {
-  const out = new Map<FullnessBand, RollStats>();
+  const out = new Map<string, RollStats>();
   for (const s of shots) {
     const a = s.answers.find((x) => questionKey(x.question) === questionKey(ROLL_QUESTION));
     if (!a || !s.impact) continue;
     const b = band(s.impact.fullness);
-    let st = out.get(b);
-    if (!st) out.set(b, (st = { band: b, n: 0, meanShooterTravel: 0, counts: {} }));
+    const c = collisionsOf(s);
+    const key = `${b}\u0000${c}`;
+    let st = out.get(key);
+    if (!st) out.set(key, (st = { band: b, collisions: c, n: 0, meanShooterTravel: 0, counts: {} }));
     st.meanShooterTravel = (st.meanShooterTravel * st.n + s.impact.shooterTravel) / (st.n + 1);
     st.n++;
     st.counts[a.answer] = (st.counts[a.answer] ?? 0) + 1;
   }
   const order: FullnessBand[] = ["pieno", "mezza pietra", "sottile"];
-  return order.filter((b) => out.has(b)).map((b) => out.get(b)!);
+  return [...out.values()].sort((x, y) => x.collisions.localeCompare(y.collisions) || order.indexOf(x.band) - order.indexOf(y.band));
 }
 
-/** Indicazioni sul modello, ricavate dai segnali. Sono proposte da verificare, non correzioni automatiche. */
+/** Indicazioni sul modello, ricavate dai segnali, separate per impostazione degli urti. Sono proposte da verificare, non correzioni automatiche. */
 export function recommendations(qs: QuestionStats[], rs: RollStats[]): string[] {
+  const groups = [...new Set([...qs.map((q) => q.collisions), ...rs.map((r) => r.collisions)])].sort();
   const rec: string[] = [];
+  for (const c of groups) {
+    const lines = recommendationsFor(qs.filter((q) => q.collisions === c), rs.filter((r) => r.collisions === c));
+    for (const l of lines) rec.push(groups.length > 1 || c !== "normali" ? `[urti ${c}] ${l}` : l);
+  }
+  return rec;
+}
+
+function recommendationsFor(qs: QuestionStats[], rs: RollStats[]): string[] {
+  const rec: string[] = [];
+  /** Domande per cui è già stata data un'indicazione specifica. */
+  const covered = new Set<string>();
   const sig = (needle: string) => qs.find((q) => q.signal && q.question.startsWith(needle))?.signal ?? null;
   const majority = (r: RollStats, ans: string) => {
     const n = Object.entries(r.counts).filter(([k]) => k !== "Non so").reduce((a, [, v]) => a + v, 0);
@@ -194,10 +230,14 @@ export function recommendations(qs: QuestionStats[], rs: RollStats[]): string[] 
   if (partialLong.length) rec.push(`Rotolamento troppo lungo nei colpi ${partialLong.map((r) => r.band).join(" e ")}: candidato l'aumento dell'attrito tra le pietre (stoneFriction, oggi 0,2).`);
   if (fullLong) rec.push("Rotolamento troppo lungo anche nei colpi pieni: la restituzione non spiega il difetto; rivedere la perdita di energia dopo l'urto.");
   if (partialShort.length) rec.push(`Rotolamento troppo corto nei colpi ${partialShort.map((r) => r.band).join(" e ")}: candidata la riduzione dell'attrito tra le pietre.`);
+  if (partialLong.length || fullLong || partialShort.length) covered.add(questionKey(ROLL_QUESTION));
 
   const s = (needle: string, text: Record<string, string>) => {
     const g = sig(needle);
-    if (g && text[g.answer]) rec.push(`${text[g.answer]} (${Math.round(g.share * 100)}% delle risposte).`);
+    if (g && text[g.answer]) {
+      rec.push(`${text[g.answer]} (${Math.round(g.share * 100)}% delle risposte).`);
+      covered.add(qs.find((q) => q.question.startsWith(needle))!.question);
+    }
   };
   s("Il punto in cui la pietra inizia a curvare", {
     "Troppo presto": "La curva inizia troppo presto: ridurre il peso della deriva ad alta velocità (aumentare curlV0)",
@@ -225,8 +265,8 @@ export function recommendations(qs: QuestionStats[], rs: RollStats[]): string[] 
     "Troppo poco": "Le bocciate curvano troppo poco: aumentare la deriva ad alta velocità",
   });
   s("La pietra colpita è avanzata", {
-    Troppo: "Nei raise la pietra colpita avanza troppo: ridurre la restituzione (oggi 0,9)",
-    "Troppo poco": "Nei raise la pietra colpita avanza troppo poco: aumentare la restituzione (oggi 0,9)",
+    Troppo: "Nei raise la pietra colpita avanza troppo: ridurre la restituzione degli urti con la pietra tirata",
+    "Troppo poco": "Nei raise la pietra colpita avanza troppo poco: aumentare la restituzione degli urti con la pietra tirata",
   });
   s("Con rotazione bassa", {
     "Dovrebbe curvare di più": "Con rotazione bassa la curva dovrebbe crescere: introdurre una dipendenza della deriva dalla rotazione",
@@ -236,5 +276,12 @@ export function recommendations(qs: QuestionStats[], rs: RollStats[]): string[] 
     "Dovrebbe curvare di più": "Con rotazione alta la curva dovrebbe crescere: introdurre una dipendenza della deriva dalla rotazione",
     "Dovrebbe curvare di meno": "Con rotazione alta la curva dovrebbe ridursi: introdurre una dipendenza della deriva dalla rotazione",
   });
+
+  // Ogni altro segnale netto, anche senza le misure dell'urto: da guardare a mano.
+  for (const q of qs) {
+    if (!q.signal || covered.has(q.question)) continue;
+    const n = Object.entries(q.counts).filter(([k]) => k !== "Non so").reduce((a, [, v]) => a + v, 0);
+    rec.push(`«${q.question}»: ${Math.round(q.signal.share * 100)}% di ${n} risposte dice «${q.signal.answer}». Da verificare rivedendo i replay di quei tiri.`);
+  }
   return rec;
 }

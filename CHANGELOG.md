@@ -2,6 +2,9 @@
 
 ## Non ancora rilasciato
 
+- **Scia delle pietre:** nel riquadro Tiro la casella «Mostra la scia delle pietre» mostra o nasconde le tracce sulla casa e sulla pista; la scelta resta memorizzata nel browser.
+- **Correzione:** i rapporti dei giudizi indicavano «urti vivaci» anche per i tiri con «Normali». Ora l'impostazione si ricava dai valori usati nel tiro; l'agente la ricava dal replay, quindi anche i rapporti già arrivati sono classificati correttamente.
+- **Agente:** statistiche e indicazioni separate per impostazione degli urti; ogni domanda con un segnale netto (almeno 3 risposte, almeno il 60% nella stessa direzione) compare tra le indicazioni anche quando mancano le misure dell'urto.
 - **Invia allo sviluppatore:** i giudizi arrivano al repository senza mail e senza account. La funzione Vercel
   `api/feedback.ts` salva il rapporto in `reports/feedback/inbox/`; il commit avvia subito l'agente, che ora legge
   questa cartella e, solo se configurata, la posta. Duplicati scartati, limite di invii, codice tester facoltativo.

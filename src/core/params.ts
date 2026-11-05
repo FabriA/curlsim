@@ -86,6 +86,19 @@ export const COLLISIONS: Record<CollisionLevel, Pick<IceParams, "restitution" | 
   lively: { restitution: 0.9, restitutionSecondary: 0.9 },
 };
 
+/**
+ * Impostazione degli urti che corrisponde ai valori di un replay, oppure null se i valori sono
+ * altri. Senza `restitutionSecondary` (replay fino alla 0.2.2) vale `restitution`.
+ */
+export function collisionLevelOf(p: Pick<IceParams, "restitution" | "restitutionSecondary">): CollisionLevel | null {
+  const e2 = p.restitutionSecondary ?? p.restitution;
+  for (const k of Object.keys(COLLISIONS) as CollisionLevel[]) {
+    const c = COLLISIONS[k];
+    if (c.restitution === p.restitution && (c.restitutionSecondary ?? c.restitution) === e2) return k;
+  }
+  return null;
+}
+
 /** Livelli di abilità usati per sweeper e tiratori. */
 export type SkillLevel = "beginner" | "club" | "elite";
 

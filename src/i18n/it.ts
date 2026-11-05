@@ -23,6 +23,8 @@ export const it = {
   "ice.collisionsHint": "«Normali»: urti quasi elastici; in una fila di pietre in freeze colpita in pieno esce solo l'ultima. «Vivaci»: le pietre intermedie si muovono di più (come fino alla versione 0.2.2).",
   "fb.collisions.normal": "normali",
   "fb.collisions.lively": "vivaci",
+  "fb.collisions.custom": "personalizzati ({e}/{e2})",
+  "shot.trails": "Mostra la scia delle pietre",
 
   "shot.broom": "Scopa dello skip",
   "shot.broomHint": "Tocca la casa per spostare la scopa. La linea di tiro parte dalla staffa.",
