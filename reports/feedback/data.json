@@ -8,7 +8,8 @@
   "web-6f93da09c462",
   "web-a7653297804c",
   "web-8199c8253df7",
-  "web-116fe23124b6"
+  "web-116fe23124b6",
+  "web-89d2e21ba230"
  ],
  "shots": [
   {
@@ -2027,7 +2028,166 @@
     }
    },
    "warnings": []
+  },
+  {
+   "message": "web-89d2e21ba230",
+   "date": "2026-11-05T16:16:34.000Z",
+   "app": "0.3.0",
+   "engine": "0.2.0",
+   "n": 1,
+   "kind": "Raise o freeze · pietra rimossa",
+   "speed": 2.22,
+   "spinTurns": 3.5,
+   "sweepTime": 16.8,
+   "collisions": "normali",
+   "outcome": "In gioco · pietre rimosse: 1",
+   "hash": "a8d3658c",
+   "answers": [
+    {
+     "question": "La pietra colpita è avanzata…",
+     "answer": "Troppo"
+    },
+    {
+     "question": "Dopo l'urto, la pietra tirata è rimasta…",
+     "answer": "Giusto"
+    },
+    {
+     "question": "Spazzata per 16,8 s: l'allungamento del tiro è…",
+     "answer": "Giusto"
+    },
+    {
+     "question": "La riduzione della curva dovuta alla spazzata è…",
+     "answer": "Giusto"
+    }
+   ],
+   "comment": "",
+   "replayCheck": "identico",
+   "rerunHash": "a8d3658c",
+   "impact": {
+    "fullness": 0.51,
+    "speed": 1.2,
+    "shooterTravel": 1.6,
+    "targetTravel": 1.5,
+    "shooterOut": false,
+    "targetOut": false
+   },
+   "replay": {
+    "format": "curling-replay",
+    "version": 1,
+    "engineVersion": "0.2.0",
+    "params": {
+     "curlV0": 0.1,
+     "spinRatioRef": 0.1,
+     "sweepFriction": 0.9202966120205112,
+     "sweepCurl": 0.85,
+     "restitution": 0.95,
+     "stoneFriction": 0.2,
+     "inertiaK": 0.5,
+     "mu": 0.007411714778538704,
+     "curlK": 0.007008407567627729,
+     "restitutionSecondary": 0.97
+    },
+    "team": 1,
+    "stonesBefore": [
+     {
+      "id": 0,
+      "team": 0,
+      "x": 0.7286687180955105,
+      "y": 14.860818329278185
+     },
+     {
+      "id": 1,
+      "team": 1,
+      "x": 0.52562497018272,
+      "y": 15.078365202041887
+     },
+     {
+      "id": 2,
+      "team": 1,
+      "x": 1.163762463622918,
+      "y": 17.297343304231667
+     },
+     {
+      "id": 3,
+      "team": 1,
+      "x": 1.9469312055722527,
+      "y": 15.020352702638235
+     },
+     {
+      "id": 4,
+      "team": 1,
+      "x": 1.8744155813176846,
+      "y": 15.977558942798531
+     }
+    ],
+    "shot": {
+     "broomX": 1.0187312151137822,
+     "broomY": 14.80280582987453,
+     "speed": 2.22,
+     "spin": -1,
+     "spinRate": 1.5778677450762377,
+     "spinTurns": 3.5
+    },
+    "skill": {
+     "lineSigma": 0,
+     "lineSigmaTakeout": 0,
+     "stopNoise": {
+      "p": [
+       0.3,
+       0.63,
+       0.07
+      ],
+      "sigma": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "seed": 2,
+    "release": {
+     "x": 0.2888543354072355,
+     "y": -10.872,
+     "vx": 0.06308411278533133,
+     "vy": 2.219103511491541,
+     "w": -1.5778677450762377
+    },
+    "sweep": [
+     [
+      0,
+      901
+     ],
+     [
+      4671,
+      14863
+     ],
+     [
+      16214,
+      21878
+     ]
+    ],
+    "result": {
+     "hash": "a8d3658c",
+     "ticks": 21878,
+     "sweepTime": 16.76,
+     "swept": [
+      [
+       0,
+       0.9
+      ],
+      [
+       4.67,
+       14.86
+      ],
+      [
+       16.21,
+       21.88
+      ]
+     ]
+    }
+   },
+   "warnings": []
   }
  ],
- "updated": "2026-11-05 14:51 UTC"
+ "updated": "2026-11-05 16:17 UTC"
 }
