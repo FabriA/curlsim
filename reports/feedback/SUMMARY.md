@@ -1,6 +1,6 @@
 # Segnalazioni sul realismo
 
-Aggiornato il 2026-11-05 09:29 UTC · motore 0.2.0 · messaggi elaborati: 3 · tiri valutati: 7
+Aggiornato il 2026-11-05 12:23 UTC · motore 0.2.0 · messaggi elaborati: 4 · tiri valutati: 10
 
 ## Indicazioni
 
@@ -10,7 +10,7 @@ Nessun segnale netto: servono almeno 3 risposte informative su una domanda, con 
 
 | Esito della riesecuzione | Tiri |
 | --- | --- |
-| Identico all'hash registrato | 4 |
+| Identico all'hash registrato | 7 |
 | Diverso dall'hash registrato | 0 |
 | Registrato con un altro motore | 0 |
 | Senza replay | 3 |
@@ -28,11 +28,21 @@ Nessun segnale netto: servono almeno 3 risposte informative su una domanda, con 
 | La curva di questo colpo è… | 5 | Giusto 5 | — |
 | Dopo l'urto, la direzione della pietra tirata è… | 5 | Credibile 5 | — |
 | Dopo l'urto, la distanza percorsa dalla pietra tirata è… | 5 | Troppo lungo 4 · Giusto 1 | Troppo lungo (80%) |
+| La pietra colpita è avanzata… | 2 | Giusto 2 | — |
+| Dopo l'urto, la pietra tirata è rimasta… | 2 | Giusto 2 | — |
 | Spazzata per # s: l'allungamento del tiro è… | 1 | Giusto 1 | — |
 | La riduzione della curva dovuta alla spazzata è… | 1 | Giusto 1 | — |
+| Il punto in cui la pietra inizia a curvare davvero arriva… | 1 | Troppo presto 1 | — |
+| La chiusura finale della curva è… | 1 | Giusto 1 | — |
+| Con un hog-to-hog di # s, per questo peso il tiro è risultato… | 1 | Giusto 1 | — |
+
+## Commenti
+
+- 2026-11-05 · tiro 3 · Raise o freeze · pietra rimossa: La seconda pietra colpita si è spostata troppo, circa il 30-40% in più di quanto atteso
 
 ## Messaggi
 
+- [2026-11-05 · web-6f93da09c462](messages/2026-11-05-web-6f93da09c462.md) · 3 tiri · versione 0.3.0
 - [2026-11-05 · web-2580227929ee](messages/2026-11-05-web-2580227929ee.md) · 3 tiri · versione 0.3.0
 - [2026-11-04 · da8a94fc0dcd](messages/2026-11-04-da8a94fc0dcd.md) · 3 tiri · versione 0.2.2
 - [2026-11-04 · 91dfda604e18](messages/2026-11-04-91dfda604e18.md) · 1 tiri · versione 0.2.2
