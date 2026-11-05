@@ -1,5 +1,12 @@
 # Registro delle versioni
 
+## Non ancora rilasciato
+
+- **Invia allo sviluppatore:** i giudizi arrivano al repository senza mail e senza account. La funzione Vercel
+  `api/feedback.ts` salva il rapporto in `reports/feedback/inbox/`; il commit avvia subito l'agente, che ora legge
+  questa cartella e, solo se configurata, la posta. Duplicati scartati, limite di invii, codice tester facoltativo.
+  «Invia per e-mail» resta come alternativa.
+
 ## 0.3.0 — 5 novembre 2026
 
 Fase 2. Motore fisico 0.2.0: i replay delle versioni 0.2.x si riproducono identici (i nuovi parametri degli urti viaggiano nel replay).

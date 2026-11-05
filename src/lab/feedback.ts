@@ -20,6 +20,10 @@ import {
 } from "./feedback-model";
 
 const STORE_KEY = "curlsim.feedback";
+const CODE_KEY = "curlsim.feedbackCode";
+/** Funzione su Vercel che salva il rapporto nel repository (api/feedback.ts). */
+const UPLOAD_URL = "/api/feedback";
+const UPLOAD_TIMEOUT_MS = 20_000;
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const fmt = (n: number, d: number) => num(n, d);
 const kindLabel = (k: ShotKind) => t(`fb.kind.${k}` as Key);
@@ -36,6 +40,16 @@ export class FeedbackPanel {
     } catch {
       this.records = [];
     }
+    try {
+      const code = localStorage.getItem(CODE_KEY);
+      if (code) {
+        $<HTMLInputElement>("fb-code").value = code;
+        $("fb-code-row").hidden = false;
+      }
+    } catch {
+      /* memoria del browser non disponibile */
+    }
+    $("fb-upload").addEventListener("click", () => void this.upload());
     $("fb-copy").addEventListener("click", () => void this.copy());
     $("fb-send").addEventListener("click", (e) => this.send(e));
     $("fb-clear").addEventListener("click", () => this.clear());
@@ -175,6 +189,51 @@ export class FeedbackPanel {
     }
   }
 
+  /** Invia il rapporto alla funzione su Vercel; se va a buon fine le risposte inviate si cancellano. */
+  private async upload(): Promise<void> {
+    if (this.records.length === 0) {
+      this.msg(t("fb.nothing"));
+      return;
+    }
+    const btn = $<HTMLButtonElement>("fb-upload");
+    const code = $<HTMLInputElement>("fb-code").value.trim();
+    const sent = this.records.length;
+    btn.disabled = true;
+    this.msg(t("fb.uploading"));
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), UPLOAD_TIMEOUT_MS);
+    try {
+      const r = await fetch(UPLOAD_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ report: this.report(), code: code || undefined }),
+        signal: ctrl.signal,
+      });
+      const data = (await r.json().catch(() => ({}))) as { id?: string; duplicate?: boolean };
+      if (r.ok && data.id) {
+        try {
+          if (code) localStorage.setItem(CODE_KEY, code);
+        } catch {
+          /* niente */
+        }
+        this.records = [];
+        this.persist();
+        this.msg(t(data.duplicate ? "fb.uploadedDup" : "fb.uploaded", { n: sent, id: data.id }));
+      } else if (r.status === 401) {
+        $("fb-code-row").hidden = false;
+        $<HTMLInputElement>("fb-code").focus();
+        this.msg(t("fb.codeNeeded"));
+      } else if (r.status === 429) this.msg(t("fb.uploadRate"));
+      else if (r.status === 413) this.msg(t("fb.uploadTooLarge"));
+      else this.msg(t("fb.uploadFailed"));
+    } catch {
+      this.msg(t("fb.uploadFailed"));
+    } finally {
+      clearTimeout(timer);
+      this.renderCollected();
+    }
+  }
+
   private send(e: MouseEvent): void {
     const body = this.report();
     const link = $<HTMLAnchorElement>("fb-send");
@@ -225,6 +284,7 @@ export class FeedbackPanel {
     $("fb-count").textContent = t("fb.collected", { n: this.records.length });
     const none = this.records.length === 0;
     $<HTMLButtonElement>("fb-copy").disabled = none;
+    $<HTMLButtonElement>("fb-upload").disabled = none;
     $<HTMLButtonElement>("fb-clear").disabled = none;
     $("fb-send").setAttribute("aria-disabled", String(none));
   }

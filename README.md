@@ -94,18 +94,41 @@ Nel pannello **Pietre in gioco** si sceglie lo strumento attivo sulla casa:
 La logica sta in `src/core/placement.ts` e lo strumento d'interfaccia in `src/lab/placement-tool.ts`,
 pronti per la modalità di allenamento.
 
+## Invio dei giudizi senza mail
+
+Il pulsante **Invia allo sviluppatore** del riquadro «Il tuo giudizio» manda il rapporto (risposte e replay)
+alla funzione `api/feedback.ts`, ospitata da Vercel nello stesso progetto. La funzione controlla che sia un
+rapporto, lo salva nel repository come `reports/feedback/inbox/<data>-<hash>.txt` e il commit avvia l'agente.
+I tester non hanno bisogno di un account GitHub né della posta. Non si salvano indirizzi IP o altri dati del
+mittente; un rapporto identico già ricevuto non viene salvato due volte; c'è un limite di invii all'ora per
+istanza e, se si vuole, un codice condiviso con i tester. Se l'invio non riesce resta «Invia per e-mail».
+
+**Configurazione (una volta), su Vercel → progetto → Settings → Environment Variables**, ambiente Production:
+
+| Variabile | Valore |
+| --- | --- |
+| `GITHUB_TOKEN` | token fine-grained di GitHub con accesso solo a questo repository e permesso «Contents: Read and write» |
+| `GITHUB_REPO` | facoltativa, predefinita `FabriA/curlsim` |
+| `GITHUB_BRANCH` | facoltativa, predefinita `main` |
+| `FEEDBACK_CODE` | facoltativa: se c'è, l'invio chiede questo codice ai tester |
+
+Dopo aver aggiunto o cambiato le variabili serve un nuovo deploy (**Deployments → … → Redeploy**).
+Senza `GITHUB_TOKEN` la funzione risponde 503 e il laboratorio propone la mail.
+
 ## Agente delle segnalazioni
 
-`tools/feedback-agent/` legge la casella dei giudizi via IMAP, **in sola lettura** (nessun messaggio viene
-spostato, cancellato o segnato come letto), riconosce i rapporti «CurlSim – giudizi sui tiri», riesegue i replay
+`tools/feedback-agent/` legge i rapporti arrivati dal laboratorio in `reports/feedback/inbox/` e, se configurata,
+la casella dei giudizi via IMAP, **in sola lettura** (nessun messaggio viene spostato, cancellato o segnato come
+letto). Riconosce i rapporti «CurlSim – giudizi sui tiri», riesegue i replay
 con il motore attuale, aggrega le risposte e scrive i risultati in `reports/feedback/`
 (`SUMMARY.md`, una scheda per messaggio in `messages/`, `data.json`). Ogni messaggio è elaborato una sola volta.
 Le indicazioni sul modello sono proposte da verificare: l'agente non modifica mai i parametri.
 
-GitHub Actions lo esegue ogni due ore (`.github/workflows/feedback-agent.yml`) e pubblica i rapporti nuovi con un commit.
+GitHub Actions lo esegue a ogni rapporto salvato in `reports/feedback/inbox/`, ogni due ore e su richiesta
+(`.github/workflows/feedback-agent.yml`), e pubblica i rapporti nuovi con un commit.
 Vercel ignora i commit che toccano solo `reports/` (`vercel.json`), quindi non parte un deploy a ogni aggiornamento.
 
-**Configurazione (una volta):** in GitHub, **Settings → Secrets and variables → Actions → New repository secret**:
+**Posta (facoltativa):** senza `IMAP_HOST` l'agente legge solo i rapporti dal laboratorio. Per la casella, in GitHub, **Settings → Secrets and variables → Actions → New repository secret**:
 
 | Segreto | Valore |
 | --- | --- |

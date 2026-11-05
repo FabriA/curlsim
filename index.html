@@ -249,6 +249,15 @@
       <p id="fb-empty" class="hint" data-t="fb.none"></p>
       <div class="fb-collected">
         <p id="fb-count" class="value"></p>
+        <div class="actions">
+          <button id="fb-upload" class="primary-plain" type="button" data-t="fb.upload"></button>
+        </div>
+        <label id="fb-code-row" class="field" hidden>
+          <span data-t="fb.code"></span>
+          <input id="fb-code" type="text" autocomplete="off" spellcheck="false">
+        </label>
+        <p id="fb-msg" class="hint" role="status"></p>
+        <p class="hint" data-t="fb.uploadHint"></p>
         <div class="actions secondary">
           <button id="fb-copy" type="button" data-t="fb.copy"></button>
           <a id="fb-send" class="button-link" href="#" data-t="fb.send"></a>
@@ -256,7 +265,6 @@
         </div>
         <p id="fb-to" class="hint mono"></p>
         <p class="hint" data-t="fb.mailHint"></p>
-        <p id="fb-msg" class="hint" role="status"></p>
       </div>
       </div>
     </details>

@@ -80,7 +80,8 @@ export function messageMarkdown(id: string, list: ShotRecord[]): string {
   const out: string[] = [];
   const first = list[0];
   out.push(`# Segnalazione ${id}`, "");
-  out.push(`Ricevuta il ${first.date} · laboratorio ${first.app} · motore ${first.engine} · tiri: ${list.length}`, "");
+  const via = id.startsWith("web-") ? "dal laboratorio" : "per e-mail";
+  out.push(`Ricevuta ${via} il ${first.date} · laboratorio ${first.app} · motore ${first.engine} · tiri: ${list.length}`, "");
   for (const s of list) {
     out.push(`## Tiro ${s.n} · ${s.kind}`, "");
     out.push(`- Velocità ${n2(s.speed)} m/s · rotazione ${n2(s.spinTurns, 1)} giri · spazzata ${n2(s.sweepTime, 1)} s · urti ${s.collisions ?? "vivaci (versione precedente)"} · esito: ${s.outcome || "—"}`);

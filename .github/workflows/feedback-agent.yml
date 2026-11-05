@@ -1,11 +1,17 @@
-# Agente delle segnalazioni: legge la casella dei giudizi via IMAP (sola lettura),
-# valuta i nuovi rapporti e pubblica i risultati in reports/feedback/.
+# Agente delle segnalazioni: legge i rapporti inviati dal laboratorio (reports/feedback/inbox/)
+# e, se configurata, la casella dei giudizi via IMAP (sola lettura); valuta i nuovi rapporti e
+# pubblica i risultati in reports/feedback/.
 name: Agente segnalazioni
 
 on:
   schedule:
     - cron: "17 */2 * * *" # ogni due ore, al minuto 17 (UTC)
   workflow_dispatch: {}
+  # Rapporti inviati dal laboratorio: la funzione su Vercel li salva qui con un commit.
+  push:
+    branches: [main]
+    paths:
+      - "reports/feedback/inbox/**"
 
 permissions:
   contents: write
