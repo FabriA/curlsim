@@ -257,6 +257,9 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
   color: var(--accent);
 }
 .sweep.active { background: var(--accent); color: var(--accent-fg); border-style: solid; }
+/* Ferma: secondario, accanto a Spazza mentre la pietra corre. */
+.stop { flex: 0 0 auto; font-weight: 600; border-color: var(--bad); color: var(--bad); }
+.fab-row .stop { flex: 0 0 34%; font-size: var(--step-0); letter-spacing: 0.02em; }
 .align-end { align-self: end; }
 .file { position: relative; display: inline-flex; }
 .file input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
@@ -281,22 +284,21 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
   box-shadow: 0 0 0 1px var(--rule);
   max-width: 100%;
 }
-/* Proporzioni reali: casa 4,75 × 11,02 m; pista 4,75 × 45,72 m. */
+/* Proporzioni reali: casa 4,75 × 11,02 m; pista 4,75 × 45,72 m. Casa e pista alte uguali,
+   abbastanza basse da lasciare in vista i comandi di tiro sotto la casa. */
+.views { --view-h: min(760px, calc(100vh - 290px)); }
+@media (max-width: 720px) {
+  .views { --view-h: min(calc(min(68vw, 330px) * 11.022 / 4.75), calc(100svh - 200px)); }
+}
 .house-view canvas {
-  height: min(78vh, 760px);
-  aspect-ratio: 4.75 / 11.022;
+  height: var(--view-h);
+  width: calc(var(--view-h) * 4.75 / 11.022);
   cursor: crosshair;
   touch-action: none;
 }
 .sheet-view canvas {
-  height: min(78vh, 760px);
-  aspect-ratio: 4.75 / 45.72;
-}
-@media (max-width: 720px) {
-  /* Casa e pista alte uguali; abbastanza basse da lasciare in vista i comandi sotto la casa. */
-  .views { --view-h: min(calc(min(68vw, 330px) * 11.022 / 4.75), calc(100svh - 200px)); }
-  .house-view canvas { height: var(--view-h); width: calc(var(--view-h) * 4.75 / 11.022); }
-  .sheet-view canvas { height: var(--view-h); width: calc(var(--view-h) * 4.75 / 45.72); }
+  height: var(--view-h);
+  width: calc(var(--view-h) * 4.75 / 45.72);
 }
 
 .table-wrap { overflow-x: auto; }
@@ -326,40 +328,37 @@ tbody tr:hover, tbody tr:focus-visible { background: var(--bg); }
 .dot.t1 { background: var(--team-1); }
 canvas[data-tool="place"] { cursor: grab; }
 
-/* Comandi su schermi stretti, subito sotto la casa: rotazione e tiro (o spazzata) affiancati, peso sotto. */
-.fab { display: none; }
+/* Comandi di tiro subito sotto la casa (anche su desktop): rotazione e tiro (o spazzata e ferma)
+   affiancati, peso sotto. Nel pannello Tiro restano solo le impostazioni. */
+.inline-actions { display: none; }
+/* Casa e pista affiancate, comandi su tutta la larghezza sotto. */
+.views { display: grid; grid-template-columns: auto minmax(0, auto); justify-content: center; column-gap: 10px; row-gap: 8px; }
+.sheet-view figcaption { text-align: center; overflow-wrap: anywhere; }
+.fab { display: grid; gap: 8px; grid-column: 1 / -1; }
+.fab-row { display: flex; gap: 10px; }
+.fab-row button {
+  flex: 1 1 0;
+  min-height: 52px;
+  font-family: var(--font-display);
+  font-size: var(--step-1);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.fab-row .fab-spin { flex: 0 0 34%; font-size: var(--step-0); letter-spacing: 0.02em; }
+.fab .sweep:not(.active) { background: var(--surface); }
+.fab-weight { display: grid; gap: 2px; }
+.fab-weight-label {
+  font-size: var(--step--1);
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.fab-weight-label b { color: var(--fg); font-family: var(--font-mono); font-weight: 500; font-variant-numeric: tabular-nums; }
+.fab-weight input { width: 100%; height: 32px; accent-color: var(--accent); touch-action: pan-y; }
 @media (max-width: 720px) {
-  .inline-actions { display: none; }
-  /* Casa e pista affiancate, comandi su tutta la larghezza sotto. */
-  .views { display: grid; grid-template-columns: auto minmax(0, auto); justify-content: center; column-gap: 10px; row-gap: 8px; }
-  .sheet-view figcaption { text-align: center; overflow-wrap: anywhere; }
-  .fab {
-    display: grid;
-    gap: 8px;
-    grid-column: 1 / -1;
-  }
-  .fab-row { display: flex; gap: 10px; }
-  .fab-row button {
-    flex: 1 1 0;
-    min-height: 56px;
-    font-family: var(--font-display);
-    font-size: var(--step-1);
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-  .fab-row .fab-spin { flex: 0 0 34%; font-size: var(--step-0); letter-spacing: 0.02em; }
-  .fab .sweep:not(.active) { background: var(--surface); }
-  .fab-weight { display: grid; gap: 2px; }
-  .fab-weight-label {
-    font-size: var(--step--1);
-    color: var(--muted);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .fab-weight-label b { color: var(--fg); font-family: var(--font-mono); font-weight: 500; font-variant-numeric: tabular-nums; }
-  .fab-weight input { width: 100%; height: 32px; accent-color: var(--accent); touch-action: pan-y; }
+  .fab-row button { min-height: 56px; }
 }
 
 /* Intertempi sopra la casa, come un cronometro a bordo pista. */

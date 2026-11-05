@@ -459,6 +459,25 @@ function repeatLast(): void {
   startSim(structuredClone(last.replay), last.replay);
 }
 
+/** Ferma il tiro (o la riproduzione) in corso e riporta le pietre alla posizione di partenza. */
+function stopShot(): void {
+  if (!state.sim) return;
+  state.sim = null;
+  state.delivery = null;
+  state.pendingReplay = null;
+  state.playback = null;
+  state.splits = { bh: null, hh: null, running: false };
+  state.sweepKey = false;
+  state.sweepButton = false;
+  // Nell'end la posizione valida è quella decisa dalle regole; il tiro fermato non conta.
+  const start = endMode?.active ? endMode.stones() : state.lastSetup?.stones ?? state.stones;
+  resetTo(start);
+  $("splits").hidden = true;
+  setBusy(false);
+  setStatus(t("status.stopped", { n: state.stones.length }));
+  draw();
+}
+
 function retryFromSame(): void {
   const last = state.log[state.log.length - 1];
   if (!last || state.sim) return;
@@ -694,6 +713,8 @@ function setBusy(b: boolean): void {
   $("fab-weight-row").hidden = b;
   $("fab-rate").hidden = b || !feedback?.hasPending;
   $("fab-sweep").hidden = !b || !!state.playback;
+  $("fab-stop").hidden = !b;
+  $("stop").hidden = !b;
   if (!b) {
     $("fab-sweep").classList.remove("active");
     $("sweep-btn").classList.remove("active");
@@ -853,6 +874,8 @@ function init(): void {
   bindSweepInputs();
   bindPanels();
   $("fab-throw").addEventListener("click", throwStone);
+  $("stop").addEventListener("click", stopShot);
+  $("fab-stop").addEventListener("click", stopShot);
   endMode = new EndMode({
     setStones: (s) => {
       state.stones = s.map((p) => ({ ...p }));

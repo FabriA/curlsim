@@ -20,7 +20,7 @@ export const it = {
   "ice.collisions": "Urti tra pietre",
   "ice.collisions.normal": "Normali",
   "ice.collisions.lively": "Vivaci",
-  "ice.collisionsHint": "«Vivaci» trasmette più energia da pietra a pietra, soprattutto nelle catene (come fino alla versione 0.2.2).",
+  "ice.collisionsHint": "«Normali»: urti quasi elastici; in una fila di pietre in freeze colpita in pieno esce solo l'ultima. «Vivaci»: le pietre intermedie si muovono di più (come fino alla versione 0.2.2).",
   "fb.collisions.normal": "normali",
   "fb.collisions.lively": "vivaci",
 
@@ -43,9 +43,10 @@ export const it = {
   "shot.throw": "Tira",
   "shot.repeat": "Rivedi l'ultimo tiro",
   "shot.retry": "Riprova dalla stessa posizione",
+  "shot.stop": "Ferma",
   "shot.clear": "Svuota la pista",
   "shot.sweep": "Spazza",
-  "shot.sweepHint": "Tieni premuto il pulsante. Da tastiera: Spazio tira, poi tienilo premuto per spazzare.",
+  "shot.sweepHint": "Tira e Spazza sono sotto la casa: per spazzare tieni premuto Spazza. Da tastiera: Spazio tira, poi tienilo premuto per spazzare.",
   "shot.sweepOff": "Preset «World Curling 2026 — adattamento v1»: spazza solo chi tira, solo la pietra appena consegnata e solo davanti alla tee line.",
   "shot.speed": "Velocità di riproduzione",
 
@@ -236,6 +237,7 @@ export const it = {
 
   "status.ready": "Pronto al tiro. Pietre in gioco: {n}.",
   "status.moving": "Pietra in corsa…",
+  "status.stopped": "Tiro fermato: pietre riportate alla posizione di partenza. Pietre in gioco: {n}.",
   "status.done": "Tiro {n} concluso.",
   "status.full": "Pista piena: svuotala per continuare.",
   "status.replaying": "Riproduzione del tiro {n} con gli stessi input…",

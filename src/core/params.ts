@@ -75,11 +75,14 @@ export const BASE_PARAMS: Omit<IceParams, "mu" | "curlK"> = {
 export type CollisionLevel = "normal" | "lively";
 
 /**
- * «Vivaci» sono i valori fino alla versione 0.2.2. «Normali» riducono l'energia trasmessa, più
- * nettamente nelle catene di pietre (urti tra pietre colpite), dove i primi test la trovavano eccessiva.
+ * «Vivaci» sono i valori fino alla versione 0.2.2. «Normali» rendono gli urti quasi elastici, come le
+ * pietre di granito: in una fila di pietre in freeze colpita in pieno la quantità di moto passa
+ * lungo la fila (come nel pendolo di Newton), esce solo l'ultima e le altre si spostano di pochi
+ * centimetri; nel colpo pieno la pietra tirata si ferma quasi sul posto.
+ * (Una prima versione di «Normali», 0,85 / 0,6, faceva l'opposto e fu ritirata.)
  */
 export const COLLISIONS: Record<CollisionLevel, Pick<IceParams, "restitution" | "restitutionSecondary">> = {
-  normal: { restitution: 0.85, restitutionSecondary: 0.6 },
+  normal: { restitution: 0.95, restitutionSecondary: 0.97 },
   lively: { restitution: 0.9, restitutionSecondary: 0.9 },
 };
 

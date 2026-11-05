@@ -4,8 +4,9 @@
 
 Fase 2. Motore fisico invariato (0.2.0).
 
-- **Telefono:** i comandi (rotazione, Tira, Spazza, Valuta e peso) non sono più fissati in fondo allo schermo sopra la casa: stanno subito sotto la casa e la pista, che si rimpiccioliscono quanto basta per lasciarli in vista insieme.
-- **Urti tra pietre, «Normali» o «Vivaci»** (pannello Ghiaccio). «Normali», ora predefinito, trasmette meno energia: restituzione 0,85 negli urti con la pietra tirata e 0,6 negli urti tra pietre già colpite, quindi colpo singolo circa −5% di strada per la colpita e catene circa −33%. «Vivaci» è il comportamento fino alla 0.2.2 (0,9 per tutti gli urti). Il replay registra i valori: i replay precedenti si rivedono identici. Il rapporto dei giudizi indica gli urti usati.
+- **Comandi di tiro sotto la casa**, su telefono e su desktop: rotazione, Tira, Spazza, Valuta e peso stanno subito sotto la casa e la pista, dimensionate per restare in vista insieme ai comandi. Nel pannello Tiro restano le impostazioni.
+- **Ferma:** durante un tiro o una riproduzione, accanto a Spazza, ferma la simulazione e riporta le pietre alla posizione di partenza. Il tiro fermato non entra nel registro né, nell'end a due, nel conteggio delle pietre.
+- **Urti tra pietre, «Normali» o «Vivaci»** (pannello Ghiaccio). «Normali», predefinito, rende gli urti quasi elastici: restituzione 0,95 negli urti con la pietra tirata e 0,97 negli urti tra le altre pietre. In una fila di pietre in freeze colpita in pieno esce solo l'ultima e le altre si spostano di pochi centimetri; nel colpo pieno la tirata si ferma quasi sul posto. «Vivaci» è il comportamento fino alla 0.2.2 (0,9 per tutti gli urti). Una prima versione di «Normali» (0,85 / 0,6) faceva muovere di più le pietre intermedie ed è stata sostituita; i replay registrati con quei valori si rivedono identici, perché il replay li contiene. Il rapporto dei giudizi indica gli urti usati.
 - **Peso:** il cursore va da 1,6 a 3,8 m/s (prima fino a 4,6); 3,8 m/s resta il riferimento della pelata.
 
 - **Modalità «End a due»:** due giocatori sullo stesso dispositivo giocano un end standard da 16 pietre.

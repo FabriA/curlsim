@@ -160,12 +160,17 @@ describe("vivacità degli urti", () => {
     expect(travel(lively, chain)).toEqual(travel(legacy, chain));
   });
 
-  it("«normali» riduce poco il colpo singolo e molto la catena", () => {
-    const single = travel(normal, [[0, 1]])[1] / travel(lively, [[0, 1]])[1];
-    const last = travel(normal, chain)[2] / travel(lively, chain)[2];
-    expect(single).toBeGreaterThan(0.9);
-    expect(single).toBeLessThan(1);
-    expect(last).toBeLessThan(0.75);
+  it("«normali»: fila di tre pietre in freeze colpita in pieno, esce solo l'ultima e le altre restano quasi ferme", () => {
+    // Pietre allineate sulla linea centrale, a 1 cm l'una dall'altra; la tirata arriva dritta a 2,2 m/s.
+    const freeze: [number, number][] = [[0, 1], [0, 1 + 2 * STONE_RADIUS + 0.01], [0, 1 + 4 * STONE_RADIUS + 0.02]];
+    const [shooter, first, middle, last] = travel(normal, freeze, 2.2);
+    expect(first).toBeLessThan(0.05);
+    expect(middle).toBeLessThan(0.05);
+    expect(shooter - (1 - 2 * STONE_RADIUS)).toBeLessThan(0.05); // dopo il contatto la tirata si ferma quasi sul posto
+    expect(last).toBeGreaterThan(10);
+    // Con «vivaci» le pietre intermedie si muovono di più.
+    const v = travel(lively, freeze, 2.2);
+    expect(v[1] + v[2]).toBeGreaterThan(first + middle);
   });
 
   it("la restituzione della pietra tirata vale solo per gli urti in cui c'è lei", () => {
@@ -176,6 +181,6 @@ describe("vivacità degli urti", () => {
     a.moving = true;
     const w: World = { params: { ...noFriction, restitution: 0.9, restitutionSecondary: 0.5 }, stones: [a, b], tick: 0 };
     runUntil(w, 1000);
-    expect(b.vy).toBeCloseTo(1.5, 6);
+    expect(b.vy).toBeCloseTo(1.5, 6); // (1 + 0,5) / 2 · 2
   });
 });
