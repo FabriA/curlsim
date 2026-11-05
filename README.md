@@ -156,3 +156,6 @@ generatore con seme e versione del motore nel replay. Il motore usa solo `+ − 
 `npm test` verifica che il replay di riferimento dia l'hash registrato in `src/core/reference.ts`;
 il pulsante **Verifica determinismo** del laboratorio rifà lo stesso calcolo nel browser.
 Se il comportamento fisico cambia, aggiornare `ENGINE_VERSION` e l'hash di riferimento.
+
+Hash di riferimento `97156709` (motore 0.2.0) confermato identico in Node e nei browser: Chromium, Chrome per Android,
+Edge, Firefox per Windows e per Android, Safari per iPhone.
