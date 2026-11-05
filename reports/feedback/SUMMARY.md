@@ -1,6 +1,6 @@
 # Segnalazioni sul realismo
 
-Aggiornato il 2026-11-05 12:23 UTC · motore 0.2.0 · messaggi elaborati: 4 · tiri valutati: 10
+Aggiornato il 2026-11-05 12:26 UTC · motore 0.2.0 · messaggi elaborati: 5 · tiri valutati: 11
 
 ## Indicazioni
 
@@ -10,7 +10,7 @@ Nessun segnale netto: servono almeno 3 risposte informative su una domanda, con 
 
 | Esito della riesecuzione | Tiri |
 | --- | --- |
-| Identico all'hash registrato | 7 |
+| Identico all'hash registrato | 8 |
 | Diverso dall'hash registrato | 0 |
 | Registrato con un altro motore | 0 |
 | Senza replay | 3 |
@@ -28,8 +28,8 @@ Nessun segnale netto: servono almeno 3 risposte informative su una domanda, con 
 | La curva di questo colpo è… | 5 | Giusto 5 | — |
 | Dopo l'urto, la direzione della pietra tirata è… | 5 | Credibile 5 | — |
 | Dopo l'urto, la distanza percorsa dalla pietra tirata è… | 5 | Troppo lungo 4 · Giusto 1 | Troppo lungo (80%) |
-| La pietra colpita è avanzata… | 2 | Giusto 2 | — |
-| Dopo l'urto, la pietra tirata è rimasta… | 2 | Giusto 2 | — |
+| La pietra colpita è avanzata… | 3 | Giusto 3 | — |
+| Dopo l'urto, la pietra tirata è rimasta… | 3 | Giusto 3 | — |
 | Spazzata per # s: l'allungamento del tiro è… | 1 | Giusto 1 | — |
 | La riduzione della curva dovuta alla spazzata è… | 1 | Giusto 1 | — |
 | Il punto in cui la pietra inizia a curvare davvero arriva… | 1 | Troppo presto 1 | — |
@@ -42,6 +42,7 @@ Nessun segnale netto: servono almeno 3 risposte informative su una domanda, con 
 
 ## Messaggi
 
+- [2026-11-05 · web-a7653297804c](messages/2026-11-05-web-a7653297804c.md) · 1 tiri · versione 0.3.0
 - [2026-11-05 · web-6f93da09c462](messages/2026-11-05-web-6f93da09c462.md) · 3 tiri · versione 0.3.0
 - [2026-11-05 · web-2580227929ee](messages/2026-11-05-web-2580227929ee.md) · 3 tiri · versione 0.3.0
 - [2026-11-04 · da8a94fc0dcd](messages/2026-11-04-da8a94fc0dcd.md) · 3 tiri · versione 0.2.2

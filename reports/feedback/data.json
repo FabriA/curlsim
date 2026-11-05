@@ -5,7 +5,8 @@
   "91dfda604e18",
   "da8a94fc0dcd",
   "web-2580227929ee",
-  "web-6f93da09c462"
+  "web-6f93da09c462",
+  "web-a7653297804c"
  ],
  "shots": [
   {
@@ -857,7 +858,120 @@
     }
    },
    "warnings": []
+  },
+  {
+   "message": "web-a7653297804c",
+   "date": "2026-11-05T12:26:16.000Z",
+   "app": "0.3.0",
+   "engine": "0.2.0",
+   "n": 4,
+   "kind": "Raise o freeze · pietra rimossa",
+   "speed": 2.56,
+   "spinTurns": 3.5,
+   "sweepTime": 0,
+   "collisions": "vivaci",
+   "outcome": "In gioco · pietre rimosse: 2",
+   "hash": "d6d85df5",
+   "answers": [
+    {
+     "question": "La pietra colpita è avanzata…",
+     "answer": "Giusto"
+    },
+    {
+     "question": "Dopo l'urto, la pietra tirata è rimasta…",
+     "answer": "Giusto"
+    }
+   ],
+   "comment": "",
+   "replayCheck": "identico",
+   "rerunHash": "d6d85df5",
+   "impact": {
+    "fullness": 0.26,
+    "speed": 1.59,
+    "shooterTravel": 1.35,
+    "targetTravel": 1.13,
+    "shooterOut": false,
+    "targetOut": false
+   },
+   "replay": {
+    "format": "curling-replay",
+    "version": 1,
+    "engineVersion": "0.2.0",
+    "params": {
+     "curlV0": 0.1,
+     "spinRatioRef": 0.1,
+     "sweepFriction": 0.9202966120205112,
+     "sweepCurl": 0.85,
+     "restitution": 0.95,
+     "stoneFriction": 0.2,
+     "inertiaK": 0.5,
+     "mu": 0.007411714778538704,
+     "curlK": 0.007008407567627729,
+     "restitutionSecondary": 0.97
+    },
+    "team": 1,
+    "stonesBefore": [
+     {
+      "id": 1,
+      "team": 0,
+      "x": 1.222485132823086,
+      "y": 18.078219076290665
+     },
+     {
+      "id": 2,
+      "team": 1,
+      "x": 0.05174702940115215,
+      "y": 17.08480604991067
+     },
+     {
+      "id": 3,
+      "team": 0,
+      "x": -0.6636312675921952,
+      "y": 17.8629651734173
+     }
+    ],
+    "shot": {
+     "broomX": 0.6271468441391153,
+     "broomY": 17.05079018176614,
+     "speed": 2.56,
+     "spin": -1,
+     "spinRate": 1.5778677450762377,
+     "spinTurns": 3.5
+    },
+    "skill": {
+     "lineSigma": 0,
+     "lineSigmaTakeout": 0,
+     "stopNoise": {
+      "p": [
+       0.3,
+       0.63,
+       0.07
+      ],
+      "sigma": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "seed": 5,
+    "release": {
+     "x": 0.1673268089358544,
+     "y": -10.872,
+     "vx": 0.042151221508088574,
+     "vy": 2.559652959782903,
+     "w": -1.5778677450762377
+    },
+    "sweep": [],
+    "result": {
+     "hash": "d6d85df5",
+     "ticks": 17270,
+     "sweepTime": 0,
+     "swept": []
+    }
+   },
+   "warnings": []
   }
  ],
- "updated": "2026-11-05 12:23 UTC"
+ "updated": "2026-11-05 12:26 UTC"
 }
