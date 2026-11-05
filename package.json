@@ -1,6 +1,6 @@
 {
   "name": "curling-sim",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "private": true,
   "description": "Simulatore di curling – fase 1: laboratorio fisico 2D",
   "type": "module",

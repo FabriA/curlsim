@@ -1,6 +1,8 @@
 # Registro delle versioni
 
-## Non ancora rilasciato
+## 0.3.1 — 5 novembre 2026
+
+Motore fisico invariato (0.2.0): i replay delle versioni 0.2.x e 0.3.0 si riproducono identici.
 
 - **Scia delle pietre:** nel riquadro Tiro la casella «Mostra la scia delle pietre» mostra o nasconde le tracce sulla casa e sulla pista; la scelta resta memorizzata nel browser.
 - **Correzione:** i rapporti dei giudizi indicavano «urti vivaci» anche per i tiri con «Normali». Ora l'impostazione si ricava dai valori usati nel tiro; l'agente la ricava dal replay, quindi anche i rapporti già arrivati sono classificati correttamente.
