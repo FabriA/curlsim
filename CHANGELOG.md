@@ -1,5 +1,10 @@
 # Registro delle versioni
 
+## Non ancora rilasciato
+
+- **Più lingue:** italiano, inglese, tedesco e francese. Il selettore in alto a destra mostra solo la bandiera; il cambio è immediato, senza ricaricare la pagina, e non perde le risposte già scelte nel riquadro dei giudizi. Alla prima apertura vale la lingua del browser; la scelta resta memorizzata.
+- I rapporti per lo sviluppatore restano in italiano qualunque sia la lingua scelta (domande, risposte, esito e numeri), così l'agente li legge come prima; i commenti dei tester restano nella loro lingua.
+
 ## 0.3.1 — 5 novembre 2026
 
 Motore fisico invariato (0.2.0): i replay delle versioni 0.2.x e 0.3.0 si riproducono identici.

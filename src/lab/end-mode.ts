@@ -21,16 +21,18 @@ import {
 } from "../core/end";
 import type { Team } from "../core/physics";
 import type { StonePlacement } from "../core/sim";
-import { t } from "../i18n";
+import { bindText, t, textOf, tt, type Text } from "../i18n";
 import type { Key } from "../i18n/it";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const teamName = (team: Team) => t(`team.${team}` as Key);
+/** Nome della squadra che segue la lingua, per i messaggi che restano a schermo. */
+const teamRef = (team: Team) => () => teamName(team);
 
 export interface EndHost {
   setStones(stones: StonePlacement[]): void;
   redraw(): void;
-  status(msg: string): void;
+  status(msg: Text): void;
   /** true mentre una pietra è in corsa. */
   busy(): boolean;
   /** Cancella dal ghiaccio le traiettorie dell'ultimo tiro. */
@@ -93,16 +95,16 @@ export class EndMode {
     this.lastRuling = ruling;
     this.host.setStones(state.stones);
     if (ruling.kind === "fgz") {
-      this.message(t("end.fgzViolation", { n, team: teamName(team), protected: this.state.rules.fgzStones + 1 }));
+      this.message(tt("end.fgzViolation", { n, team: teamRef(team), protected: this.state.rules.fgzStones + 1 }));
     } else if (ruling.kind === "noTick") {
-      this.message(t("end.noTickViolation", { team: teamName(team), chooser: teamName(ruling.chooser) }));
+      this.message(tt("end.noTickViolation", { team: teamRef(team), chooser: teamRef(ruling.chooser) }));
       this.showChoice(ruling.chooser);
     } else {
       this.message("");
     }
     if (state.score) this.showResult();
     this.render();
-    if (ruling.kind === "ok") this.host.status($("end-line").textContent ?? "");
+    if (ruling.kind === "ok") this.host.status(() => this.lineText());
     this.host.redraw();
   }
 
@@ -110,7 +112,7 @@ export class EndMode {
     this.state = resolveNoTick(this.state, choice);
     this.host.setStones(this.state.stones);
     this.hideSheet();
-    this.message(t(choice === "leave" ? "end.noTickLeft" : "end.noTickRestored"));
+    this.message(tt(choice === "leave" ? "end.noTickLeft" : "end.noTickRestored"));
     if (this.state.score) this.showResult();
     this.render();
     this.host.redraw();
@@ -121,7 +123,7 @@ export class EndMode {
     this.state = undoShot(this.state);
     this.host.setStones(this.state.stones);
     this.hideSheet();
-    this.message(t("end.undone", { n: nextStoneNumber(this.state) }));
+    this.message(tt("end.undone", { n: nextStoneNumber(this.state) }));
     this.render();
     this.host.redraw();
   }
@@ -140,7 +142,7 @@ export class EndMode {
     this.host.clearTraces();
     this.hideSheet();
     this.message("");
-    this.host.status(t("end.started", { team: teamName(nextTeam(this.state)), hammer: teamName(hammer) }));
+    this.host.status(tt("end.started", { team: teamRef(nextTeam(this.state)), hammer: teamRef(hammer) }));
     this.render();
     this.host.redraw();
   }
@@ -167,11 +169,7 @@ export class EndMode {
       pips.setAttribute("aria-label", t("end.stonesLeft", { n: left }));
       $(`end-points-${team}`).textContent = e.score && e.score.team === team ? String(e.score.points) : e.score ? "0" : "";
     }
-    let line: string;
-    if (e.pending) line = t("end.waitChoice", { team: teamName(e.pending.chooser) });
-    else if (isComplete(e)) line = this.resultText();
-    else line = t("end.next", { n: nextStoneNumber(e), team: teamName(nextTeam(e)) });
-    $("end-line").textContent = line;
+    $("end-line").textContent = this.lineText();
     const r = e.rules;
     $("end-fgz-state").textContent = !r.fgz
       ? t("end.fgzOff")
@@ -182,18 +180,25 @@ export class EndMode {
     $<HTMLButtonElement>("end-new").disabled = this.host.busy();
   }
 
+  private lineText(): string {
+    const e = this.state;
+    if (e.pending) return t("end.waitChoice", { team: teamName(e.pending.chooser) });
+    if (isComplete(e)) return this.resultText();
+    return t("end.next", { n: nextStoneNumber(e), team: teamName(nextTeam(e)) });
+  }
+
   private resultText(): string {
     const s = this.state.score!;
     return s.team === null ? t("end.blank") : t("end.scored", { team: teamName(s.team), n: s.points });
   }
 
-  private message(s: string): void {
-    $("end-msg").textContent = s;
-    if (s) this.host.status(s);
+  private message(s: Text): void {
+    bindText($("end-msg"), s);
+    if (textOf(s)) this.host.status(s);
   }
 
   private showChoice(chooser: Team): void {
-    $("decision-text").textContent = t("end.choiceText", { team: teamName(chooser) });
+    bindText($("decision-text"), () => t("end.choiceText", { team: teamName(chooser) }));
     $("decision-choice").hidden = false;
     $("decision-result").hidden = true;
     $("decision").hidden = false;
@@ -202,8 +207,9 @@ export class EndMode {
 
   private showResult(): void {
     const s = this.state.score!;
-    $("decision-text").textContent =
-      this.resultText() + " " + t("end.nextHammer", { team: teamName(nextHammer(this.state)) }) + (s.team === null ? " " + t("end.blankHammer") : "");
+    const hammer = nextHammer(this.state);
+    const text = this.resultText.bind(this);
+    bindText($("decision-text"), () => text() + " " + t("end.nextHammer", { team: teamName(hammer) }) + (s.team === null ? " " + t("end.blankHammer") : ""));
     $("decision-choice").hidden = true;
     $("decision-result").hidden = false;
     $("decision").hidden = false;

@@ -144,6 +144,7 @@ export const it = {
   "fb.removed": "pietra rimossa",
   "fb.out": "fuori gioco",
   "fb.impact": "Urto: {text}.",
+  "fb.impactText": "colpo pieno al {pct}% · velocità all'urto {v} m/s · tirata dopo l'urto {s} m{so} · colpita {tg} m{to}",
   "fb.comment": "Commento (facoltativo)",
   "fb.save": "Salva il giudizio",
   "fb.skip": "Salta",
@@ -258,6 +259,17 @@ export const it = {
 
   "view.sheet": "Pista intera",
   "view.house": "Casa di gioco",
+
+  "lang.choose": "Lingua: {name}. Tocca per cambiarla",
+  "aria.mode": "Modalità",
+  "aria.controls": "Comandi",
+  "aria.views": "Pista",
+  "aria.house": "Casa di gioco vista dall'alto",
+  "aria.sheet": "Pista intera vista dall'alto",
+  "aria.shotControls": "Comandi di tiro",
+  "shot.left": "a sinistra",
+  "shot.right": "a destra",
+  "log.rowTitle": "Mostra il replay di questo tiro",
 } as const;
 
 export type Key = keyof typeof it;

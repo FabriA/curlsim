@@ -7,11 +7,12 @@ import { BACK_LINE_OUTSIDE, FAR_HOG_INSIDE, HACK_Y, HOUSE_RADIUS, RELEASE_Y, STO
 import { APP_VERSION, COLLISIONS, collisionLevelOf, DT, ENGINE_VERSION, PROFILES, SHOT_PRECISION, SPIN_TURNS, SWEEP_GAIN, type CollisionLevel, type IceParams, type Precision, type ProfileId, type ShotLevel, type SkillLevel, type SpinLevel } from "../core/params";
 import { REFERENCE_HASH, referenceReplay } from "../core/reference";
 import { makeReplay, runReplay, Sim, skillFromPrecision, validateReplay, type Replay, type Skill, type StonePlacement } from "../core/sim";
-import { num, t } from "../i18n";
+import { bindText, getLanguage, initialLanguage, num, onLanguageChange, setLanguage, t, tIn, tt, type Lang, type Text } from "../i18n";
 import type { Key } from "../i18n/it";
 import { HOUSE_VIEW, Renderer, SHEET_VIEW, type DrawStone, type Scene } from "./render";
 import { PlacementTool } from "./placement-tool";
 import { FeedbackPanel } from "./feedback";
+import { mountLanguagePicker } from "./lang-picker";
 import { EndMode } from "./end-mode";
 import { deliveryPosition, planDelivery, type Delivery } from "../core/delivery";
 import { makeScenario, validateScenario, type PlacementCheck } from "../core/placement";
@@ -33,8 +34,18 @@ interface LogEntry {
   curl: number;
   turns: number;
   sweep: number;
-  outcome: string;
+  outcome: Outcome;
   hash: string;
+}
+
+/** Esito di un tiro, tradotto quando serve: nel registro nella lingua scelta, nel rapporto in italiano. */
+interface Outcome {
+  reason: Key;
+  others: number;
+}
+function outcomeText(o: Outcome, lang: Lang = getLanguage()): string {
+  const base = tIn(lang, o.reason);
+  return o.others ? `${base} · ${tIn(lang, "outcome.hit", { n: o.others })}` : base;
 }
 
 const state = {
@@ -68,6 +79,9 @@ function applyTexts(): void {
     el.setAttribute("aria-label", label);
     el.title = label;
   });
+  document.querySelectorAll<HTMLElement>("[data-t-aria]").forEach((el) => {
+    el.setAttribute("aria-label", t(el.dataset.tAria as Key));
+  });
   document.title = t("app.title");
 }
 
@@ -80,11 +94,11 @@ function readTargets() {
 }
 
 function recalibrate(): void {
-  $("derived").textContent = t("ice.calibrating");
+  bindText($("derived"), tt("ice.calibrating"));
   // Lascia ridisegnare l'interfaccia prima del calcolo (circa mezzo secondo).
   setTimeout(() => {
     state.params = calibrate(readTargets());
-    $("derived").textContent = t("ice.derived", { mu: state.params.mu.toFixed(5), k: state.params.curlK.toFixed(5) });
+    bindText($("derived"), tt("ice.derived", { mu: state.params.mu.toFixed(5), k: state.params.curlK.toFixed(5) }));
     updateWeightMarks();
     updateShotReadout();
     updateSweepReadout();
@@ -182,7 +196,7 @@ function updateShotReadout(): void {
   $("fab-spin").textContent = t(currentSpin() === 1 ? "fab.spinCw" : "fab.spinCcw");
   const bx = state.broom.x;
   $("broom-value").textContent = t("shot.broomValue", {
-    x: `${num(Math.abs(bx) * 100, 0)} cm ${bx < -0.005 ? "a sinistra" : bx > 0.005 ? "a destra" : ""}`.trim(),
+    x: `${num(Math.abs(bx) * 100, 0)} cm ${bx < -0.005 ? t("shot.left") : bx > 0.005 ? t("shot.right") : ""}`.trim(),
   });
 }
 
@@ -237,11 +251,11 @@ function shotParams(): IceParams {
   return { ...ice, sweepFriction: sweepFrictionForGain(ice, sweepGain()), ...COLLISIONS[collisionLevel()] };
 }
 
-/** Etichetta degli urti per il rapporto, ricavata dai valori usati davvero nel tiro. */
+/** Etichetta degli urti per il rapporto (sempre in italiano), ricavata dai valori usati davvero nel tiro. */
 function collisionsLabel(p: IceParams): string {
   const lvl = collisionLevelOf(p);
-  if (lvl) return t(lvl === "normal" ? "fb.collisions.normal" : "fb.collisions.lively");
-  return t("fb.collisions.custom", { e: num(p.restitution, 2), e2: num(p.restitutionSecondary ?? p.restitution, 2) });
+  if (lvl) return tIn("it", lvl === "normal" ? "fb.collisions.normal" : "fb.collisions.lively");
+  return tIn("it", "fb.collisions.custom", { e: String(p.restitution).replace(".", ","), e2: String(p.restitutionSecondary ?? p.restitution).replace(".", ",") });
 }
 
 function collisionLevel(): CollisionLevel {
@@ -270,7 +284,7 @@ function throwStone(): void {
       return;
     }
   } else if (state.stones.length >= MAX_STONES) {
-    setStatus(t("status.full"));
+    setStatus(tt("status.full"));
     return;
   }
   const n = state.log.length + 1;
@@ -296,7 +310,7 @@ function startSim(replay: Replay, playback: Replay | null): void {
   state.splits = { bh: null, hh: null, running: true };
   state.tickDebt = 0;
   state.lastFrame = performance.now();
-  setStatus(playback ? t("status.replaying", { n: state.log.length }) : t("status.moving"));
+  setStatus(playback ? tt("status.replaying", { n: state.log.length }) : tt("status.moving"));
   setBusy(true);
   // Su telefono porta in vista la casa, dove si vede la pietra arrivare.
   if (isNarrow()) {
@@ -400,7 +414,7 @@ function finishShot(): void {
     // Nell'end la riproduzione non cambia la partita: tornano le pietre decise dalle regole.
     if (endMode?.active) state.stones = endMode.stones().map((s) => ({ ...s }));
     const expected = state.playback.result?.hash;
-    setStatus(expected === hash || !expected ? t("status.same", { hash }) : t("status.different", { a: hash, b: expected }));
+    setStatus(expected === hash || !expected ? tt("status.same", { hash }) : tt("status.different", { a: hash, b: expected }));
     state.playback = null;
     draw();
     return;
@@ -409,8 +423,7 @@ function finishShot(): void {
   const m = sim.metrics;
   const removedDelivered = m.removals.find((r) => r.id === sim.deliveredId);
   const others = m.removals.filter((r) => r.id !== sim.deliveredId).length;
-  let outcome = removedDelivered ? t(`outcome.${removedDelivered.reason}` as Key) : t("outcome.inPlay");
-  if (others) outcome += ` · ${t("outcome.hit", { n: others })}`;
+  const outcome: Outcome = { reason: removedDelivered ? (`outcome.${removedDelivered.reason}` as Key) : "outcome.inPlay", others };
 
   // Curva = distanza dell'ultimo punto dalla linea iniziale di tiro.
   const tr = sim.trace.get(sim.deliveredId) ?? [];
@@ -438,7 +451,7 @@ function finishShot(): void {
   setNextTeam(replay.team === 0 ? 1 : 0);
   renderLog();
   showReplay(replay);
-  setStatus(t("status.done", { n: entry.n }));
+  setStatus(tt("status.done", { n: entry.n }));
   feedback?.ask({
     n: entry.n,
     speed: v0,
@@ -447,7 +460,7 @@ function finishShot(): void {
     sweepTime: m.sweepTime,
     spinTurns: replay.shot.spinTurns ?? SPIN_TURNS.normal,
     stopped: !!m.stop,
-    outcome,
+    outcome: outcomeText(outcome, "it"),
     hash,
     ice: readTargets(),
     sweepGain: sweepGain(),
@@ -481,7 +494,7 @@ function stopShot(): void {
   resetTo(start);
   $("splits").hidden = true;
   setBusy(false);
-  setStatus(t("status.stopped", { n: state.stones.length }));
+  setStatus(tt("status.stopped", { n: state.stones.length }));
   draw();
 }
 
@@ -491,7 +504,7 @@ function retryFromSame(): void {
   resetTo(last.replay.stonesBefore);
   state.log.pop();
   renderLog();
-  setStatus(t("status.ready", { n: state.stones.length }));
+  setStatus(tt("status.ready", { n: state.stones.length }));
   draw();
 }
 
@@ -508,7 +521,7 @@ function clearSheet(): void {
   state.lastTraces = [];
   state.log = [];
   renderLog();
-  setStatus(t("status.ready", { n: 0 }));
+  setStatus(tt("status.ready", { n: 0 }));
   draw();
 }
 
@@ -546,7 +559,7 @@ function placementMessage(m: PlacementCheck | "removed" | "added" | "moved"): vo
     overlap: "place.overlap",
     teamFull: "place.teamFull",
   };
-  setStatus(t(keys[m], { n: state.stones.length }));
+  setStatus(tt(keys[m], { n: state.stones.length }));
 }
 
 function copyScenario(): void {
@@ -653,7 +666,7 @@ function renderLog(): void {
       num(e.curl, 2),
       num(e.turns, 1),
       num(e.sweep, 1),
-      e.outcome,
+      outcomeText(e.outcome),
       e.hash,
     ];
     cells.forEach((c, i) => {
@@ -663,7 +676,7 @@ function renderLog(): void {
       tr.append(td);
     });
     tr.tabIndex = 0;
-    tr.title = "Mostra il replay di questo tiro";
+    tr.title = t("log.rowTitle");
     tr.addEventListener("click", () => showReplay(e.replay));
     body.append(tr);
   }
@@ -677,11 +690,11 @@ async function copyReplay(): Promise<void> {
   const ta = $<HTMLTextAreaElement>("replay-text");
   try {
     await navigator.clipboard.writeText(ta.value);
-    setReplayMsg(t("replay.copied"));
+    setReplayMsg(tt("replay.copied"));
   } catch {
     ta.focus();
     ta.select();
-    setReplayMsg(t("replay.copyFailed"));
+    setReplayMsg(tt("replay.copyFailed"));
   }
 }
 
@@ -690,24 +703,24 @@ function loadReplayText(text: string): void {
   try {
     r = JSON.parse(text);
   } catch {
-    setReplayMsg(t("replay.invalid"));
+    setReplayMsg(tt("replay.invalid"));
     return;
   }
   if (state.sim) return;
   if ((r as { format?: string }).format === "curling-scenario") {
     if (!validateScenario(r)) {
-      setReplayMsg(t("scenario.invalid"));
+      setReplayMsg(tt("scenario.invalid"));
       return;
     }
     resetTo(r.stones);
     setNextTeam(r.nextTeam);
-    setReplayMsg(t("scenario.loaded", { n: r.stones.length }));
-    setStatus(t("status.ready", { n: state.stones.length }));
+    setReplayMsg(tt("scenario.loaded", { n: r.stones.length }));
+    setStatus(tt("status.ready", { n: state.stones.length }));
     draw();
     return;
   }
   if (!validateReplay(r)) {
-    setReplayMsg(t("replay.invalid"));
+    setReplayMsg(tt("replay.invalid"));
     return;
   }
   const msg = r.engineVersion !== ENGINE_VERSION ? t("replay.versionWarn", { v: r.engineVersion }) + " " : "";
@@ -730,11 +743,11 @@ function checkDeterminism(): void {
   el.append(pill, txt);
 }
 
-function setReplayMsg(s: string): void {
-  $("replay-msg").textContent = s;
+function setReplayMsg(s: Text): void {
+  bindText($("replay-msg"), s);
 }
-function setStatus(s: string): void {
-  $("status").textContent = s;
+function setStatus(s: Text): void {
+  bindText($("status"), s);
 }
 function setBusy(b: boolean): void {
   for (const id of ["throw", "repeat", "retry", "clear", "load-file", "copy-scenario"]) $<HTMLButtonElement>(id).disabled = b;
@@ -762,7 +775,7 @@ function setMode(mode: "lab" | "end"): void {
     endMode!.enter();
   } else {
     endMode!.exit();
-    setStatus(t("status.ready", { n: state.stones.length }));
+    setStatus(tt("status.ready", { n: state.stones.length }));
   }
   draw();
 }
@@ -862,8 +875,27 @@ function bindBroom(): void {
   });
 }
 
-function init(): void {
+/** Cambio di lingua senza ricaricare: testi statici, letture calcolate, registro e riquadri. */
+function relocalize(): void {
   applyTexts();
+  if (state.params) updateWeightMarks();
+  updateShotReadout();
+  updateMixReadout();
+  updateSweepReadout();
+  renderLog();
+  if (state.splits.bh !== null || state.sim) updateSplits();
+  endMode?.render();
+  langPicker?.refresh();
+  draw();
+}
+
+let langPicker: { refresh(): void } | null = null;
+
+function init(): void {
+  setLanguage(initialLanguage());
+  applyTexts();
+  langPicker = mountLanguagePicker($("lang"));
+  onLanguageChange(relocalize);
   houseR = new Renderer($<HTMLCanvasElement>("house"), HOUSE_VIEW, true);
   sheetR = new Renderer($<HTMLCanvasElement>("sheet"), SHEET_VIEW, false);
 
@@ -948,7 +980,7 @@ function init(): void {
   new MutationObserver(draw).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
   renderLog();
-  setStatus(t("status.ready", { n: 0 }));
+  setStatus(tt("status.ready", { n: 0 }));
   applyProfile("normal");
   weightSlider().value = "2.03";
   checkDeterminism();

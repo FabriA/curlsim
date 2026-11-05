@@ -68,6 +68,12 @@ tests/           calibrazione, plausibilità, urti, regole, determinismo
 
 I valori sono approssimazioni su valori tipici di gioco, da validare con misure su ghiaccio.
 
+## Lingue
+
+Le stringhe dell'interfaccia sono in `src/i18n/` (`it.ts` è il riferimento; `en.ts`, `de.ts`, `fr.ts` hanno le stesse chiavi,
+controllate dai test insieme ai segnaposto). Per aggiungere una lingua: un nuovo file con tutte le chiavi, la voce in `LANGS`
+e la bandiera in `src/lab/lang-picker.ts`. Il rapporto dei giudizi resta sempre in italiano.
+
 ## End a due (fase 2)
 
 Nell'intestazione si passa da **Laboratorio** a **End a due**: due giocatori sullo stesso dispositivo giocano un end

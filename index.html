@@ -19,15 +19,16 @@
     <h1 data-t="app.title">Laboratorio di curling</h1>
     <p class="sub" data-t="app.subtitle"></p>
   </div>
-  <div class="seg mode" role="radiogroup" aria-label="Modalità">
+  <div class="seg mode" role="radiogroup" data-t-aria="aria.mode" aria-label="Modalità">
     <label><input type="radio" name="mode" id="mode-lab" checked><span data-t="mode.lab"></span></label>
     <label><input type="radio" name="mode" id="mode-end"><span data-t="mode.end"></span></label>
   </div>
   <p id="status" class="status" role="status" aria-live="polite"></p>
+  <div id="lang"></div>
 </header>
 
 <main class="lab">
-  <section class="controls" aria-label="Comandi">
+  <section class="controls" data-t-aria="aria.controls" aria-label="Comandi">
     <details class="panel end-only" id="p-end" open>
       <summary data-t="section.end"></summary>
       <div class="panel-body">
@@ -211,10 +212,10 @@
     </details>
   </section>
 
-  <section id="views" class="views" aria-label="Pista">
+  <section id="views" class="views" data-t-aria="aria.views" aria-label="Pista">
     <figure class="view house-view">
       <div class="house-wrap">
-        <canvas id="house" aria-label="Casa di gioco vista dall'alto"></canvas>
+        <canvas id="house" data-t-aria="aria.house" aria-label="Casa di gioco vista dall'alto"></canvas>
         <div id="splits" class="splits" hidden>
           <div><span data-t="split.backHog"></span><b id="split-bh">—</b></div>
           <div><span data-t="split.hogHog"></span><b id="split-hh">—</b></div>
@@ -223,11 +224,11 @@
       <figcaption data-t="view.house"></figcaption>
     </figure>
     <figure class="view sheet-view">
-      <canvas id="sheet" aria-label="Pista intera vista dall'alto"></canvas>
+      <canvas id="sheet" data-t-aria="aria.sheet" aria-label="Pista intera vista dall'alto"></canvas>
       <figcaption data-t="view.sheet"></figcaption>
     </figure>
     <!-- Comandi di tiro su telefono: subito sotto la casa, nel flusso della pagina. -->
-    <div id="fab" class="fab" aria-label="Comandi di tiro">
+    <div id="fab" class="fab" data-t-aria="aria.shotControls" aria-label="Comandi di tiro">
       <div class="fab-row">
         <button id="fab-spin" class="fab-spin" type="button" data-t-label="fab.spinLabel"></button>
         <button id="fab-throw" class="primary" type="button" data-t="shot.throw"></button>
