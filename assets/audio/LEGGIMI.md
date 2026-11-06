@@ -1,5 +1,11 @@
 # Suoni
 
+- `collision-original.wav` — urto tra due pietre, fornito dallo sviluppatore (6 novembre 2026): mono 48 kHz, 0,33 s.
+  Colpo secco, energia soprattutto tra 300 e 1000 Hz (picchi a circa 325, 550 e 716 Hz), un secondo piccolo colpo a 75 ms.
+- `collision.wav` — lo stesso, tagliato 6 ms prima dell'attacco e con una dissolvenza negli ultimi 50 ms; genera `src/lab/sounds/collision.ts`.
+  Nel gioco: volume e brillantezza dalla forza dell'urto (filtro passa-basso da circa 2,5 kHz per gli urti lenti a 11 kHz
+  per quelli violenti), altezza variata di ±4% a ogni urto.
+
 - `slide-loop-2mps-48k.wav` — scivolamento della pietra, loop continuo di 16 s, mono 48 kHz, riferimento 2 m/s.
   Ricostruzione sintetica fornita dallo sviluppatore (6 novembre 2026), in attesa di una registrazione su una pietra reale.
   Corpo principale tra circa 40 e 230 Hz.

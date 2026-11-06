@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { impactModel, slideMapping } from "../src/lab/audio";
+import { collisionPlayback, impactModel, slideMapping } from "../src/lab/audio";
 import { SLIDE_WAV_BASE64 } from "../src/lab/sounds/slide";
 
 describe("suono dello scivolamento", () => {
@@ -39,5 +39,23 @@ describe("suono degli urti", () => {
     expect(energy(m, 250, 800)).toBeGreaterThan(10 * energy(m, 1000, 20000));
     expect(energy(m, 250, 800)).toBeGreaterThan(energy(m, 0, 250));
     expect(m.partials.every((p) => p.decay < 0.15)).toBe(true);
+  });
+});
+
+describe("campione d'urto", () => {
+  it("è un WAV mono a 48 kHz di circa 0,3 s", async () => {
+    const { COLLISION_WAV_BASE64 } = await import("../src/lab/sounds/collision");
+    const b = Buffer.from(COLLISION_WAV_BASE64, "base64");
+    expect(b.toString("ascii", 0, 4)).toBe("RIFF");
+    expect(b.readUInt16LE(22)).toBe(1);
+    expect(b.readUInt32LE(24)).toBe(48000);
+  });
+  it("urti forti più forti e più chiari; altezza variata di poco", () => {
+    const weak = collisionPlayback(0.1, () => 0);
+    const strong = collisionPlayback(1, () => 1);
+    expect(strong.gain).toBeGreaterThan(weak.gain);
+    expect(strong.cutoff).toBeGreaterThan(weak.cutoff);
+    expect(weak.rate).toBeCloseTo(0.96, 9);
+    expect(strong.rate).toBeCloseTo(1.04, 9);
   });
 });

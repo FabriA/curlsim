@@ -8,6 +8,22 @@ const STORE_KEY = "curlsim.sound";
 
 type Ctx = AudioContext;
 
+function fromBase64(b64: string): ArrayBuffer {
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes.buffer;
+}
+
+/**
+ * Riproduzione del campione d'urto in funzione della forza (0–1): urti violenti forti e chiari,
+ * urti lenti più deboli e scuri; ogni urto varia l'altezza di ±4% per non suonare identico.
+ */
+export function collisionPlayback(strength: number, rand: () => number = Math.random): { gain: number; cutoff: number; rate: number } {
+  const s = Math.min(1, Math.max(0, strength));
+  return { gain: 0.7 * (0.12 + 0.88 * Math.pow(s, 0.8)), cutoff: 2500 + 8500 * s, rate: 0.96 + 0.08 * rand() };
+}
+
 /** Volume complessivo degli urti. */
 const IMPACT_LEVEL = 0.55;
 
@@ -92,6 +108,7 @@ async function decode(ctx: Ctx, data: ArrayBuffer): Promise<AudioBuffer> {
 export class Sound {
   private ctx: Ctx | null = null;
   private slideBuffer: AudioBuffer | null = null;
+  private collisionBuffer: AudioBuffer | null = null;
   private slideBus: GainNode | null = null;
   private voices = new Map<number, Voice>();
   private sweepGain: GainNode | null = null;
@@ -172,12 +189,15 @@ export class Sound {
   private async loadSlide(ctx: Ctx): Promise<void> {
     try {
       const { SLIDE_WAV_BASE64 } = await import("./sounds/slide");
-      const bin = atob(SLIDE_WAV_BASE64);
-      const bytes = new Uint8Array(bin.length);
-      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-      this.slideBuffer = await decode(ctx, bytes.buffer);
+      this.slideBuffer = await decode(ctx, fromBase64(SLIDE_WAV_BASE64));
     } catch {
       this.slideBuffer = null; // senza il loop la pietra scivola in silenzio
+    }
+    try {
+      const { COLLISION_WAV_BASE64 } = await import("./sounds/collision");
+      this.collisionBuffer = await decode(ctx, fromBase64(COLLISION_WAV_BASE64));
+    } catch {
+      this.collisionBuffer = null; // senza il campione resta il modello sintetico
     }
   }
 
@@ -264,8 +284,30 @@ export class Sound {
     this.voices.delete(id);
   }
 
+  /** Urto con il campione registrato: volume e brillantezza dalla forza, altezza un poco variata. */
+  private playCollision(strength: number): void {
+    const ctx = this.ctx!;
+    const now = ctx.currentTime;
+    const p = collisionPlayback(strength, Math.random);
+    const src = ctx.createBufferSource();
+    src.buffer = this.collisionBuffer;
+    src.playbackRate.value = p.rate;
+    const lp = ctx.createBiquadFilter();
+    lp.type = "lowpass";
+    lp.frequency.value = p.cutoff;
+    lp.Q.value = 0.5;
+    const g = ctx.createGain();
+    g.gain.value = p.gain;
+    src.connect(lp).connect(g).connect(ctx.destination);
+    src.start(now);
+  }
+
   /** Urto tra due pietre: modi del granito più lo scatto del contatto (vedi impactModel). */
   private clack(strength: number): void {
+    if (this.collisionBuffer) {
+      this.playCollision(strength);
+      return;
+    }
     const ctx = this.ctx!;
     const now = ctx.currentTime;
     const m = impactModel(strength, Math.random);
