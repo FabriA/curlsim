@@ -13,6 +13,12 @@ Fase 3. Motore fisico invariato (0.2.0).
 - **Urti con un campione registrato:** il suono fornito (colpo secco, energia tra 300 e 1000 Hz) a ogni urto, con volume e brillantezza che seguono la forza dell'urto e un'altezza variata di ±4%. Il modello sintetico del granito resta come riserva se il campione non si carica.
 - **Uscita dalla pista:** una pietra che esce dal gioco sulla linea laterale o in fondo fa un suono suo (il colpo sintetico originale), non più quello dell'urto tra pietre.
 - **Più lingue:** italiano, inglese, tedesco e francese. Il selettore in alto a destra mostra solo la bandiera; il cambio è immediato, senza ricaricare la pagina, e non perde le risposte già scelte nel riquadro dei giudizi. Alla prima apertura vale la lingua del browser; la scelta resta memorizzata.
+- **Curva del draw a scelta** (riquadro Ghiaccio), come per gli urti, per confrontare le versioni sulla base dei giudizi («la curva inizia troppo presto», «finale troppo dolce», «con molti giri curva poco»):
+  - «Classica (fino alla 0.3.1)»: deriva come 1/√v; il 41% della curva negli ultimi 3 m.
+  - «Finale più netto» (predefinita): deriva come 1/v e curva che cresce con i giri; il 50% della curva negli ultimi 3 m.
+  - «Finale molto netto»: deriva come 1/v^1,5; il 59% della curva negli ultimi 3 m, arresto circa 20 cm più corto a parità di peso.
+  - La curva totale del draw di riferimento resta quella del profilo in tutte e tre. Con le due nuove, a parità di peso, 1,5 / 3,5 / 6,5 giri danno circa 1,07 / 1,20 / 1,40 m.
+  - I replay registrati prima si riproducono identici (senza i nuovi valori vale la classica). Il rapporto riporta «· curva …» e l'agente separa le statistiche anche per forma della curva, ricavandola dal replay.
 - I rapporti per lo sviluppatore restano in italiano qualunque sia la lingua scelta (domande, risposte, esito e numeri), così l'agente li legge come prima; i commenti dei tester restano nella loro lingua.
 
 ## 0.3.1 — 5 novembre 2026

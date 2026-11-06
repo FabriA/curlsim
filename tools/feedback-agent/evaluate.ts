@@ -3,7 +3,7 @@
  * e individua i segnali che suggeriscono un intervento sul modello fisico.
  * Non modifica mai i parametri: propone dove guardare.
  */
-import { collisionLevelOf, ENGINE_VERSION } from "../../src/core/params";
+import { collisionLevelOf, curveLevelOf, ENGINE_VERSION } from "../../src/core/params";
 import { runReplay } from "../../src/core/sim";
 import type { ParsedReport, ParsedShot } from "./parse";
 
@@ -21,6 +21,7 @@ export interface ShotRecord {
   sweepTime: number | null;
   /** Vivacità degli urti; null nei rapporti precedenti, che avevano urti vivaci. */
   collisions?: string | null;
+  curve?: string | null;
   outcome: string;
   hash: string | null;
   answers: { question: string; answer: string }[];
@@ -85,6 +86,7 @@ export function checkShot(shot: ParsedShot, message: string, date: string, repor
     spinTurns: shot.spinTurns,
     sweepTime: shot.sweepTime,
     collisions: shot.collisions,
+    curve: shot.curve,
     outcome: shot.outcome,
     hash: shot.hash,
     answers: shot.answers,
@@ -123,6 +125,18 @@ export function collisionsOf(s: Pick<ShotRecord, "replay" | "collisions">): stri
   return s.collisions ?? "vivaci";
 }
 
+/** Forma della curva di un tiro: dal replay se c'è, altrimenti dal rapporto; prima della 0.3.2 era la classica. */
+export function curveOf(s: Pick<ShotRecord, "replay" | "curve">): string {
+  if (s.replay?.params) return { classic: "classica", late: "netta", later: "molto netta" }[curveLevelOf(s.replay.params)];
+  return s.curve ?? "classica";
+}
+
+/** Impostazioni che separano le statistiche: urti e, se non è la classica, forma della curva. */
+export function settingsOf(s: Pick<ShotRecord, "replay" | "collisions" | "curve">): string {
+  const c = curveOf(s);
+  return c === "classica" ? collisionsOf(s) : `${collisionsOf(s)}, curva ${c}`;
+}
+
 /** Domanda senza i numeri del tiro, per raggruppare «Spazzata per 16,6 s…» con «Spazzata per 3,2 s…». */
 export function questionKey(q: string): string {
   return q.replace(/\d+(?:[.,]\d+)?/g, "#").replace(/\s+/g, " ").trim();
@@ -149,7 +163,7 @@ export function questionStats(shots: ShotRecord[]): QuestionStats[] {
   for (const s of shots) {
     for (const a of s.answers) {
       const q = questionKey(a.question);
-      const c = collisionsOf(s);
+      const c = settingsOf(s);
       const key = `${q}\u0000${c}`;
       let st = map.get(key);
       if (!st) map.set(key, (st = { question: q, collisions: c, total: 0, counts: {}, signal: null }));
@@ -191,7 +205,7 @@ export function rollStats(shots: ShotRecord[]): RollStats[] {
     const a = s.answers.find((x) => questionKey(x.question) === questionKey(ROLL_QUESTION));
     if (!a || !s.impact) continue;
     const b = band(s.impact.fullness);
-    const c = collisionsOf(s);
+    const c = settingsOf(s);
     const key = `${b}\u0000${c}`;
     let st = out.get(key);
     if (!st) out.set(key, (st = { band: b, collisions: c, n: 0, meanShooterTravel: 0, counts: {} }));

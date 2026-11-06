@@ -306,4 +306,12 @@ export const fr: Record<Key, string> = {
   "role.skip": "skip",
   "sound.on": "Son activé : touche pour le couper",
   "sound.off": "Son coupé : touche pour l'activer",
+  "ice.curve": "Courbe du placement",
+  "ice.curve.classic": "Classique (jusqu'à 0.3.1)",
+  "ice.curve.late": "Fin plus nette",
+  "ice.curve.later": "Fin beaucoup plus nette",
+  "ice.curveHint": "Avec une fin plus nette, la pierre tourne moins au début et davantage dans les derniers mètres, et plus avec beaucoup de tours. La courbe totale du placement de référence reste celle du profil.",
+  "fb.curve.classic": "classique",
+  "fb.curve.late": "nette",
+  "fb.curve.later": "très nette",
 };

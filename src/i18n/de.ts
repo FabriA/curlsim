@@ -306,4 +306,12 @@ export const de: Record<Key, string> = {
   "role.skip": "Skip",
   "sound.on": "Ton an: tippen zum Ausschalten",
   "sound.off": "Ton aus: tippen zum Einschalten",
+  "ice.curve": "Curl des Draws",
+  "ice.curve.classic": "Klassisch (bis 0.3.1)",
+  "ice.curve.late": "Schärferes Ende",
+  "ice.curve.later": "Viel schärferes Ende",
+  "ice.curveHint": "Mit schärferem Ende curlt der Stein anfangs weniger und auf den letzten Metern mehr, und mit vielen Umdrehungen mehr. Der gesamte Curl des Referenz-Draws bleibt wie im Profil.",
+  "fb.curve.classic": "klassisch",
+  "fb.curve.late": "scharf",
+  "fb.curve.later": "sehr scharf",
 };

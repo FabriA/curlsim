@@ -4,7 +4,7 @@
  */
 import { calibrate, spinRateForTurns, stopForSpeed, speedToStopAt, sweepFrictionForGain } from "../core/calibrate";
 import { BACK_LINE_OUTSIDE, FAR_HOG_INSIDE, HACK_Y, HOUSE_RADIUS, RELEASE_Y, STONE_RADIUS, TEE_Y } from "../core/geometry";
-import { APP_VERSION, COLLISIONS, collisionLevelOf, DT, ENGINE_VERSION, PROFILES, SHOT_PRECISION, SPIN_TURNS, SWEEP_GAIN, type CollisionLevel, type IceParams, type Precision, type ProfileId, type ShotLevel, type SkillLevel, type SpinLevel } from "../core/params";
+import { APP_VERSION, BASE_PARAMS, COLLISIONS, collisionLevelOf, CURVES, curveLevelOf, DT, ENGINE_VERSION, PROFILES, SHOT_PRECISION, SPIN_TURNS, SWEEP_GAIN, type CollisionLevel, type CurveLevel, type IceParams, type Precision, type ProfileId, type ShotLevel, type SkillLevel, type SpinLevel } from "../core/params";
 import { REFERENCE_HASH, referenceReplay } from "../core/reference";
 import { makeReplay, runReplay, Sim, skillFromPrecision, validateReplay, type Replay, type Skill, type StonePlacement } from "../core/sim";
 import { bindText, getLanguage, initialLanguage, num, onLanguageChange, setLanguage, t, tIn, tt, type Lang, type Text } from "../i18n";
@@ -98,7 +98,7 @@ function recalibrate(): void {
   bindText($("derived"), tt("ice.calibrating"));
   // Lascia ridisegnare l'interfaccia prima del calcolo (circa mezzo secondo).
   setTimeout(() => {
-    state.params = calibrate(readTargets());
+    state.params = calibrate(readTargets(), { ...BASE_PARAMS, ...CURVES[curveLevel()] });
     bindText($("derived"), tt("ice.derived", { mu: state.params.mu.toFixed(5), k: state.params.curlK.toFixed(5) }));
     updateWeightMarks();
     updateShotReadout();
@@ -257,6 +257,11 @@ function collisionsLabel(p: IceParams): string {
   const lvl = collisionLevelOf(p);
   if (lvl) return tIn("it", lvl === "normal" ? "fb.collisions.normal" : "fb.collisions.lively");
   return tIn("it", "fb.collisions.custom", { e: String(p.restitution).replace(".", ","), e2: String(p.restitutionSecondary ?? p.restitution).replace(".", ",") });
+}
+
+function curveLevel(): CurveLevel {
+  const v = $<HTMLSelectElement>("curve").value;
+  return v === "classic" || v === "later" ? v : "late";
 }
 
 function collisionLevel(): CollisionLevel {
@@ -489,6 +494,7 @@ function finishShot(): void {
     ice: readTargets(),
     sweepGain: activeSweepGain(),
     collisions: collisionsLabel(replay.params),
+    curve: tIn("it", `fb.curve.${curveLevelOf(replay.params)}` as Key),
     impact: m.impact,
     replay,
   });

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { formatReport, type FeedbackRecord, type ShotFacts } from "../src/lab/feedback-model";
 import { REFERENCE_HASH, referenceReplay } from "../src/core/reference";
 import { parseReport } from "../tools/feedback-agent/parse";
-import { addReport, band, collisionsOf, emptyDataset, questionKey, questionStats, recommendations, rollStats } from "../tools/feedback-agent/evaluate";
+import { addReport, band, collisionsOf, curveOf, emptyDataset, questionKey, questionStats, recommendations, rollStats, settingsOf } from "../tools/feedback-agent/evaluate";
 import { messageMarkdown, summaryMarkdown } from "../tools/feedback-agent/report";
 
 const fmt = (n: number, d: number) => n.toFixed(d).replace(".", ",");
@@ -124,5 +124,20 @@ describe("agente delle segnalazioni: valutazione", () => {
     expect(md.includes("| vivaci | mezza pietra | 3 |")).toBe(true);
     expect(md.includes("@")).toBe(false);
     expect(messageMarkdown("m1", ds.shots).includes("## Tiro 1 · Bocciata")).toBe(true);
+  });
+});
+
+describe("forma della curva nei rapporti", () => {
+  it("la riga del tiro riporta la curva e il lettore la legge", () => {
+    const text = report([{ facts: facts({ collisions: "normali", curve: "molto netta" }), kind: "draw", answers: [], comment: "", at: "" }]);
+    expect(text).toMatch(/· curva molto netta/);
+    expect(parseReport(text)!.shots[0].curve).toBe("molto netta");
+  });
+  it("dal replay: senza curlExp è la classica e non separa le statistiche", () => {
+    const r = referenceReplay();
+    expect(curveOf({ replay: r })).toBe("classica");
+    expect(settingsOf({ replay: r })).toBe(collisionsOf({ replay: r }));
+    const late = { ...r, params: { ...r.params, curlExp: 1 as const, spinGain: 0.2 } };
+    expect(settingsOf({ replay: late })).toBe(`${collisionsOf({ replay: late })}, curva netta`);
   });
 });

@@ -28,6 +28,18 @@ export interface IceParams {
   curlV0: number;
   /** Rapporto rotazione/velocità sotto il quale la curva si riduce ((rad/s)/(m/s)). */
   spinRatioRef: number;
+  /**
+   * Come la deriva cresce quando la pietra rallenta: 0,5 = come 1/√v (fino alla 0.3.1),
+   * 1 = come 1/v, 1,5 = come 1/v^1,5: concentrano la curva nel finale. Se manca vale 0,5.
+   */
+  curlExp?: 0.5 | 1 | 1.5;
+  /**
+   * Effetto dei giri sulla curva: 0 = nessuno (fino alla 0.3.1); con g la curva si moltiplica per
+   * 1 + g·(ω/v ÷ spinRef − 1), cioè cresce con i giri rispetto alla rotazione normale.
+   */
+  spinGain?: number;
+  /** Rapporto ω/v della rotazione normale (3,5 giri su un draw al tee), riferimento di spinGain. */
+  spinRef?: number;
   /** Fattore sull'attrito durante la spazzata (< 1). */
   sweepFriction: number;
   /** Fattore sulla deriva durante la spazzata (< 1). */
@@ -70,6 +82,26 @@ export const BASE_PARAMS: Omit<IceParams, "mu" | "curlK"> = {
   stoneFriction: 0.2,
   inertiaK: 0.5,
 };
+
+/** Forma della curva del draw. */
+export type CurveLevel = "classic" | "late" | "later";
+
+/**
+ * «Classica» è il modello fino alla 0.3.1. «Finale più netto», dai giudizi dei tester (curva che
+ * inizia troppo presto e si chiude troppo dolce, più curva con molti giri): deriva come 1/v
+ * («netta») o 1/v^1,5 («molto netta») e curva che cresce con i giri. La curva totale del draw di
+ * riferimento con rotazione normale resta quella del profilo.
+ */
+export const CURVES: Record<CurveLevel, Pick<IceParams, "curlExp" | "spinGain">> = {
+  classic: { curlExp: 0.5, spinGain: 0 },
+  late: { curlExp: 1, spinGain: 0.2 },
+  later: { curlExp: 1.5, spinGain: 0.2 },
+};
+
+/** Forma della curva che corrisponde ai valori di un replay; senza curlExp è la classica. */
+export function curveLevelOf(p: Pick<IceParams, "curlExp">): CurveLevel {
+  return p.curlExp === 1.5 ? "later" : p.curlExp === 1 ? "late" : "classic";
+}
 
 /** Vivacità degli urti tra pietre: quanta energia passa da una pietra all'altra. */
 export type CollisionLevel = "normal" | "lively";

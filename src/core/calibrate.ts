@@ -56,9 +56,13 @@ export function measureDrawCurl(params: IceParams, spin: 1 | -1 = 1, turns = SPI
   return sim.delivered.x * spin;
 }
 
-export function calibrate(t: IceTargets, base = BASE_PARAMS): IceParams {
+/** Rapporto ω/v della rotazione normale: dipende solo dalla geometria (giri sul percorso del draw al tee). */
+export const NORMAL_SPIN_RATIO = (2 * Math.PI * SPIN_TURNS.normal) / D_TOTAL;
+
+export function calibrate(t: IceTargets, base: Partial<IceParams> & typeof BASE_PARAMS = BASE_PARAMS): IceParams {
   const mu = decelerationFor(t.hogToHog) / G;
   const params: IceParams = { ...base, mu, curlK: 0 };
+  if (params.spinGain) params.spinRef = NORMAL_SPIN_RATIO;
   let lo = 0;
   let hi = 0.05;
   for (let i = 0; i < 30; i++) {

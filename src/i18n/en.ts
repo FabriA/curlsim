@@ -306,4 +306,12 @@ export const en: Record<Key, string> = {
   "role.skip": "skip",
   "sound.on": "Sound on: tap to turn it off",
   "sound.off": "Sound off: tap to turn it on",
+  "ice.curve": "Draw curl",
+  "ice.curve.classic": "Classic (up to 0.3.1)",
+  "ice.curve.late": "Sharper finish",
+  "ice.curve.later": "Much sharper finish",
+  "ice.curveHint": "With a sharper finish the stone curls less early and more in the last metres, and curls more with many turns. The total curl of the reference draw stays as set by the profile.",
+  "fb.curve.classic": "classic",
+  "fb.curve.late": "sharp",
+  "fb.curve.later": "very sharp",
 };

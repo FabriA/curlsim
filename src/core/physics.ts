@@ -58,7 +58,17 @@ function advanceStone(s: Stone, p: IceParams, swept: boolean): void {
   let spinFactor = s.w / (p.spinRatioRef * v);
   if (spinFactor > 1) spinFactor = 1;
   else if (spinFactor < -1) spinFactor = -1;
-  const aLat = (spinFactor * p.curlK * (swept ? p.sweepCurl : 1)) / Math.sqrt(v + p.curlV0);
+  // Curva «finale più netto»: più rotazione per metro, più curva (il «grab» con molti giri).
+  if (p.spinGain) {
+    const ratio = (s.w < 0 ? -s.w : s.w) / v / (p.spinRef ?? 1);
+    let k = 1 + p.spinGain * (ratio - 1);
+    if (k < 0.5) k = 0.5;
+    spinFactor = spinFactor * k;
+  }
+  // La deriva cresce quando la pietra rallenta: come 1/√v (classica), 1/v o 1/v^1,5 (finale più netto).
+  const vv = v + p.curlV0;
+  const slow = p.curlExp === 1 ? vv : p.curlExp === 1.5 ? vv * Math.sqrt(vv) : Math.sqrt(vv);
+  const aLat = (spinFactor * p.curlK * (swept ? p.sweepCurl : 1)) / slow;
 
   // Accelerazione = −aLong·u + aLat·(perpendicolare destra di u), con perp destra = (uy, −ux).
   s.vx += (-aLong * ux + aLat * uy) * DT;

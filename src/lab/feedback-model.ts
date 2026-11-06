@@ -26,6 +26,8 @@ export interface ShotFacts {
   sweepGain: number;
   /** Vivacità degli urti tra pietre, già tradotta («normali», «vivaci»). */
   collisions?: string;
+  /** Forma della curva, già tradotta in italiano («classica», «netta», «molto netta»). */
+  curve?: string;
   /** Primo urto della pietra tirata, se c'è stato. */
   impact?: ImpactMetrics | null;
   /** Replay completo del tiro: entra sempre nel rapporto, per riprodurre il tiro identico. */
@@ -140,6 +142,7 @@ export function formatReport(
       `Tiro ${f.n} · ${shotLabel(r.kind, f, label, words.removed)} · ${fmt(f.speed, 2)} m/s · rotazione ${fmt(f.spinTurns, 1)} giri · spazzata ${fmt(f.sweepTime, 1)} s` +
         ` · ghiaccio hog-to-hog ${fmt(f.ice.hogToHog, 1)} s, curva ${fmt(f.ice.curl, 1)} m · sweeper ${fmt(f.sweepGain, 2)} m` +
         (f.collisions ? ` · urti ${f.collisions}` : "") +
+        (f.curve ? ` · curva ${f.curve}` : "") +
         ` · esito: ${f.outcome} · hash ${f.hash}`,
     );
     if (f.impact) lines.push(`  Urto: ${describeImpact(f.impact, fmt, words.out)}`);

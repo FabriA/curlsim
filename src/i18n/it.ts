@@ -304,6 +304,14 @@ export const it = {
   "role.skip": "skip",
   "sound.on": "Suoni attivi: tocca per disattivarli",
   "sound.off": "Suoni disattivati: tocca per attivarli",
+  "ice.curve": "Curva del draw",
+  "ice.curve.classic": "Classica (fino alla 0.3.1)",
+  "ice.curve.late": "Finale più netto",
+  "ice.curve.later": "Finale molto netto",
+  "ice.curveHint": "Con il finale più netto la pietra curva meno all'inizio e di più negli ultimi metri, e con molti giri curva di più. La curva totale del draw di riferimento resta quella del profilo.",
+  "fb.curve.classic": "classica",
+  "fb.curve.late": "netta",
+  "fb.curve.later": "molto netta",
 } as const;
 
 export type Key = keyof typeof it;
