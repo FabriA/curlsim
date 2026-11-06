@@ -34,10 +34,10 @@ describe("suono degli urti", () => {
     expect(bright(strong)).toBeGreaterThan(bright(weak));
     expect(strong.click.cutoff).toBeGreaterThan(weak.click.cutoff);
   });
-  it("l'energia sta soprattutto tra 500 e 1000 Hz, come negli urti misurati", () => {
+  it("suono basso: l'energia sta tra 250 e 800 Hz, con poca energia sopra 1 kHz e una breve risonanza", () => {
     const m = impactModel(0.6, fixed);
-    expect(energy(m, 500, 1000)).toBeGreaterThan(energy(m, 1000, 2000));
-    expect(energy(m, 500, 1000)).toBeGreaterThan(energy(m, 200, 500));
-    expect(m.partials.every((p) => p.decay < 0.02)).toBe(true);
+    expect(energy(m, 250, 800)).toBeGreaterThan(10 * energy(m, 1000, 20000));
+    expect(energy(m, 250, 800)).toBeGreaterThan(energy(m, 0, 250));
+    expect(m.partials.every((p) => p.decay < 0.15)).toBe(true);
   });
 });

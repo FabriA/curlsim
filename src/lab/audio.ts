@@ -19,41 +19,46 @@ export interface ImpactModel {
 }
 
 /**
- * Modi misurati su urti reali (analisi spettrale di clip fornite, 6 novembre 2026; nessun campione
- * è incluso nel gioco): energia soprattutto tra 500 e 1000 Hz, picchi intorno a 440, 590, 800,
- * 876, 1010 e 1340 Hz, decadimento rapido (circa 5–40 ms per perdere 20 dB). Rispetto alla banda
- * 500–1000 Hz: 1–2 kHz circa −5 dB, 2–4 kHz circa −13 dB, 4–8 kHz circa −20 dB. Ampiezze relative
- * in dB rispetto al picco più forte (876 Hz).
+ * Modi del granito ricavati dall'analisi di urti reali (clip fornite il 6 novembre 2026; nessun
+ * campione è incluso nel gioco). L'urto più pulito ha i picchi a circa 275, 412, 550 e 687 Hz,
+ * quasi una serie armonica di 137 Hz, con il più forte a 412 Hz; poca energia sopra 1 kHz
+ * (1–2 kHz circa −20 dB, 2–4 kHz circa −30 dB, 4–8 kHz circa −39 dB) e una coda che si spegne in un paio di decimi
+ * di secondo (in parte riverbero del palazzetto). Ampiezze in dB rispetto al modo a 412 Hz.
  */
 const GRANITE_MODES: [number, number][] = [
-  [440, -7.4],
-  [590, -2.5],
-  [800, -2.6],
-  [876, 0],
-  [1010, -3.3],
-  [1340, -3],
-  [1740, -4],
-  [2250, -6],
-  [2900, -8],
-  [3700, -11],
+  [137, -16],
+  [275, -8],
+  [412, 0],
+  [550, -10],
+  [687, -5],
+  [833, -9],
+  [1100, -17],
+  [1500, -20],
+  [1950, -22],
+  [2600, -24],
+  [3400, -27],
+  [4600, -30],
 ];
 
 /**
  * Suono di un urto in funzione della forza (0–1: variazione di velocità fino a circa 2,5 m/s).
- * Urti forti: più forti e più brillanti (più modi alti, scatto più chiaro), smorzamento più rapido.
- * Urti deboli: più scuri, quasi solo i modi tra 500 e 900 Hz. Ogni urto varia un poco le frequenze.
+ * Urti forti: più forti e un po' più chiari; urti deboli: più scuri. Ogni urto varia un poco le
+ * frequenze, così due urti non suonano mai identici.
  */
 export function impactModel(strength: number, rand: () => number = Math.random): ImpactModel {
   const s = Math.min(1, Math.max(0, strength));
   const level = 0.15 + 0.85 * Math.pow(s, 0.8);
   const partials = GRANITE_MODES.map(([f, db]) => {
-    const tilt = f > 1000 ? (1 - s) * -2 * Math.log2(f / 1000) : 0; // urti deboli: meno alti
+    const tilt = f > 700 ? (1 - s) * -6 * Math.log2(f / 700) : 0; // urti deboli: meno alti
     const amp = level * Math.pow(10, (db + tilt) / 20) * (0.85 + 0.3 * rand());
-    const decay = (0.012 - 0.005 * s) * Math.pow(876 / f, 0.5) * (0.85 + 0.3 * rand());
-    return { freq: f * (0.97 + 0.06 * rand()), amp: amp * 0.4, decay };
+    const decay = 0.07 * Math.pow(412 / f, 0.5) * (0.85 + 0.3 * rand());
+    return { freq: f * (0.98 + 0.04 * rand()), amp: amp * 0.45, decay };
   });
-  return { partials, click: { gain: level * (0.5 + 0.15 * s), cutoff: 6500 + 1000 * s, decay: 0.003 + 0.002 * s } };
+  return { partials, click: { gain: level * (0.2 + 0.15 * s), cutoff: 4000 + 2000 * s, decay: 0.002 + 0.002 * s } };
 }
+
+/** Spazzata: due scope che strofinano in alternanza, ognuna circa 3,5 colpi al secondo. */
+export const SWEEP_SOUND = { strokesPerSecond: 3.5, brushes: 2, highpass: 900, lowpass: 9000, attack: 0.015, decay: 0.09, level: 0.16 };
 
 /** Volume complessivo dello scivolamento e numero massimo di pietre che suonano insieme. */
 const SLIDE_LEVEL = 0.6;
@@ -148,26 +153,19 @@ export class Sound {
     this.slideBus.connect(ctx.destination);
     void this.loadSlide(ctx);
 
-    // Spazzata: rumore acuto, modulato a circa 5 colpi al secondo.
+    // Spazzata: rumore a banda larga (scopa sul ghiaccio), modulato da colpi programmati in update().
     const sweep = ctx.createBufferSource();
     sweep.buffer = buf;
     sweep.loop = true;
-    sweep.playbackRate.value = 0.9;
-    const band = ctx.createBiquadFilter();
-    band.type = "bandpass";
-    band.frequency.value = 2600;
-    band.Q.value = 0.8;
-    const strokes = ctx.createGain();
-    strokes.gain.value = 0.5;
-    const lfo = ctx.createOscillator();
-    lfo.frequency.value = 5;
-    const depth = ctx.createGain();
-    depth.gain.value = 0.5;
-    lfo.connect(depth).connect(strokes.gain);
-    lfo.start();
+    const hp = ctx.createBiquadFilter();
+    hp.type = "highpass";
+    hp.frequency.value = SWEEP_SOUND.highpass;
+    const lp = ctx.createBiquadFilter();
+    lp.type = "lowpass";
+    lp.frequency.value = SWEEP_SOUND.lowpass;
     this.sweepGain = ctx.createGain();
     this.sweepGain.gain.value = 0;
-    sweep.connect(band).connect(strokes).connect(this.sweepGain).connect(ctx.destination);
+    sweep.connect(hp).connect(lp).connect(this.sweepGain).connect(ctx.destination);
     sweep.start();
   }
 
@@ -193,10 +191,35 @@ export class Sound {
     if (!ctx || !this.enabled || ctx.state !== "running") return;
     const now = ctx.currentTime;
     this.updateSlide(ctx, stones);
-    this.sweepGain!.gain.setTargetAtTime(sweeping ? 0.12 : 0, now, 0.03);
+    this.scheduleStrokes(now, sweeping);
     if (impact > 0.05 && now - this.lastImpact > 0.03) {
       this.lastImpact = now;
       this.clack(Math.min(1, impact / 2.5));
+    }
+  }
+
+  /** Colpi di scopa programmati fino a 0,2 s avanti: ogni scopa ha il suo ritmo, con un po' di irregolarità. */
+  private nextStroke: number[] = [];
+  private scheduleStrokes(now: number, sweeping: boolean): void {
+    const g = this.sweepGain!.gain;
+    if (!sweeping) {
+      if (this.nextStroke.length) {
+        g.cancelScheduledValues(now);
+        g.setTargetAtTime(0, now, 0.03);
+        this.nextStroke = [];
+      }
+      return;
+    }
+    const sw = SWEEP_SOUND;
+    if (!this.nextStroke.length) this.nextStroke = Array.from({ length: sw.brushes }, (_, i) => now + 0.02 + i / (sw.brushes * sw.strokesPerSecond));
+    for (let b = 0; b < this.nextStroke.length; b++) {
+      while (this.nextStroke[b] < now + 0.2) {
+        const t = Math.max(now, this.nextStroke[b]);
+        const peak = sw.level * (0.75 + 0.5 * Math.random());
+        g.setTargetAtTime(peak, t, sw.attack / 3);
+        g.setTargetAtTime(peak * 0.15, t + sw.attack, sw.decay / 3);
+        this.nextStroke[b] += (1 / sw.strokesPerSecond) * (0.88 + 0.24 * Math.random());
+      }
     }
   }
 
@@ -282,6 +305,8 @@ export class Sound {
     if (!ctx) return;
     const now = ctx.currentTime;
     for (const [id, v] of this.voices) this.release(id, v);
+    this.sweepGain?.gain.cancelScheduledValues(now);
     this.sweepGain?.gain.setTargetAtTime(0, now, 0.02);
+    this.nextStroke = [];
   }
 }
