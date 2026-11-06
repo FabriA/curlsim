@@ -4,7 +4,6 @@ import { readFileSync, writeFileSync } from "node:fs";
 const sounds = [
   { wav: "slide-loop-2mps-16k.wav", out: "slide.ts", name: "SLIDE_WAV_BASE64", doc: "Scivolamento della pietra: loop WAV mono 16 kHz, riferimento 2 m/s" },
   { wav: "collision.wav", out: "collision.ts", name: "COLLISION_WAV_BASE64", doc: "Urto tra due pietre: WAV mono 48 kHz, circa 0,3 s" },
-  { wav: "sweep-loop.wav", out: "sweep.ts", name: "SWEEP_WAV_BASE64", doc: "Spazzata: loop WAV mono 48 kHz, circa 0,9 s" },
 ];
 for (const s of sounds) {
   const wav = readFileSync(new URL(`../../assets/audio/${s.wav}`, import.meta.url));

@@ -1,7 +1,8 @@
 /**
  * Suoni con la Web Audio API. Lo scivolamento usa un loop registrato (ricostruzione a 2 m/s,
  * assets/audio/LEGGIMI.md): una voce per ogni pietra in movimento, con volume e altezza che
- * seguono la velocità. Urti e spazzata usano campioni registrati, con suoni sintetici di riserva. Disattivabili; la scelta resta
+ * seguono la velocità. Gli urti tra pietre usano un campione registrato (con un modello sintetico di riserva);
+ * l'uscita dalla pista e la spazzata sono sintetizzate. Disattivabili; la scelta resta
  * memorizzata nel browser. I suoni non toccano la simulazione: sono solo una resa dell'interfaccia.
  */
 const STORE_KEY = "curlsim.sound";
@@ -73,9 +74,8 @@ export function impactModel(strength: number, rand: () => number = Math.random):
   return { partials, click: { gain: level * (0.2 + 0.15 * s), cutoff: 4000 + 2000 * s, decay: 0.002 + 0.002 * s } };
 }
 
-/** Volume della spazzata registrata e del fruscio sintetico di riserva. */
-const SWEEP_LEVEL = 0.35;
-const SWEEP_SYNTH_LEVEL = 0.12;
+/** Volume del fruscio della spazzata. */
+const SWEEP_LEVEL = 0.12;
 
 /** Volume complessivo dello scivolamento e numero massimo di pietre che suonano insieme. */
 const SLIDE_LEVEL = 0.6;
@@ -110,7 +110,6 @@ export class Sound {
   private ctx: Ctx | null = null;
   private slideBuffer: AudioBuffer | null = null;
   private collisionBuffer: AudioBuffer | null = null;
-  private sweepSampleGain: GainNode | null = null;
   private slideBus: GainNode | null = null;
   private voices = new Map<number, Voice>();
   private sweepGain: GainNode | null = null;
@@ -172,8 +171,7 @@ export class Sound {
     this.slideBus.connect(ctx.destination);
     void this.loadSlide(ctx);
 
-    // Spazzata di riserva (finché il campione non è caricato): il fruscio sintetico originale,
-    // rumore acuto modulato a circa 5 colpi al secondo.
+    // Spazzata: fruscio sintetico, rumore acuto modulato a circa 5 colpi al secondo.
     const sweep = ctx.createBufferSource();
     sweep.buffer = buf;
     sweep.loop = true;
@@ -209,20 +207,6 @@ export class Sound {
     } catch {
       this.collisionBuffer = null; // senza il campione resta il modello sintetico
     }
-    try {
-      const { SWEEP_WAV_BASE64 } = await import("./sounds/sweep");
-      const buf = await decode(ctx, fromBase64(SWEEP_WAV_BASE64));
-      const src = ctx.createBufferSource();
-      src.buffer = buf;
-      src.loop = true;
-      const g = ctx.createGain();
-      g.gain.value = 0;
-      src.connect(g).connect(ctx.destination);
-      src.start(ctx.currentTime, Math.random() * buf.duration);
-      this.sweepSampleGain = g;
-    } catch {
-      this.sweepSampleGain = null; // resta il fruscio sintetico
-    }
   }
 
   /**
@@ -244,11 +228,9 @@ export class Sound {
     if (board > 0.05) this.boardHit(Math.min(1, board / 2.5));
   }
 
-  /** Spazzata: il loop registrato se è caricato, altrimenti il fruscio sintetico. */
+  /** Spazzata: fruscio sintetico, attivo finché si tiene premuto Spazza. */
   private setSweeping(now: number, sweeping: boolean): void {
-    const sample = this.sweepSampleGain;
-    if (sample) sample.gain.setTargetAtTime(sweeping ? SWEEP_LEVEL : 0, now, 0.017);
-    this.sweepGain!.gain.setTargetAtTime(!sample && sweeping ? SWEEP_SYNTH_LEVEL : 0, now, 0.03);
+    this.sweepGain!.gain.setTargetAtTime(sweeping ? SWEEP_LEVEL : 0, now, 0.03);
   }
 
   /** Una voce per pietra; più pietre insieme abbassano il volume di ognuna per non saturare. */
@@ -384,6 +366,5 @@ export class Sound {
     const now = ctx.currentTime;
     for (const [id, v] of this.voices) this.release(id, v);
     this.sweepGain?.gain.setTargetAtTime(0, now, 0.02);
-    this.sweepSampleGain?.gain.setTargetAtTime(0, now, 0.02);
   }
 }
