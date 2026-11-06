@@ -12,7 +12,7 @@ Fase 3. Motore fisico invariato (0.2.0).
 - **Scivolamento meno «meccanico»:** tolta dal loop la pulsazione ritmica (circa 3 e 5,6 Hz); l'altezza non sale più con la velocità (sembrava un motore che accelera): la velocità cambia volume e brillantezza (più scuro quando la pietra rallenta), con una piccola differenza d'altezza fissa tra le pietre.
 - **Urti con un campione registrato:** il suono fornito (colpo secco, energia tra 300 e 1000 Hz) a ogni urto, con volume e brillantezza che seguono la forza dell'urto e un'altezza variata di ±4%. Il modello sintetico del granito resta come riserva se il campione non si carica.
 - **Uscita dalla pista:** una pietra che esce dal gioco sulla linea laterale o in fondo fa un suono suo (il colpo sintetico originale), non più quello dell'urto tra pietre.
-- **Spazzata:** al posto del fruscio pulsante, due scope che strofinano in alternanza a circa 3,5 colpi al secondo ciascuna, con un po' di irregolarità; rumore a banda larga tra circa 0,9 e 9 kHz.
+- **Spazzata con un campione registrato:** il suono fornito, reso ciclico senza giunture, suona finché si tiene premuto Spazza. Se non si carica resta il fruscio sintetico originale.
 - **Più lingue:** italiano, inglese, tedesco e francese. Il selettore in alto a destra mostra solo la bandiera; il cambio è immediato, senza ricaricare la pagina, e non perde le risposte già scelte nel riquadro dei giudizi. Alla prima apertura vale la lingua del browser; la scelta resta memorizzata.
 - I rapporti per lo sviluppatore restano in italiano qualunque sia la lingua scelta (domande, risposte, esito e numeri), così l'agente li legge come prima; i commenti dei tester restano nella loro lingua.
 

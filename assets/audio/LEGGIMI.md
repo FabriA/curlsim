@@ -1,5 +1,10 @@
 # Suoni
 
+- `sweep-original.wav` — spazzata, fornita dallo sviluppatore (6 novembre 2026): mono 48 kHz, 1,05 s, energia soprattutto
+  tra 300 e 1000 Hz con un fruscio fino a 16 kHz.
+- `sweep-loop.wav` — la stessa resa ciclica: gli ultimi 150 ms sfumano a potenza costante nei primi 150 ms (0,9 s);
+  genera `src/lab/sounds/sweep.ts`. Nel gioco suona finché si tiene premuto Spazza, con entrata e uscita di 50 ms.
+
 - `collision-original.wav` — urto tra due pietre, fornito dallo sviluppatore (6 novembre 2026): mono 48 kHz, 0,33 s.
   Colpo secco, energia soprattutto tra 300 e 1000 Hz (picchi a circa 325, 550 e 716 Hz), un secondo piccolo colpo a 75 ms.
 - `collision.wav` — lo stesso, tagliato 6 ms prima dell'attacco e con una dissolvenza negli ultimi 50 ms; genera `src/lab/sounds/collision.ts`.

@@ -59,3 +59,14 @@ describe("campione d'urto", () => {
     expect(strong.rate).toBeCloseTo(1.04, 9);
   });
 });
+
+describe("campione della spazzata", () => {
+  it("è un loop WAV mono a 48 kHz di circa 0,9 s", async () => {
+    const { SWEEP_WAV_BASE64 } = await import("../src/lab/sounds/sweep");
+    const b = Buffer.from(SWEEP_WAV_BASE64, "base64");
+    expect(b.toString("ascii", 0, 4)).toBe("RIFF");
+    expect(b.readUInt16LE(22)).toBe(1);
+    expect(b.readUInt32LE(24)).toBe(48000);
+    expect(Math.round(((b.length - 44) / 96000) * 10) / 10).toBe(0.9);
+  });
+});
