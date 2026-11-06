@@ -1,20 +1,19 @@
 # Segnalazioni sul realismo
 
-Aggiornato il 2026-11-06 07:58 UTC · motore 0.2.0 · messaggi elaborati: 10 · tiri valutati: 27
+Aggiornato il 2026-11-06 10:09 UTC · motore 0.2.0 · messaggi elaborati: 11 · tiri valutati: 31
 
-Tiri per impostazione degli urti: normali 21 · vivaci 6. Le statistiche sono separate per impostazione.
+Tiri per impostazione degli urti: normali 25 · vivaci 6. Le statistiche sono separate per impostazione.
 
 ## Indicazioni
 
 - [urti normali] Chiusura finale troppo dolce: accentuare la deriva a bassa velocità (ridurre curlV0) (71% delle risposte).
-- [urti normali] Nei raise la pietra colpita avanza troppo: ridurre la restituzione degli urti con la pietra tirata (67% delle risposte).
 - [urti vivaci] «Dopo l'urto, la distanza percorsa dalla pietra tirata è…»: 80% di 5 risposte dice «Troppo lungo». Da verificare rivedendo i replay di quei tiri.
 
 ## Replay
 
 | Esito della riesecuzione | Tiri |
 | --- | --- |
-| Identico all'hash registrato | 24 |
+| Identico all'hash registrato | 28 |
 | Diverso dall'hash registrato | 0 |
 | Registrato con un altro motore | 0 |
 | Senza replay | 3 |
@@ -31,17 +30,17 @@ Tiri per impostazione degli urti: normali 21 · vivaci 6. Le statistiche sono se
 
 | Domanda | Urti | Risposte | Distribuzione | Segnale |
 | --- | --- | --- | --- | --- |
-| La pietra colpita è avanzata… | normali | 9 | Troppo 6 · Giusto 3 | Troppo (67%) |
-| Dopo l'urto, la pietra tirata è rimasta… | normali | 9 | Giusto 9 | — |
+| La pietra colpita è avanzata… | normali | 12 | Troppo 7 · Giusto 5 | — |
+| Dopo l'urto, la pietra tirata è rimasta… | normali | 12 | Giusto 12 | — |
+| Spazzata per # s: l'allungamento del tiro è… | normali | 8 | Giusto 6 · Troppo poco 1 · Non so 1 | — |
+| La riduzione della curva dovuta alla spazzata è… | normali | 8 | Giusto 5 · Troppo poco 2 · Non so 1 | — |
 | Il punto in cui la pietra inizia a curvare davvero arriva… | normali | 7 | Troppo presto 4 · Giusto 3 | — |
 | La chiusura finale della curva è… | normali | 7 | Troppo dolce 5 · Giusto 2 | Troppo dolce (71%) |
 | Con un hog-to-hog di # s, per questo peso il tiro è risultato… | normali | 7 | Giusto 7 | — |
 | La curva di questo colpo è… | vivaci | 5 | Giusto 5 | — |
 | Dopo l'urto, la direzione della pietra tirata è… | vivaci | 5 | Credibile 5 | — |
 | Dopo l'urto, la distanza percorsa dalla pietra tirata è… | vivaci | 5 | Troppo lungo 4 · Giusto 1 | Troppo lungo (80%) |
-| Spazzata per # s: l'allungamento del tiro è… | normali | 5 | Giusto 4 · Troppo poco 1 | — |
-| La riduzione della curva dovuta alla spazzata è… | normali | 5 | Giusto 4 · Non so 1 | — |
-| La curva di questo colpo è… | normali | 3 | Giusto 3 | — |
+| La curva di questo colpo è… | normali | 4 | Giusto 4 | — |
 | Dopo l'urto, la direzione della pietra tirata è… | normali | 3 | Credibile 3 | — |
 | Dopo l'urto, la distanza percorsa dalla pietra tirata è… | normali | 3 | Giusto 2 · Non so 1 | — |
 | Con rotazione alta (# giri) la curva è quasi uguale a quella normale. Secondo te la pietra… | normali | 2 | Dovrebbe curvare di più 2 | — |
@@ -53,6 +52,7 @@ Tiri per impostazione degli urti: normali 21 · vivaci 6. Le statistiche sono se
 
 ## Messaggi
 
+- [2026-11-06 · web-335aee2bffac](messages/2026-11-06-web-335aee2bffac.md) · 4 tiri · versione 0.3.1
 - [2026-11-06 · web-0847a31fca12](messages/2026-11-06-web-0847a31fca12.md) · 2 tiri · versione 0.3.1
 - [2026-11-06 · web-78ed81f2bfae](messages/2026-11-06-web-78ed81f2bfae.md) · 3 tiri · versione 0.3.1
 - [2026-11-05 · web-89d2e21ba230](messages/2026-11-05-web-89d2e21ba230.md) · 1 tiri · versione 0.3.0
