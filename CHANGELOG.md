@@ -10,6 +10,7 @@ Fase 3. Motore fisico invariato (0.2.0).
 - **Suoni** disattivabili dall'intestazione: scivolamento, urti, spazzata.
 - **Scivolamento più realistico:** al posto del rumore sintetico, il loop fornito (ricostruzione a 2 m/s, corpo tra 40 e 230 Hz), una voce per ogni pietra in movimento, con volume e altezza che seguono la velocità. Urti e spazzata restano sintetici per ora.
 - **Scivolamento meno «meccanico»:** tolta dal loop la pulsazione ritmica (circa 3 e 5,6 Hz); l'altezza non sale più con la velocità (sembrava un motore che accelera): la velocità cambia volume e brillantezza (più scuro quando la pietra rallenta), con una piccola differenza d'altezza fissa tra le pietre.
+- **Urti più realistici:** al posto del «toc» sintetico, un modello del granito ricavato dall'analisi di urti reali (clip fornite; nessun campione incluso): modi tra circa 440 e 3700 Hz con l'energia soprattutto tra 500 e 1000 Hz, smorzamento di pochi millisecondi e scatto del contatto. Gli urti forti sono più forti e più chiari, quelli lenti più scuri.
 - **Più lingue:** italiano, inglese, tedesco e francese. Il selettore in alto a destra mostra solo la bandiera; il cambio è immediato, senza ricaricare la pagina, e non perde le risposte già scelte nel riquadro dei giudizi. Alla prima apertura vale la lingua del browser; la scelta resta memorizzata.
 - I rapporti per lo sviluppatore restano in italiano qualunque sia la lingua scelta (domande, risposte, esito e numeri), così l'agente li legge come prima; i commenti dei tester restano nella loro lingua.
 

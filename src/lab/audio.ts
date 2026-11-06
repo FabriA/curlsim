@@ -8,6 +8,53 @@ const STORE_KEY = "curlsim.sound";
 
 type Ctx = AudioContext;
 
+/** Volume complessivo degli urti. */
+const IMPACT_LEVEL = 0.55;
+
+export interface ImpactModel {
+  /** Modi del granito: sinusoidi smorzate (frequenza Hz, ampiezza, costante di tempo s). */
+  partials: { freq: number; amp: number; decay: number }[];
+  /** Scatto del contatto: rumore filtrato. */
+  click: { gain: number; cutoff: number; decay: number };
+}
+
+/**
+ * Modi misurati su urti reali (analisi spettrale di clip fornite, 6 novembre 2026; nessun campione
+ * è incluso nel gioco): energia soprattutto tra 500 e 1000 Hz, picchi intorno a 440, 590, 800,
+ * 876, 1010 e 1340 Hz, decadimento rapido (circa 5–40 ms per perdere 20 dB). Rispetto alla banda
+ * 500–1000 Hz: 1–2 kHz circa −5 dB, 2–4 kHz circa −13 dB, 4–8 kHz circa −20 dB. Ampiezze relative
+ * in dB rispetto al picco più forte (876 Hz).
+ */
+const GRANITE_MODES: [number, number][] = [
+  [440, -7.4],
+  [590, -2.5],
+  [800, -2.6],
+  [876, 0],
+  [1010, -3.3],
+  [1340, -3],
+  [1740, -4],
+  [2250, -6],
+  [2900, -8],
+  [3700, -11],
+];
+
+/**
+ * Suono di un urto in funzione della forza (0–1: variazione di velocità fino a circa 2,5 m/s).
+ * Urti forti: più forti e più brillanti (più modi alti, scatto più chiaro), smorzamento più rapido.
+ * Urti deboli: più scuri, quasi solo i modi tra 500 e 900 Hz. Ogni urto varia un poco le frequenze.
+ */
+export function impactModel(strength: number, rand: () => number = Math.random): ImpactModel {
+  const s = Math.min(1, Math.max(0, strength));
+  const level = 0.15 + 0.85 * Math.pow(s, 0.8);
+  const partials = GRANITE_MODES.map(([f, db]) => {
+    const tilt = f > 1000 ? (1 - s) * -2 * Math.log2(f / 1000) : 0; // urti deboli: meno alti
+    const amp = level * Math.pow(10, (db + tilt) / 20) * (0.85 + 0.3 * rand());
+    const decay = (0.012 - 0.005 * s) * Math.pow(876 / f, 0.5) * (0.85 + 0.3 * rand());
+    return { freq: f * (0.97 + 0.06 * rand()), amp: amp * 0.4, decay };
+  });
+  return { partials, click: { gain: level * (0.5 + 0.15 * s), cutoff: 6500 + 1000 * s, decay: 0.003 + 0.002 * s } };
+}
+
 /** Volume complessivo dello scivolamento e numero massimo di pietre che suonano insieme. */
 const SLIDE_LEVEL = 0.6;
 const MAX_VOICES = 6;
@@ -194,33 +241,39 @@ export class Sound {
     this.voices.delete(id);
   }
 
-  /** Colpo secco dell'urto tra due pietre. */
+  /** Urto tra due pietre: modi del granito più lo scatto del contatto (vedi impactModel). */
   private clack(strength: number): void {
     const ctx = this.ctx!;
     const now = ctx.currentTime;
+    const m = impactModel(strength, Math.random);
+    const bus = ctx.createGain();
+    bus.gain.value = IMPACT_LEVEL;
+    bus.connect(ctx.destination);
+    for (const p of m.partials) {
+      const osc = ctx.createOscillator();
+      osc.frequency.value = p.freq;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0, now);
+      g.gain.linearRampToValueAtTime(p.amp, now + 0.0015);
+      g.gain.setTargetAtTime(0, now + 0.0015, p.decay);
+      osc.connect(g).connect(bus);
+      osc.start(now);
+      osc.stop(now + 0.0015 + p.decay * 7);
+    }
+    // Scatto del contatto: rumore brevissimo, più chiaro e più forte negli urti violenti.
     const src = ctx.createBufferSource();
     src.buffer = this.noise;
-    const band = ctx.createBiquadFilter();
-    band.type = "bandpass";
-    band.frequency.value = 1300;
-    band.Q.value = 3;
-    const g = ctx.createGain();
-    const peak = 0.2 + 0.8 * strength;
-    g.gain.setValueAtTime(peak, now);
-    g.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-    src.connect(band).connect(g).connect(ctx.destination);
-    src.start(now, Math.random() * 1.5, 0.15);
-    // Una nota breve dà il «toc» del granito.
-    const osc = ctx.createOscillator();
-    osc.type = "triangle";
-    osc.frequency.setValueAtTime(1900, now);
-    osc.frequency.exponentialRampToValueAtTime(900, now + 0.05);
-    const og = ctx.createGain();
-    og.gain.setValueAtTime(0.25 * peak, now);
-    og.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
-    osc.connect(og).connect(ctx.destination);
-    osc.start(now);
-    osc.stop(now + 0.07);
+    const hp = ctx.createBiquadFilter();
+    hp.type = "highpass";
+    hp.frequency.value = 1500;
+    const lp = ctx.createBiquadFilter();
+    lp.type = "lowpass";
+    lp.frequency.value = m.click.cutoff;
+    const cg = ctx.createGain();
+    cg.gain.setValueAtTime(m.click.gain, now);
+    cg.gain.setTargetAtTime(0, now, m.click.decay);
+    src.connect(hp).connect(lp).connect(cg).connect(bus);
+    src.start(now, Math.random() * 1.5, 0.08);
   }
 
   /** Silenzio immediato: fine del tiro, tiro fermato, scheda nascosta o suoni disattivati. */
