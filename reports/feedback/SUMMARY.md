@@ -1,8 +1,8 @@
 # Segnalazioni sul realismo
 
-Aggiornato il 2026-11-06 15:25 UTC · motore 0.2.0 · messaggi elaborati: 14 · tiri valutati: 41
+Aggiornato il 2026-11-06 15:27 UTC · motore 0.2.0 · messaggi elaborati: 15 · tiri valutati: 42
 
-Tiri per impostazione (urti e forma della curva): normali, curva netta 10 · normali 25 · vivaci 6. Le statistiche sono separate per impostazione.
+Tiri per impostazione (urti e forma della curva): normali, curva netta 11 · normali 25 · vivaci 6. Le statistiche sono separate per impostazione.
 
 ## Indicazioni
 
@@ -13,7 +13,7 @@ Tiri per impostazione (urti e forma della curva): normali, curva netta 10 · nor
 
 | Esito della riesecuzione | Tiri |
 | --- | --- |
-| Identico all'hash registrato | 36 |
+| Identico all'hash registrato | 37 |
 | Diverso dall'hash registrato | 2 |
 | Registrato con un altro motore | 0 |
 | Senza replay | 3 |
@@ -49,16 +49,16 @@ Un replay diverso con lo stesso motore indica un problema di determinismo: va co
 | La curva di questo colpo è… | normali, curva netta | 4 | Giusto 4 | — |
 | Dopo l'urto, la direzione della pietra tirata è… | normali, curva netta | 4 | Credibile 4 | — |
 | Dopo l'urto, la distanza percorsa dalla pietra tirata è… | normali, curva netta | 4 | Giusto 4 | — |
+| La pietra colpita è avanzata… | normali, curva netta | 4 | Giusto 2 · Troppo 2 | — |
+| Dopo l'urto, la pietra tirata è rimasta… | normali, curva netta | 4 | Giusto 4 | — |
 | Dopo l'urto, la direzione della pietra tirata è… | normali | 3 | Credibile 3 | — |
 | Dopo l'urto, la distanza percorsa dalla pietra tirata è… | normali | 3 | Giusto 2 · Non so 1 | — |
-| La pietra colpita è avanzata… | normali, curva netta | 3 | Giusto 2 · Troppo 1 | — |
-| Dopo l'urto, la pietra tirata è rimasta… | normali, curva netta | 3 | Giusto 3 | — |
 | Il punto in cui la pietra inizia a curvare davvero arriva… | normali, curva netta | 3 | Giusto 3 | — |
 | La chiusura finale della curva è… | normali, curva netta | 3 | Giusto 3 | — |
 | Con un hog-to-hog di # s, per questo peso il tiro è risultato… | normali, curva netta | 3 | Giusto 3 | — |
 | Con rotazione alta (# giri) la curva è quasi uguale a quella normale. Secondo te la pietra… | normali | 2 | Dovrebbe curvare di più 2 | — |
-| Spazzata per # s: l'allungamento del tiro è… | normali, curva netta | 1 | Giusto 1 | — |
-| La riduzione della curva dovuta alla spazzata è… | normali, curva netta | 1 | Giusto 1 | — |
+| Spazzata per # s: l'allungamento del tiro è… | normali, curva netta | 2 | Giusto 2 | — |
+| La riduzione della curva dovuta alla spazzata è… | normali, curva netta | 2 | Giusto 2 | — |
 
 ## Commenti
 
@@ -67,6 +67,7 @@ Un replay diverso con lo stesso motore indica un problema di determinismo: va co
 
 ## Messaggi
 
+- [2026-11-06 · web-7c11eb87fa0a](messages/2026-11-06-web-7c11eb87fa0a.md) · 1 tiri · versione 0.3.1
 - [2026-11-06 · web-4498ee7849c5](messages/2026-11-06-web-4498ee7849c5.md) · 6 tiri · versione 0.3.1
 - [2026-11-06 · web-45c5b3081e56](messages/2026-11-06-web-45c5b3081e56.md) · 1 tiri · versione 0.3.1
 - [2026-11-06 · web-050fa52aada2](messages/2026-11-06-web-050fa52aada2.md) · 3 tiri · versione 0.3.1
