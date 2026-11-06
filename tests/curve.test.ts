@@ -56,3 +56,21 @@ describe("forma della curva del draw", () => {
     expect(high - low).toBeGreaterThan(0.2);
   });
 });
+
+describe("arresto con la curva netta", () => {
+  // Caso reale: dopo una bocciata le pietre colpite restavano a 0,1 mm/s per sempre, il tiro non finiva.
+  it("dopo una bocciata in una casa affollata tutte le pietre si fermano", () => {
+    const stones = [
+      { id: 0, team: 0 as const, x: -0.525, y: 16.062 }, { id: 1, team: 1 as const, x: -0.0465, y: 17.941 },
+      { id: 2, team: 0 as const, x: 0.0358, y: 18.175 }, { id: 3, team: 1 as const, x: -0.1729, y: 17.723 },
+      { id: 4, team: 0 as const, x: 0.1327, y: 18.95 },
+    ];
+    for (const c of ["late", "later"] as const) {
+      const p = forCurve(c);
+      const sp = 3.2288, ang = -0.01844;
+      const sim = new Sim(p, stones, 0, { x: 0, y: RELEASE_Y, vx: sp * Math.sin(ang), vy: sp * Math.cos(ang), w: -spinRateForTurns(p, 4.19) });
+      while (!sim.done) sim.step(false);
+      expect(sim.metrics.ticks).toBeLessThan(30_000);
+    }
+  });
+});

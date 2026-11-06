@@ -19,6 +19,7 @@ Fase 3. Motore fisico invariato (0.2.0).
   - «Finale molto netto»: deriva come 1/v^1,5; il 59% della curva negli ultimi 3 m, arresto circa 20 cm più corto a parità di peso.
   - La curva totale del draw di riferimento resta quella del profilo in tutte e tre. Con le due nuove, a parità di peso, 1,5 / 3,5 / 6,5 giri danno circa 1,07 / 1,20 / 1,40 m.
   - I replay registrati prima si riproducono identici (senza i nuovi valori vale la classica). Il rapporto riporta «· curva …» e l'agente separa le statistiche anche per forma della curva, ricavandola dal replay.
+- **Correzione (curva netta):** dopo una bocciata alcune pietre colpite restavano in moto a circa 0,1 mm/s senza fermarsi mai: la deriva laterale a velocità quasi nulla superava l'attrito. Il tiro non si chiudeva (niente giudizio, niente registro) fino al limite di 90 s. Ora la deriva non supera il 90% dell'attrito e l'aumento di curva per i giri ha un tetto; draw e curva classica non cambiano. Verificato su 9.000 tiri casuali con tutte le combinazioni di urti e curva.
 - I rapporti per lo sviluppatore restano in italiano qualunque sia la lingua scelta (domande, risposte, esito e numeri), così l'agente li legge come prima; i commenti dei tester restano nella loro lingua.
 
 ## 0.3.1 — 5 novembre 2026

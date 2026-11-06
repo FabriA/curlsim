@@ -34,6 +34,8 @@ export interface World {
 }
 
 const STOP_SPEED = 1e-4;
+/** Rapporto massimo rotazione/velocità (rispetto al draw normale) che aumenta la curva: i draw arrivano a circa 1,9. */
+const SPIN_RATIO_MAX = 2.5;
 
 export function createStone(id: number, team: Team, x: number, y: number): Stone {
   return { id, team, x, y, vx: 0, vy: 0, w: 0, moving: false, inPlay: true, hitStone: false };
@@ -60,7 +62,10 @@ function advanceStone(s: Stone, p: IceParams, swept: boolean): void {
   else if (spinFactor < -1) spinFactor = -1;
   // Curva «finale più netto»: più rotazione per metro, più curva (il «grab» con molti giri).
   if (p.spinGain) {
-    const ratio = (s.w < 0 ? -s.w : s.w) / v / (p.spinRef ?? 1);
+    // Limitato: dopo un urto una pietra quasi ferma può girare molto (rapporto giri/metro enorme),
+    // e senza limite la deriva supererebbe l'attrito e la pietra non si fermerebbe più.
+    let ratio = (s.w < 0 ? -s.w : s.w) / v / (p.spinRef ?? 1);
+    if (ratio > SPIN_RATIO_MAX) ratio = SPIN_RATIO_MAX;
     let k = 1 + p.spinGain * (ratio - 1);
     if (k < 0.5) k = 0.5;
     spinFactor = spinFactor * k;
@@ -68,7 +73,14 @@ function advanceStone(s: Stone, p: IceParams, swept: boolean): void {
   // La deriva cresce quando la pietra rallenta: come 1/√v (classica), 1/v o 1/v^1,5 (finale più netto).
   const vv = v + p.curlV0;
   const slow = p.curlExp === 1 ? vv : p.curlExp === 1.5 ? vv * Math.sqrt(vv) : Math.sqrt(vv);
-  const aLat = (spinFactor * p.curlK * (swept ? p.sweepCurl : 1)) / slow;
+  let aLat = (spinFactor * p.curlK * (swept ? p.sweepCurl : 1)) / slow;
+  // La deriva nasce dall'attrito e non può superarlo: con la curva «netta» a velocità quasi nulla
+  // la spinta laterale ricostruirebbe a ogni tick la velocità persa e la pietra non si fermerebbe
+  // mai. Con 0,9 la velocità di equilibrio resta sotto la soglia di arresto. Con la curva classica
+  // la deriva resta sempre molto sotto l'attrito: nessun effetto.
+  const aLatMax = 0.9 * aLong;
+  if (aLat > aLatMax) aLat = aLatMax;
+  else if (aLat < -aLatMax) aLat = -aLatMax;
 
   // Accelerazione = −aLong·u + aLat·(perpendicolare destra di u), con perp destra = (uy, −ux).
   s.vx += (-aLong * ux + aLat * uy) * DT;
