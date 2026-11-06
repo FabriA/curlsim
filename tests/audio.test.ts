@@ -3,12 +3,13 @@ import { slideMapping } from "../src/lab/audio";
 import { SLIDE_WAV_BASE64 } from "../src/lab/sounds/slide";
 
 describe("suono dello scivolamento", () => {
-  it("volume e altezza crescono con la velocità; silenzio sotto 0,015 m/s", () => {
+  it("il volume cresce con la velocità e tace sotto 0,015 m/s; la pietra lenta è più scura", () => {
     expect(slideMapping(0.01).gain).toBe(0);
-    expect(slideMapping(2)).toEqual({ rate: 1, gain: 1 });
+    expect(slideMapping(2).gain).toBe(1);
     expect(slideMapping(1).gain).toBeLessThan(1);
-    expect(slideMapping(0.5).rate).toBeGreaterThan(0.87);
-    expect(slideMapping(10).rate).toBeCloseTo(1.18, 9); // velocità limitata a 5 m/s
+    expect(slideMapping(0.3).cutoff).toBeLessThan(slideMapping(2).cutoff);
+    expect(slideMapping(10).cutoff).toBe(1200);
+    expect(slideMapping(0).cutoff).toBe(300);
   });
 
   it("il loop incluso è un WAV mono a 16 kHz di 16 s", () => {

@@ -14,14 +14,19 @@ const MAX_VOICES = 6;
 
 interface Voice {
   src: AudioBufferSourceNode;
+  filter: BiquadFilterNode;
   gain: GainNode;
 }
 
-/** Altezza e volume dello scivolamento in funzione della velocità (m/s), dal modello del file fornito. */
-export function slideMapping(v: number): { rate: number; gain: number } {
+/**
+ * Volume e brillantezza dello scivolamento in funzione della velocità (m/s). L'altezza non cambia:
+ * un rombo che sale di tono con la velocità ricorda un motore che accelera, non una pietra.
+ * Il volume segue il modello del file fornito; la pietra lenta è più scura (meno alti).
+ */
+export function slideMapping(v: number): { gain: number; cutoff: number } {
   const s = Number.isFinite(v) ? Math.min(5, Math.max(0, v)) : 0;
   const r = s / 2;
-  return { rate: Math.min(1.2, Math.max(0.88, 0.88 + 0.12 * r)), gain: s <= 0.015 ? 0 : Math.pow(Math.min(r, 2), 0.8) };
+  return { gain: s <= 0.015 ? 0 : Math.pow(Math.min(r, 2), 0.8), cutoff: 300 + 900 * Math.min(1, s / 2.5) };
 }
 
 async function decode(ctx: Ctx, data: ArrayBuffer): Promise<AudioBuffer> {
@@ -163,16 +168,21 @@ export class Sound {
         const src = ctx.createBufferSource();
         src.buffer = buf;
         src.loop = true;
+        // Ogni pietra ha una piccola differenza d'altezza fissa e parte da un punto diverso del loop.
+        src.playbackRate.value = 0.97 + Math.random() * 0.06;
+        const filter = ctx.createBiquadFilter();
+        filter.type = "lowpass";
+        filter.Q.value = 0.6;
+        filter.frequency.value = slideMapping(s.speed).cutoff;
         const gain = ctx.createGain();
         gain.gain.value = 0;
-        src.connect(gain).connect(this.slideBus);
-        // Ogni pietra parte da un punto diverso del loop, così due pietre non suonano identiche.
+        src.connect(filter).connect(gain).connect(this.slideBus);
         src.start(now, Math.random() * buf.duration);
-        v = { src, gain };
+        v = { src, filter, gain };
         this.voices.set(s.id, v);
       }
       const m = slideMapping(s.speed);
-      v.src.playbackRate.setTargetAtTime(m.rate, now, 0.06);
+      v.filter.frequency.setTargetAtTime(m.cutoff, now, 0.1);
       v.gain.gain.setTargetAtTime(m.gain * scale, now, 0.04);
     }
   }
