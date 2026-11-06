@@ -360,8 +360,9 @@ function frame(now: number): void {
   state.tickDebt -= ticks;
   const schedule = state.playback?.sweep;
   let impact = 0;
+  let board = 0;
   for (let i = 0; i < ticks && !sim.done; i++) {
-    const before = sim.world.stones.map((s) => [s.vx, s.vy]);
+    const before = sim.world.stones.map((s) => [s.vx, s.vy, s.inPlay ? 1 : 0]);
     let on: boolean;
     if (schedule) {
       const tk = sim.world.tick;
@@ -369,9 +370,12 @@ function frame(now: number): void {
     } else on = sweepInput();
     sim.step(on);
     // Urto: un salto di velocità in un solo passo (l'attrito del ghiaccio toglie molto meno).
+    // Una pietra che esce dal gioco (sponda, linea laterale, fondo) si ferma di colpo: è un altro suono.
     sim.world.stones.forEach((s, k) => {
       const b = before[k];
-      if (b) impact = Math.max(impact, Math.hypot(s.vx - b[0], s.vy - b[1]));
+      if (!b) return;
+      if (b[2] && !s.inPlay) board = Math.max(board, Math.hypot(b[0], b[1]));
+      else if (s.inPlay) impact = Math.max(impact, Math.hypot(s.vx - b[0], s.vy - b[1]));
     });
     for (const s of sim.world.stones) {
       if (s.moving) state.angles.set(s.id, (state.angles.get(s.id) ?? 0) + s.w * DT);
@@ -381,7 +385,7 @@ function frame(now: number): void {
   $("sweep-btn").classList.toggle("active", sweepActive);
   $("fab-sweep").classList.toggle("active", sweepActive);
   const moving = sim.done ? [] : sim.world.stones.filter((s) => s.moving && s.inPlay).map((s) => ({ id: s.id, speed: Math.hypot(s.vx, s.vy) }));
-  sound.update(moving, sweepActive, impact);
+  sound.update(moving, sweepActive, impact, board);
   if (sim.done) sound.silence();
   if (sim.metrics.hogToHog !== null) state.splits.hh = sim.metrics.hogToHog;
   if (sim.done) state.splits.running = false;

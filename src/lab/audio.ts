@@ -206,7 +206,7 @@ export class Sound {
    * (m/s), `sweeping` se si sta spazzando, `impact` la variazione di velocità dell'urto più forte
    * nel fotogramma (0 se nessuno).
    */
-  update(stones: { id: number; speed: number }[], sweeping: boolean, impact: number): void {
+  update(stones: { id: number; speed: number }[], sweeping: boolean, impact: number, board = 0): void {
     const ctx = this.ctx;
     if (!ctx || !this.enabled || ctx.state !== "running") return;
     const now = ctx.currentTime;
@@ -216,6 +216,8 @@ export class Sound {
       this.lastImpact = now;
       this.clack(Math.min(1, impact / 2.5));
     }
+    // Pietra che esce dal gioco contro la sponda: il suono sintetico, diverso da un urto tra pietre.
+    if (board > 0.05) this.boardHit(Math.min(1, board / 2.5));
   }
 
   /** Colpi di scopa programmati fino a 0,2 s avanti: ogni scopa ha il suo ritmo, con un po' di irregolarità. */
@@ -282,6 +284,34 @@ export class Sound {
     v.gain.gain.setTargetAtTime(0, ctx.currentTime, 0.04);
     v.src.stop(ctx.currentTime + 0.3);
     this.voices.delete(id);
+  }
+
+  /** Pietra che esce dal gioco contro la sponda o in fondo: colpo sintetico, più secco e legnoso. */
+  private boardHit(strength: number): void {
+    const ctx = this.ctx!;
+    const now = ctx.currentTime;
+    const src = ctx.createBufferSource();
+    src.buffer = this.noise;
+    const band = ctx.createBiquadFilter();
+    band.type = "bandpass";
+    band.frequency.value = 1300;
+    band.Q.value = 3;
+    const g = ctx.createGain();
+    const peak = 0.2 + 0.8 * strength;
+    g.gain.setValueAtTime(peak, now);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+    src.connect(band).connect(g).connect(ctx.destination);
+    src.start(now, Math.random() * 1.5, 0.15);
+    const osc = ctx.createOscillator();
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(1900, now);
+    osc.frequency.exponentialRampToValueAtTime(900, now + 0.05);
+    const og = ctx.createGain();
+    og.gain.setValueAtTime(0.25 * peak, now);
+    og.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+    osc.connect(og).connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.07);
   }
 
   /** Urto con il campione registrato: volume e brillantezza dalla forza, altezza un poco variata. */
