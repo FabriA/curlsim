@@ -1,8 +1,8 @@
 # Segnalazioni sul realismo
 
-Aggiornato il 2026-11-06 15:13 UTC · motore 0.2.0 · messaggi elaborati: 12 · tiri valutati: 34
+Aggiornato il 2026-11-06 15:14 UTC · motore 0.2.0 · messaggi elaborati: 13 · tiri valutati: 35
 
-Tiri per impostazione (urti e forma della curva): normali, curva netta 3 · normali 25 · vivaci 6. Le statistiche sono separate per impostazione.
+Tiri per impostazione (urti e forma della curva): normali, curva netta 4 · normali 25 · vivaci 6. Le statistiche sono separate per impostazione.
 
 ## Indicazioni
 
@@ -13,7 +13,7 @@ Tiri per impostazione (urti e forma della curva): normali, curva netta 3 · norm
 
 | Esito della riesecuzione | Tiri |
 | --- | --- |
-| Identico all'hash registrato | 29 |
+| Identico all'hash registrato | 30 |
 | Diverso dall'hash registrato | 2 |
 | Registrato con un altro motore | 0 |
 | Senza replay | 3 |
@@ -27,6 +27,7 @@ Un replay diverso con lo stesso motore indica un problema di determinismo: va co
 | normali | pieno | 2 | 0,38 | 0 | 1 | 0 | 1 |
 | normali | mezza pietra | 1 | 2,39 | 0 | 1 | 0 | 0 |
 | normali, curva netta | pieno | 1 | 0,75 | 0 | 1 | 0 | 0 |
+| normali, curva netta | mezza pietra | 1 | 2,38 | 0 | 1 | 0 | 0 |
 | vivaci | pieno | 2 | 0,09 | 0 | 0 | 2 | 0 |
 
 ## Risposte per domanda
@@ -47,9 +48,9 @@ Un replay diverso con lo stesso motore indica un problema di determinismo: va co
 | Dopo l'urto, la direzione della pietra tirata è… | normali | 3 | Credibile 3 | — |
 | Dopo l'urto, la distanza percorsa dalla pietra tirata è… | normali | 3 | Giusto 2 · Non so 1 | — |
 | Con rotazione alta (# giri) la curva è quasi uguale a quella normale. Secondo te la pietra… | normali | 2 | Dovrebbe curvare di più 2 | — |
-| La curva di questo colpo è… | normali, curva netta | 1 | Giusto 1 | — |
-| Dopo l'urto, la direzione della pietra tirata è… | normali, curva netta | 1 | Credibile 1 | — |
-| Dopo l'urto, la distanza percorsa dalla pietra tirata è… | normali, curva netta | 1 | Giusto 1 | — |
+| La curva di questo colpo è… | normali, curva netta | 2 | Giusto 2 | — |
+| Dopo l'urto, la direzione della pietra tirata è… | normali, curva netta | 2 | Credibile 2 | — |
+| Dopo l'urto, la distanza percorsa dalla pietra tirata è… | normali, curva netta | 2 | Giusto 2 | — |
 | La pietra colpita è avanzata… | normali, curva netta | 1 | Giusto 1 | — |
 | Dopo l'urto, la pietra tirata è rimasta… | normali, curva netta | 1 | Giusto 1 | — |
 | Il punto in cui la pietra inizia a curvare davvero arriva… | normali, curva netta | 1 | Giusto 1 | — |
@@ -63,6 +64,7 @@ Un replay diverso con lo stesso motore indica un problema di determinismo: va co
 
 ## Messaggi
 
+- [2026-11-06 · web-45c5b3081e56](messages/2026-11-06-web-45c5b3081e56.md) · 1 tiri · versione 0.3.1
 - [2026-11-06 · web-050fa52aada2](messages/2026-11-06-web-050fa52aada2.md) · 3 tiri · versione 0.3.1
 - [2026-11-06 · web-335aee2bffac](messages/2026-11-06-web-335aee2bffac.md) · 4 tiri · versione 0.3.1
 - [2026-11-06 · web-0847a31fca12](messages/2026-11-06-web-0847a31fca12.md) · 2 tiri · versione 0.3.1
