@@ -98,7 +98,7 @@ body {
 
 .top {
   position: relative;
-  padding-right: 52px;
+  padding-right: 100px;
   display: flex;
   flex-wrap: wrap;
   align-items: end;
@@ -474,8 +474,11 @@ body:not([data-mode="end"]) .end-only { display: none !important; }
 .primary-plain { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
 
 /* Selettore della lingua: solo la bandiera, in alto a destra. */
-.lang { position: absolute; top: 4px; right: 0; z-index: 30; }
-.lang-btn, .lang-item {
+.top-tools { position: absolute; top: 4px; right: 0; z-index: 30; display: flex; gap: 6px; }
+.lang { position: relative; }
+.tool-btn { color: var(--fg); }
+.tool-btn svg { box-shadow: none; }
+.tool-btn, .lang-btn, .lang-item {
   display: grid;
   place-items: center;
   padding: 5px;
@@ -501,3 +504,21 @@ body:not([data-mode="end"]) .end-only { display: none !important; }
   box-shadow: 0 6px 18px rgb(0 0 0 / 0.18);
 }
 .lang-item[aria-current="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+
+/* Tabellone della partita: una colonna per end, il totale in fondo. */
+.board-wrap { overflow-x: auto; margin: 8px 0 4px; }
+.match-board { border-collapse: collapse; width: 100%; font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: var(--step--1); }
+.match-board th, .match-board td { border: 1px solid var(--rule); padding: 4px 6px; text-align: center; min-width: 1.9em; }
+.match-board tr:first-child th { color: var(--muted); font-weight: 500; }
+.match-board th[scope="row"] { text-align: left; white-space: nowrap; font-family: var(--font-body, inherit); font-weight: 600; }
+.match-board .now { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.match-board td.scored { font-weight: 700; color: var(--fg); }
+.match-board td.had-hammer { box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--accent) 55%, transparent); }
+.match-board td.total { font-weight: 700; }
+
+/* Abilità dei giocatori: per squadra, ruolo · tiro · spazzata. */
+.team-skills { border: 1px solid var(--rule); border-radius: 6px; padding: 8px 10px 10px; margin: 0 0 10px; }
+.team-skills legend { padding: 0 4px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+.skill-grid { display: grid; grid-template-columns: auto 1fr 1fr; gap: 6px 8px; align-items: center; margin-top: 6px; }
+.skill-grid .skill-head { font-size: var(--step--1); color: var(--muted); }
+.skill-grid select { width: 100%; min-width: 0; }

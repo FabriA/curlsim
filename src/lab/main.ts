@@ -13,7 +13,8 @@ import { HOUSE_VIEW, Renderer, SHEET_VIEW, type DrawStone, type Scene } from "./
 import { PlacementTool } from "./placement-tool";
 import { FeedbackPanel } from "./feedback";
 import { mountLanguagePicker } from "./lang-picker";
-import { EndMode } from "./end-mode";
+import { Sound } from "./audio";
+import { EndMode, isMatchFile, type MatchFile } from "./end-mode";
 import { deliveryPosition, planDelivery, type Delivery } from "../core/delivery";
 import { makeScenario, validateScenario, type PlacementCheck } from "../core/placement";
 import type { Team } from "../core/physics";
@@ -248,7 +249,7 @@ function syncSweepLevel(): void {
 /** Parametri del tiro: ghiaccio calibrato più l'effetto della spazzata del livello scelto. */
 function shotParams(): IceParams {
   const ice = state.params!;
-  return { ...ice, sweepFriction: sweepFrictionForGain(ice, sweepGain()), ...COLLISIONS[collisionLevel()] };
+  return { ...ice, sweepFriction: sweepFrictionForGain(ice, activeSweepGain()), ...COLLISIONS[collisionLevel()] };
 }
 
 /** Etichetta degli urti per il rapporto (sempre in italiano), ricavata dai valori usati davvero nel tiro. */
@@ -272,7 +273,12 @@ function updateSweepReadout(): void {
 
 // ——— Tiro ———
 function skill(): Skill {
-  return skillFromPrecision(readPrecision());
+  return skillFromPrecision(endMode?.active ? endMode.shooter().precision : readPrecision());
+}
+
+/** Guadagno della spazzata del tiro: in partita è quello dei due sweeper di turno. */
+function activeSweepGain(): number {
+  return endMode?.active ? endMode.shooter().sweepGain : sweepGain();
 }
 
 function throwStone(): void {
@@ -288,7 +294,7 @@ function throwStone(): void {
     return;
   }
   const n = state.log.length + 1;
-  const seed = Number($<HTMLInputElement>("seed").value) + n;
+  const seed = endMode?.active ? endMode.seedFor() : Number($<HTMLInputElement>("seed").value) + n;
   const team = endMode?.active ? endMode.team() : nextTeam();
   const replay = makeReplay(
     shotParams(),
@@ -310,6 +316,7 @@ function startSim(replay: Replay, playback: Replay | null): void {
   state.splits = { bh: null, hh: null, running: true };
   state.tickDebt = 0;
   state.lastFrame = performance.now();
+  sound.unlock();
   setStatus(playback ? tt("status.replaying", { n: state.log.length }) : tt("status.moving"));
   setBusy(true);
   // Su telefono porta in vista la casa, dove si vede la pietra arrivare.
@@ -336,6 +343,8 @@ function frame(now: number): void {
   if (dl) {
     dl.t += simTime;
     if (dl.t < dl.plan.backToHog) {
+      const rel = (state.playback ?? state.pendingReplay)?.release;
+      sound.update(rel ? Math.hypot(rel.vx, rel.vy) : 0, false, 0);
       updateSplits();
       draw();
       requestAnimationFrame(frame);
@@ -349,13 +358,20 @@ function frame(now: number): void {
   const ticks = Math.floor(state.tickDebt);
   state.tickDebt -= ticks;
   const schedule = state.playback?.sweep;
+  let impact = 0;
   for (let i = 0; i < ticks && !sim.done; i++) {
+    const before = sim.world.stones.map((s) => [s.vx, s.vy]);
     let on: boolean;
     if (schedule) {
       const tk = sim.world.tick;
       on = schedule.some(([a, b]) => tk >= a && tk < b);
     } else on = sweepInput();
     sim.step(on);
+    // Urto: un salto di velocità in un solo passo (l'attrito del ghiaccio toglie molto meno).
+    sim.world.stones.forEach((s, k) => {
+      const b = before[k];
+      if (b) impact = Math.max(impact, Math.hypot(s.vx - b[0], s.vy - b[1]));
+    });
     for (const s of sim.world.stones) {
       if (s.moving) state.angles.set(s.id, (state.angles.get(s.id) ?? 0) + s.w * DT);
     }
@@ -363,6 +379,9 @@ function frame(now: number): void {
   const sweepActive = !!(sim && !sim.done && sim.canSweep() && (schedule ? playbackSweeping(sim) : sweepInput()));
   $("sweep-btn").classList.toggle("active", sweepActive);
   $("fab-sweep").classList.toggle("active", sweepActive);
+  const fastest = sim.world.stones.reduce((m, s) => (s.moving ? Math.max(m, Math.hypot(s.vx, s.vy)) : m), 0);
+  sound.update(sim.done ? 0 : fastest, sweepActive, impact);
+  if (sim.done) sound.silence();
   if (sim.metrics.hogToHog !== null) state.splits.hh = sim.metrics.hogToHog;
   if (sim.done) state.splits.running = false;
   updateSplits();
@@ -463,12 +482,12 @@ function finishShot(): void {
     outcome: outcomeText(outcome, "it"),
     hash,
     ice: readTargets(),
-    sweepGain: sweepGain(),
+    sweepGain: activeSweepGain(),
     collisions: collisionsLabel(replay.params),
     impact: m.impact,
     replay,
   });
-  if (endMode?.active) endMode.afterShot(replay.stonesBefore, sim.placements(), replay.team);
+  if (endMode?.active) endMode.afterShot(replay.stonesBefore, sim.placements(), replay.team, replay);
   draw();
 }
 
@@ -482,6 +501,7 @@ function repeatLast(): void {
 /** Ferma il tiro (o la riproduzione) in corso e riporta le pietre alla posizione di partenza. */
 function stopShot(): void {
   if (!state.sim) return;
+  sound.silence();
   state.sim = null;
   state.delivery = null;
   state.pendingReplay = null;
@@ -707,6 +727,17 @@ function loadReplayText(text: string): void {
     return;
   }
   if (state.sim) return;
+  if (isMatchFile(r)) {
+    $<HTMLInputElement>("mode-end").checked = true;
+    setMode("end", r);
+    setReplayMsg("");
+    return;
+  }
+  // Un replay o una posizione si rivedono nel laboratorio: la partita resta salvata e si riprende tornando alla modalità partita.
+  if (endMode?.active) {
+    $<HTMLInputElement>("mode-lab").checked = true;
+    setMode("lab");
+  }
   if ((r as { format?: string }).format === "curling-scenario") {
     if (!validateScenario(r)) {
       setReplayMsg(tt("scenario.invalid"));
@@ -766,13 +797,13 @@ function setBusy(b: boolean): void {
   endMode?.render();
 }
 
-function setMode(mode: "lab" | "end"): void {
+function setMode(mode: "lab" | "end", file?: MatchFile): void {
   if (state.sim) return;
   if (mode === "end") {
     $<HTMLInputElement>("tool-broom").checked = true;
     setTool("broom");
     state.lastTraces = [];
-    endMode!.enter();
+    endMode!.enter(file);
   } else {
     endMode!.exit();
     setStatus(tt("status.ready", { n: state.stones.length }));
@@ -885,16 +916,40 @@ function relocalize(): void {
   renderLog();
   if (state.splits.bh !== null || state.sim) updateSplits();
   endMode?.render();
+  endMode?.renderSkills();
   langPicker?.refresh();
+  renderSoundButton();
   draw();
 }
 
 let langPicker: { refresh(): void } | null = null;
+const sound = new Sound();
+
+const SPEAKER_ON = '<svg viewBox="0 0 24 24" width="26" height="18" aria-hidden="true" focusable="false"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+const SPEAKER_OFF = '<svg viewBox="0 0 24 24" width="26" height="18" aria-hidden="true" focusable="false"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16.5 9.5l5 5M21.5 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+
+/** Pulsante dei suoni nell'intestazione: icona dell'altoparlante, testo per lettori di schermo. */
+function renderSoundButton(): void {
+  const btn = $("sound-btn");
+  btn.innerHTML = sound.enabled ? SPEAKER_ON : SPEAKER_OFF;
+  const label = t(sound.enabled ? "sound.on" : "sound.off");
+  btn.setAttribute("aria-label", label);
+  btn.title = label;
+  btn.setAttribute("aria-pressed", String(sound.enabled));
+}
 
 function init(): void {
   setLanguage(initialLanguage());
   applyTexts();
   langPicker = mountLanguagePicker($("lang"));
+  renderSoundButton();
+  $("sound-btn").addEventListener("click", () => {
+    sound.setEnabled(!sound.enabled);
+    renderSoundButton();
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) sound.silence();
+  });
   onLanguageChange(relocalize);
   houseR = new Renderer($<HTMLCanvasElement>("house"), HOUSE_VIEW, true);
   sheetR = new Renderer($<HTMLCanvasElement>("sheet"), SHEET_VIEW, false);

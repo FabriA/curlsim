@@ -74,18 +74,33 @@ Le stringhe dell'interfaccia sono in `src/i18n/` (`it.ts` è il riferimento; `en
 controllate dai test insieme ai segnaposto). Per aggiungere una lingua: un nuovo file con tutte le chiavi, la voce in `LANGS`
 e la bandiera in `src/lab/lang-picker.ts`. Il rapporto dei giudizi resta sempre in italiano.
 
-## End a due (fase 2)
+## Partita (fasi 2 e 3)
 
-Nell'intestazione si passa da **Laboratorio** a **End a due**: due giocatori sullo stesso dispositivo giocano un end
-standard da 16 pietre con il preset «World Curling 2026 — adattamento v1».
+Nell'intestazione si passa da **Laboratorio** a **Partita**: due giocatori sullo stesso dispositivo giocano una partita
+di più end (8 per impostazione, da 1 a 12) con il preset «World Curling 2026 — adattamento v1».
 
-- Tira per prima la squadra senza l'ultima pietra; il tabellone mostra pietre rimaste, hammer e turno.
+- **Tabellone:** una colonna per end, gli extra end con «X», il totale; una barra indica chi aveva l'ultima pietra.
+  Sopra, per l'end in corso: pietre rimaste, hammer, turno e giocatore al tiro.
 - **Free guard zone (R6):** prima della sesta pietra una guardia avversaria nella FGZ non può essere portata fuori gioco;
   altrimenti la pietra tirata è rimossa e le pietre spostate tornano al loro posto. La zona è evidenziata sulla pista.
 - **No-tick (R7):** una guardia avversaria nella FGZ che tocca la linea centrale non può esserne spostata; la squadra
   che subisce sceglie se lasciare le pietre o ripristinarle. Se la guardia esce dal gioco vale la FGZ.
-- **Punteggio (R12):** a fine end le pietre che contano sono segnate e **Nuovo end** assegna l'ultima pietra secondo R5 a.
-- **Annulla l'ultimo tiro** riporta le pietre a prima della consegna. FGZ, pietre protette e no-tick sono configurabili.
+- **Punteggio (R12) e hammer (R5 a):** a fine end le pietre che contano sono segnate; **End successivo** assegna
+  l'ultima pietra alla squadra che non ha segnato (dopo un end nullo resta). Dopo l'ultimo end la partita finisce,
+  salvo parità con l'extra end attivo; un extra end nullo ne richiede un altro. Senza extra end la parità è un pareggio.
+- **Giocatori:** pietre 1–2 lead, 3–4 second, 5–6 third, 7–8 skip. Ognuno ha un livello di tiro (precisione) e di
+  spazzata, oppure un solo livello per tutta la squadra. Spazzano i due compagni che non tengono la scopa: lo skip la
+  tiene per lead, second e third, il third per lo skip; il guadagno della spazzata è la media dei due.
+- **Salvataggio:** la partita si salva da sola nel browser a ogni tiro e riprende tornando alla modalità Partita.
+  **Copia partita** produce un file `curling-match` con le regole, gli end giocati, l'end in corso e i replay di tutti
+  i tiri; si riapre con **Carica replay o posizione** (anche per riprodurre un errore).
+- **Annulla l'ultimo tiro** riporta le pietre a prima della consegna; un tiro interrotto con **Ferma** non conta.
+
+## Suoni
+
+Il pulsante con l'altoparlante nell'intestazione attiva o disattiva i suoni (sintetizzati con la Web Audio API, senza
+file): scivolamento della pietra, urti tra pietre, spazzata. La scelta resta memorizzata; i suoni non influiscono
+sulla simulazione.
 
 ## Posizionamento delle pietre
 
