@@ -1,8 +1,8 @@
 # Segnalazioni sul realismo
 
-Aggiornato il 2026-11-06 10:09 UTC · motore 0.2.0 · messaggi elaborati: 11 · tiri valutati: 31
+Aggiornato il 2026-11-06 15:13 UTC · motore 0.2.0 · messaggi elaborati: 12 · tiri valutati: 34
 
-Tiri per impostazione degli urti: normali 25 · vivaci 6. Le statistiche sono separate per impostazione.
+Tiri per impostazione (urti e forma della curva): normali, curva netta 3 · normali 25 · vivaci 6. Le statistiche sono separate per impostazione.
 
 ## Indicazioni
 
@@ -13,22 +13,25 @@ Tiri per impostazione degli urti: normali 25 · vivaci 6. Le statistiche sono se
 
 | Esito della riesecuzione | Tiri |
 | --- | --- |
-| Identico all'hash registrato | 28 |
-| Diverso dall'hash registrato | 0 |
+| Identico all'hash registrato | 29 |
+| Diverso dall'hash registrato | 2 |
 | Registrato con un altro motore | 0 |
 | Senza replay | 3 |
 
+Un replay diverso con lo stesso motore indica un problema di determinismo: va controllato per primo.
+
 ## Rotolamento dopo l'urto, per pienezza del colpo
 
-| Urti | Colpo | Tiri | Tirata dopo l'urto, media (m) | Troppo corto | Giusto | Troppo lungo | Non so |
+| Impostazione | Colpo | Tiri | Tirata dopo l'urto, media (m) | Troppo corto | Giusto | Troppo lungo | Non so |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | normali | pieno | 2 | 0,38 | 0 | 1 | 0 | 1 |
 | normali | mezza pietra | 1 | 2,39 | 0 | 1 | 0 | 0 |
+| normali, curva netta | pieno | 1 | 0,75 | 0 | 1 | 0 | 0 |
 | vivaci | pieno | 2 | 0,09 | 0 | 0 | 2 | 0 |
 
 ## Risposte per domanda
 
-| Domanda | Urti | Risposte | Distribuzione | Segnale |
+| Domanda | Impostazione | Risposte | Distribuzione | Segnale |
 | --- | --- | --- | --- | --- |
 | La pietra colpita è avanzata… | normali | 12 | Troppo 7 · Giusto 5 | — |
 | Dopo l'urto, la pietra tirata è rimasta… | normali | 12 | Giusto 12 | — |
@@ -44,6 +47,14 @@ Tiri per impostazione degli urti: normali 25 · vivaci 6. Le statistiche sono se
 | Dopo l'urto, la direzione della pietra tirata è… | normali | 3 | Credibile 3 | — |
 | Dopo l'urto, la distanza percorsa dalla pietra tirata è… | normali | 3 | Giusto 2 · Non so 1 | — |
 | Con rotazione alta (# giri) la curva è quasi uguale a quella normale. Secondo te la pietra… | normali | 2 | Dovrebbe curvare di più 2 | — |
+| La curva di questo colpo è… | normali, curva netta | 1 | Giusto 1 | — |
+| Dopo l'urto, la direzione della pietra tirata è… | normali, curva netta | 1 | Credibile 1 | — |
+| Dopo l'urto, la distanza percorsa dalla pietra tirata è… | normali, curva netta | 1 | Giusto 1 | — |
+| La pietra colpita è avanzata… | normali, curva netta | 1 | Giusto 1 | — |
+| Dopo l'urto, la pietra tirata è rimasta… | normali, curva netta | 1 | Giusto 1 | — |
+| Il punto in cui la pietra inizia a curvare davvero arriva… | normali, curva netta | 1 | Giusto 1 | — |
+| La chiusura finale della curva è… | normali, curva netta | 1 | Giusto 1 | — |
+| Con un hog-to-hog di # s, per questo peso il tiro è risultato… | normali, curva netta | 1 | Giusto 1 | — |
 
 ## Commenti
 
@@ -52,6 +63,7 @@ Tiri per impostazione degli urti: normali 25 · vivaci 6. Le statistiche sono se
 
 ## Messaggi
 
+- [2026-11-06 · web-050fa52aada2](messages/2026-11-06-web-050fa52aada2.md) · 3 tiri · versione 0.3.1
 - [2026-11-06 · web-335aee2bffac](messages/2026-11-06-web-335aee2bffac.md) · 4 tiri · versione 0.3.1
 - [2026-11-06 · web-0847a31fca12](messages/2026-11-06-web-0847a31fca12.md) · 2 tiri · versione 0.3.1
 - [2026-11-06 · web-78ed81f2bfae](messages/2026-11-06-web-78ed81f2bfae.md) · 3 tiri · versione 0.3.1
