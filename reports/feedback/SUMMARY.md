@@ -1,20 +1,20 @@
 # Segnalazioni sul realismo
 
-Aggiornato il 2026-11-06 18:46 UTC · motore 0.2.0 · messaggi elaborati: 19 · tiri valutati: 59
+Aggiornato il 2026-11-06 18:50 UTC · motore 0.2.0 · messaggi elaborati: 20 · tiri valutati: 60
 
-Tiri per impostazione (urti e forma della curva): normali, curva molto netta 5 · normali, curva netta 23 · normali 25 · vivaci 6. Le statistiche sono separate per impostazione.
+Tiri per impostazione (urti e forma della curva): normali, curva molto netta 5 · normali, curva netta 24 · normali 25 · vivaci 6. Le statistiche sono separate per impostazione.
 
 ## Indicazioni
 
 - [urti normali] Chiusura finale troppo dolce: accentuare la deriva a bassa velocità (ridurre curlV0) (71% delle risposte).
-- [urti normali, curva netta] Nei raise la pietra colpita avanza troppo: ridurre la restituzione degli urti con la pietra tirata (71% delle risposte).
+- [urti normali, curva netta] Nei raise la pietra colpita avanza troppo: ridurre la restituzione degli urti con la pietra tirata (75% delle risposte).
 - [urti vivaci] «Dopo l'urto, la distanza percorsa dalla pietra tirata è…»: 80% di 5 risposte dice «Troppo lungo». Da verificare rivedendo i replay di quei tiri.
 
 ## Replay
 
 | Esito della riesecuzione | Tiri |
 | --- | --- |
-| Identico all'hash registrato | 54 |
+| Identico all'hash registrato | 55 |
 | Diverso dall'hash registrato | 2 |
 | Registrato con un altro motore | 0 |
 | Senza replay | 3 |
@@ -39,24 +39,24 @@ Un replay diverso con lo stesso motore indica un problema di determinismo: va co
 | --- | --- | --- | --- | --- |
 | La pietra colpita è avanzata… | normali | 12 | Troppo 7 · Giusto 5 | — |
 | Dopo l'urto, la pietra tirata è rimasta… | normali | 12 | Giusto 12 | — |
+| La pietra colpita è avanzata… | normali, curva netta | 9 | Troppo 6 · Giusto 2 · Non so 1 | Troppo (75%) |
+| Dopo l'urto, la pietra tirata è rimasta… | normali, curva netta | 9 | Giusto 8 · Troppo avanti 1 | — |
 | Spazzata per # s: l'allungamento del tiro è… | normali | 8 | Giusto 6 · Troppo poco 1 · Non so 1 | — |
 | La riduzione della curva dovuta alla spazzata è… | normali | 8 | Giusto 5 · Troppo poco 2 · Non so 1 | — |
 | La curva di questo colpo è… | normali, curva netta | 8 | Giusto 8 | — |
 | Dopo l'urto, la direzione della pietra tirata è… | normali, curva netta | 8 | Credibile 7 · Dovrebbe andare più dritta 1 | — |
 | Dopo l'urto, la distanza percorsa dalla pietra tirata è… | normali, curva netta | 8 | Giusto 8 | — |
-| La pietra colpita è avanzata… | normali, curva netta | 8 | Troppo 5 · Giusto 2 · Non so 1 | Troppo (71%) |
-| Dopo l'urto, la pietra tirata è rimasta… | normali, curva netta | 8 | Giusto 7 · Troppo avanti 1 | — |
 | Il punto in cui la pietra inizia a curvare davvero arriva… | normali | 7 | Troppo presto 4 · Giusto 3 | — |
 | La chiusura finale della curva è… | normali | 7 | Troppo dolce 5 · Giusto 2 | Troppo dolce (71%) |
 | Con un hog-to-hog di # s, per questo peso il tiro è risultato… | normali | 7 | Giusto 7 | — |
 | Il punto in cui la pietra inizia a curvare davvero arriva… | normali, curva netta | 6 | Giusto 6 | — |
 | La chiusura finale della curva è… | normali, curva netta | 6 | Giusto 6 | — |
+| Spazzata per # s: l'allungamento del tiro è… | normali, curva netta | 6 | Giusto 6 | — |
+| La riduzione della curva dovuta alla spazzata è… | normali, curva netta | 6 | Giusto 6 | — |
 | La curva di questo colpo è… | vivaci | 5 | Giusto 5 | — |
 | Dopo l'urto, la direzione della pietra tirata è… | vivaci | 5 | Credibile 5 | — |
 | Dopo l'urto, la distanza percorsa dalla pietra tirata è… | vivaci | 5 | Troppo lungo 4 · Giusto 1 | Troppo lungo (80%) |
 | Con un hog-to-hog di # s, per questo peso il tiro è risultato… | normali, curva netta | 5 | Giusto 5 | — |
-| Spazzata per # s: l'allungamento del tiro è… | normali, curva netta | 5 | Giusto 5 | — |
-| La riduzione della curva dovuta alla spazzata è… | normali, curva netta | 5 | Giusto 5 | — |
 | La curva di questo colpo è… | normali | 4 | Giusto 4 | — |
 | Dopo l'urto, la direzione della pietra tirata è… | normali | 3 | Credibile 3 | — |
 | Dopo l'urto, la distanza percorsa dalla pietra tirata è… | normali | 3 | Giusto 2 · Non so 1 | — |
@@ -79,6 +79,7 @@ Un replay diverso con lo stesso motore indica un problema di determinismo: va co
 
 ## Messaggi
 
+- [2026-11-06 · web-7de07978b3ee](messages/2026-11-06-web-7de07978b3ee.md) · 1 tiri · versione 0.3.1
 - [2026-11-06 · web-93146648e1ef](messages/2026-11-06-web-93146648e1ef.md) · 1 tiri · versione 0.3.1
 - [2026-11-06 · web-9d4381c95b7b](messages/2026-11-06-web-9d4381c95b7b.md) · 3 tiri · versione 0.3.1
 - [2026-11-06 · web-3992721ea628](messages/2026-11-06-web-3992721ea628.md) · 3 tiri · versione 0.3.1
