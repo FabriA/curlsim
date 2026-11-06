@@ -1,16 +1,42 @@
 /**
- * Suoni sintetizzati con la Web Audio API, senza file audio: il rombo della pietra che scivola
- * (più forte quanto più è veloce), il colpo secco degli urti (più forte quanto più è violento)
- * e il fruscio ritmato della spazzata. Disattivabili; la scelta resta memorizzata nel browser.
- * I suoni non toccano la simulazione: sono solo una resa dell'interfaccia.
+ * Suoni con la Web Audio API. Lo scivolamento usa un loop registrato (ricostruzione a 2 m/s,
+ * assets/audio/LEGGIMI.md): una voce per ogni pietra in movimento, con volume e altezza che
+ * seguono la velocità. Urti e spazzata sono ancora sintetizzati. Disattivabili; la scelta resta
+ * memorizzata nel browser. I suoni non toccano la simulazione: sono solo una resa dell'interfaccia.
  */
 const STORE_KEY = "curlsim.sound";
 
 type Ctx = AudioContext;
 
+/** Volume complessivo dello scivolamento e numero massimo di pietre che suonano insieme. */
+const SLIDE_LEVEL = 0.6;
+const MAX_VOICES = 6;
+
+interface Voice {
+  src: AudioBufferSourceNode;
+  gain: GainNode;
+}
+
+/** Altezza e volume dello scivolamento in funzione della velocità (m/s), dal modello del file fornito. */
+export function slideMapping(v: number): { rate: number; gain: number } {
+  const s = Number.isFinite(v) ? Math.min(5, Math.max(0, v)) : 0;
+  const r = s / 2;
+  return { rate: Math.min(1.2, Math.max(0.88, 0.88 + 0.12 * r)), gain: s <= 0.015 ? 0 : Math.pow(Math.min(r, 2), 0.8) };
+}
+
+async function decode(ctx: Ctx, data: ArrayBuffer): Promise<AudioBuffer> {
+  // Safari meno recenti conoscono solo la forma con le callback.
+  return new Promise((resolve, reject) => {
+    const p = ctx.decodeAudioData(data, resolve, reject);
+    if (p && typeof (p as Promise<AudioBuffer>).then === "function") (p as Promise<AudioBuffer>).then(resolve, reject);
+  });
+}
+
 export class Sound {
   private ctx: Ctx | null = null;
-  private slideGain: GainNode | null = null;
+  private slideBuffer: AudioBuffer | null = null;
+  private slideBus: GainNode | null = null;
+  private voices = new Map<number, Voice>();
   private sweepGain: GainNode | null = null;
   private noise: AudioBuffer | null = null;
   private lastImpact = 0;
@@ -64,22 +90,11 @@ export class Sound {
     }
     this.noise = buf;
 
-    // Scivolamento: rumore filtrato in basso, il granito sul ghiaccio.
-    const slide = ctx.createBufferSource();
-    slide.buffer = buf;
-    slide.loop = true;
-    const low = ctx.createBiquadFilter();
-    low.type = "lowpass";
-    low.frequency.value = 320;
-    low.Q.value = 0.7;
-    const body = ctx.createBiquadFilter();
-    body.type = "peaking";
-    body.frequency.value = 120;
-    body.gain.value = 8;
-    this.slideGain = ctx.createGain();
-    this.slideGain.gain.value = 0;
-    slide.connect(low).connect(body).connect(this.slideGain).connect(ctx.destination);
-    slide.start();
+    // Scivolamento: il loop registrato si carica a parte, solo quando serve.
+    this.slideBus = ctx.createGain();
+    this.slideBus.gain.value = SLIDE_LEVEL;
+    this.slideBus.connect(ctx.destination);
+    void this.loadSlide(ctx);
 
     // Spazzata: rumore acuto, modulato a circa 5 colpi al secondo.
     const sweep = ctx.createBufferSource();
@@ -104,22 +119,69 @@ export class Sound {
     sweep.start();
   }
 
+  private async loadSlide(ctx: Ctx): Promise<void> {
+    try {
+      const { SLIDE_WAV_BASE64 } = await import("./sounds/slide");
+      const bin = atob(SLIDE_WAV_BASE64);
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      this.slideBuffer = await decode(ctx, bytes.buffer);
+    } catch {
+      this.slideBuffer = null; // senza il loop la pietra scivola in silenzio
+    }
+  }
+
   /**
-   * Aggiornamento a ogni fotogramma: `speed` è la velocità della pietra più veloce (m/s),
-   * `sweeping` se si sta spazzando, `impact` la variazione di velocità dell'urto più forte
+   * Aggiornamento a ogni fotogramma: `stones` sono le pietre in movimento con la loro velocità
+   * (m/s), `sweeping` se si sta spazzando, `impact` la variazione di velocità dell'urto più forte
    * nel fotogramma (0 se nessuno).
    */
-  update(speed: number, sweeping: boolean, impact: number): void {
+  update(stones: { id: number; speed: number }[], sweeping: boolean, impact: number): void {
     const ctx = this.ctx;
     if (!ctx || !this.enabled || ctx.state !== "running") return;
     const now = ctx.currentTime;
-    const slide = Math.min(1, speed / 3) * 0.35;
-    this.slideGain!.gain.setTargetAtTime(slide, now, 0.05);
+    this.updateSlide(ctx, stones);
     this.sweepGain!.gain.setTargetAtTime(sweeping ? 0.12 : 0, now, 0.03);
     if (impact > 0.05 && now - this.lastImpact > 0.03) {
       this.lastImpact = now;
       this.clack(Math.min(1, impact / 2.5));
     }
+  }
+
+  /** Una voce per pietra; più pietre insieme abbassano il volume di ognuna per non saturare. */
+  private updateSlide(ctx: Ctx, stones: { id: number; speed: number }[]): void {
+    const buf = this.slideBuffer;
+    if (!buf || !this.slideBus) return;
+    const now = ctx.currentTime;
+    const active = stones.filter((s) => s.speed > 0.015).sort((a, b) => b.speed - a.speed).slice(0, MAX_VOICES);
+    const scale = 1 / Math.sqrt(Math.max(1, active.length));
+    const keep = new Set(active.map((s) => s.id));
+    for (const [id, v] of this.voices) if (!keep.has(id)) this.release(id, v);
+    for (const s of active) {
+      let v = this.voices.get(s.id);
+      if (!v) {
+        const src = ctx.createBufferSource();
+        src.buffer = buf;
+        src.loop = true;
+        const gain = ctx.createGain();
+        gain.gain.value = 0;
+        src.connect(gain).connect(this.slideBus);
+        // Ogni pietra parte da un punto diverso del loop, così due pietre non suonano identiche.
+        src.start(now, Math.random() * buf.duration);
+        v = { src, gain };
+        this.voices.set(s.id, v);
+      }
+      const m = slideMapping(s.speed);
+      v.src.playbackRate.setTargetAtTime(m.rate, now, 0.06);
+      v.gain.gain.setTargetAtTime(m.gain * scale, now, 0.04);
+    }
+  }
+
+  private release(id: number, v: Voice): void {
+    const ctx = this.ctx!;
+    v.gain.gain.setTargetAtTime(0, ctx.currentTime, 0.04);
+    v.src.stop(ctx.currentTime + 0.3);
+    this.voices.delete(id);
   }
 
   /** Colpo secco dell'urto tra due pietre. */
@@ -156,7 +218,7 @@ export class Sound {
     const ctx = this.ctx;
     if (!ctx) return;
     const now = ctx.currentTime;
-    this.slideGain?.gain.setTargetAtTime(0, now, 0.02);
+    for (const [id, v] of this.voices) this.release(id, v);
     this.sweepGain?.gain.setTargetAtTime(0, now, 0.02);
   }
 }

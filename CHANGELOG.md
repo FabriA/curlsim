@@ -8,6 +8,7 @@ Fase 3. Motore fisico invariato (0.2.0).
 - **Giocatori:** livello di tiro e di spazzata per lead, second, third e skip, oppure uno per tutta la squadra. Il giocatore al tiro dipende dal numero della pietra; spazzano i due compagni che non tengono la scopa.
 - **Salvataggio della partita:** automatico nel browser a ogni tiro (la partita riprende da dove era rimasta) e «Copia partita», un file con regole, end giocati, end in corso e replay di tutti i tiri, da riaprire con «Carica replay o posizione».
 - **Suoni** disattivabili dall'intestazione: scivolamento, urti, spazzata.
+- **Scivolamento più realistico:** al posto del rumore sintetico, il loop fornito (ricostruzione a 2 m/s, corpo tra 40 e 230 Hz), una voce per ogni pietra in movimento, con volume e altezza che seguono la velocità. Urti e spazzata restano sintetici per ora.
 - **Più lingue:** italiano, inglese, tedesco e francese. Il selettore in alto a destra mostra solo la bandiera; il cambio è immediato, senza ricaricare la pagina, e non perde le risposte già scelte nel riquadro dei giudizi. Alla prima apertura vale la lingua del browser; la scelta resta memorizzata.
 - I rapporti per lo sviluppatore restano in italiano qualunque sia la lingua scelta (domande, risposte, esito e numeri), così l'agente li legge come prima; i commenti dei tester restano nella loro lingua.
 

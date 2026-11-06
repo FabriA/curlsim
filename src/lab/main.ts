@@ -343,8 +343,9 @@ function frame(now: number): void {
   if (dl) {
     dl.t += simTime;
     if (dl.t < dl.plan.backToHog) {
-      const rel = (state.playback ?? state.pendingReplay)?.release;
-      sound.update(rel ? Math.hypot(rel.vx, rel.vy) : 0, false, 0);
+      // In consegna: la pietra scivola alla velocità della traiettoria di consegna.
+      const speed = Math.max(0, dl.plan.speedAtBack - dl.plan.decel * Math.min(dl.t, dl.plan.backToHog));
+      sound.update([{ id: state.sim?.world.deliveredId ?? -1, speed }], false, 0);
       updateSplits();
       draw();
       requestAnimationFrame(frame);
@@ -379,8 +380,8 @@ function frame(now: number): void {
   const sweepActive = !!(sim && !sim.done && sim.canSweep() && (schedule ? playbackSweeping(sim) : sweepInput()));
   $("sweep-btn").classList.toggle("active", sweepActive);
   $("fab-sweep").classList.toggle("active", sweepActive);
-  const fastest = sim.world.stones.reduce((m, s) => (s.moving ? Math.max(m, Math.hypot(s.vx, s.vy)) : m), 0);
-  sound.update(sim.done ? 0 : fastest, sweepActive, impact);
+  const moving = sim.done ? [] : sim.world.stones.filter((s) => s.moving && s.inPlay).map((s) => ({ id: s.id, speed: Math.hypot(s.vx, s.vy) }));
+  sound.update(moving, sweepActive, impact);
   if (sim.done) sound.silence();
   if (sim.metrics.hogToHog !== null) state.splits.hh = sim.metrics.hogToHog;
   if (sim.done) state.splits.running = false;
