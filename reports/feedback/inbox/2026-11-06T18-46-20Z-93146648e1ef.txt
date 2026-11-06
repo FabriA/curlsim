@@ -1,0 +1,13 @@
+CurlSim – giudizi sui tiri (versione 0.3.1, motore 0.2.0)
+Tiri valutati: 1
+
+Tiro 101 · Raise o freeze · pietra rimossa · 2,35 m/s · rotazione 3,5 giri · spazzata 1,2 s · ghiaccio hog-to-hog 14,5 s, curva 1,8 m · sweeper 2,15 m · urti normali · curva netta · esito: Fuori: back line · pietre rimosse: 1 · hash 5cc739d6
+  Urto: colpo pieno al 21% · velocità all'urto 1,16 m/s · tirata dopo l'urto 1,45 m (fuori gioco) · colpita 1,47 m (fuori gioco)
+  - La pietra colpita è avanzata… → Troppo
+  - Dopo l'urto, la pietra tirata è rimasta… → Troppo avanti
+  - Spazzata per 1,2 s: l'allungamento del tiro è… → Giusto
+  - La riduzione della curva dovuta alla spazzata è… → Giusto
+
+Replay (da incollare in «Carica replay o posizione» per rivedere il tiro identico):
+
+Tiro 101: {"format":"curling-replay","version":1,"engineVersion":"0.2.0","params":{"curlV0":0.1,"spinRatioRef":0.1,"sweepFriction":0.9202966120205112,"sweepCurl":0.85,"restitution":0.95,"stoneFriction":0.2,"inertiaK":0.5,"curlExp":1,"spinGain":0.2,"mu":0.007411714778538704,"curlK":0.011468071746639908,"spinRef":0.7785304129687596,"restitutionSecondary":0.97},"team":1,"stonesBefore":[{"id":0,"team":0,"x":0.42111203276371145,"y":18.308399915530178},{"id":2,"team":0,"x":0.19194382185676576,"y":14.524463856701741}],"shot":{"broomX":1.0444109232799779,"broomY":18.070675187457283,"speed":2.35,"spin":-1,"spinRate":1.5778677450762377,"spinTurns":3.5},"skill":{"lineSigma":0.35,"lineSigmaTakeout":0.18,"stopNoise":{"p":[0.3,0.63,0.07],"sigma":[0.35,1.05,3.5000000000000004]}},"seed":353617,"release":{"x":0.3266806798990412,"y":-10.872,"vx":0.07562641205455606,"vy":2.3522663572385922,"w":-1.5778677450762377},"sweep":[[2462,2958],[8770,9283],[10241,10377],[11984,12036]],"result":{"hash":"5cc739d6","ticks":18868,"sweepTime":1.2,"swept":[[2.46,2.96],[8.77,9.28],[10.24,10.38],[11.98,12.04]]}}
