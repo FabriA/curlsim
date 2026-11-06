@@ -1,20 +1,20 @@
 # Segnalazioni sul realismo
 
-Aggiornato il 2026-11-06 15:47 UTC · motore 0.2.0 · messaggi elaborati: 18 · tiri valutati: 58
+Aggiornato il 2026-11-06 18:46 UTC · motore 0.2.0 · messaggi elaborati: 19 · tiri valutati: 59
 
-Tiri per impostazione (urti e forma della curva): normali, curva molto netta 5 · normali, curva netta 22 · normali 25 · vivaci 6. Le statistiche sono separate per impostazione.
+Tiri per impostazione (urti e forma della curva): normali, curva molto netta 5 · normali, curva netta 23 · normali 25 · vivaci 6. Le statistiche sono separate per impostazione.
 
 ## Indicazioni
 
 - [urti normali] Chiusura finale troppo dolce: accentuare la deriva a bassa velocità (ridurre curlV0) (71% delle risposte).
-- [urti normali, curva netta] Nei raise la pietra colpita avanza troppo: ridurre la restituzione degli urti con la pietra tirata (67% delle risposte).
+- [urti normali, curva netta] Nei raise la pietra colpita avanza troppo: ridurre la restituzione degli urti con la pietra tirata (71% delle risposte).
 - [urti vivaci] «Dopo l'urto, la distanza percorsa dalla pietra tirata è…»: 80% di 5 risposte dice «Troppo lungo». Da verificare rivedendo i replay di quei tiri.
 
 ## Replay
 
 | Esito della riesecuzione | Tiri |
 | --- | --- |
-| Identico all'hash registrato | 53 |
+| Identico all'hash registrato | 54 |
 | Diverso dall'hash registrato | 2 |
 | Registrato con un altro motore | 0 |
 | Senza replay | 3 |
@@ -44,20 +44,20 @@ Un replay diverso con lo stesso motore indica un problema di determinismo: va co
 | La curva di questo colpo è… | normali, curva netta | 8 | Giusto 8 | — |
 | Dopo l'urto, la direzione della pietra tirata è… | normali, curva netta | 8 | Credibile 7 · Dovrebbe andare più dritta 1 | — |
 | Dopo l'urto, la distanza percorsa dalla pietra tirata è… | normali, curva netta | 8 | Giusto 8 | — |
+| La pietra colpita è avanzata… | normali, curva netta | 8 | Troppo 5 · Giusto 2 · Non so 1 | Troppo (71%) |
+| Dopo l'urto, la pietra tirata è rimasta… | normali, curva netta | 8 | Giusto 7 · Troppo avanti 1 | — |
 | Il punto in cui la pietra inizia a curvare davvero arriva… | normali | 7 | Troppo presto 4 · Giusto 3 | — |
 | La chiusura finale della curva è… | normali | 7 | Troppo dolce 5 · Giusto 2 | Troppo dolce (71%) |
 | Con un hog-to-hog di # s, per questo peso il tiro è risultato… | normali | 7 | Giusto 7 | — |
-| La pietra colpita è avanzata… | normali, curva netta | 7 | Troppo 4 · Giusto 2 · Non so 1 | Troppo (67%) |
-| Dopo l'urto, la pietra tirata è rimasta… | normali, curva netta | 7 | Giusto 7 | — |
 | Il punto in cui la pietra inizia a curvare davvero arriva… | normali, curva netta | 6 | Giusto 6 | — |
 | La chiusura finale della curva è… | normali, curva netta | 6 | Giusto 6 | — |
 | La curva di questo colpo è… | vivaci | 5 | Giusto 5 | — |
 | Dopo l'urto, la direzione della pietra tirata è… | vivaci | 5 | Credibile 5 | — |
 | Dopo l'urto, la distanza percorsa dalla pietra tirata è… | vivaci | 5 | Troppo lungo 4 · Giusto 1 | Troppo lungo (80%) |
 | Con un hog-to-hog di # s, per questo peso il tiro è risultato… | normali, curva netta | 5 | Giusto 5 | — |
+| Spazzata per # s: l'allungamento del tiro è… | normali, curva netta | 5 | Giusto 5 | — |
+| La riduzione della curva dovuta alla spazzata è… | normali, curva netta | 5 | Giusto 5 | — |
 | La curva di questo colpo è… | normali | 4 | Giusto 4 | — |
-| Spazzata per # s: l'allungamento del tiro è… | normali, curva netta | 4 | Giusto 4 | — |
-| La riduzione della curva dovuta alla spazzata è… | normali, curva netta | 4 | Giusto 4 | — |
 | Dopo l'urto, la direzione della pietra tirata è… | normali | 3 | Credibile 3 | — |
 | Dopo l'urto, la distanza percorsa dalla pietra tirata è… | normali | 3 | Giusto 2 · Non so 1 | — |
 | Con rotazione alta (# giri) la curva è quasi uguale a quella normale. Secondo te la pietra… | normali | 2 | Dovrebbe curvare di più 2 | — |
@@ -79,6 +79,7 @@ Un replay diverso con lo stesso motore indica un problema di determinismo: va co
 
 ## Messaggi
 
+- [2026-11-06 · web-93146648e1ef](messages/2026-11-06-web-93146648e1ef.md) · 1 tiri · versione 0.3.1
 - [2026-11-06 · web-9d4381c95b7b](messages/2026-11-06-web-9d4381c95b7b.md) · 3 tiri · versione 0.3.1
 - [2026-11-06 · web-3992721ea628](messages/2026-11-06-web-3992721ea628.md) · 3 tiri · versione 0.3.1
 - [2026-11-06 · web-850eacdf3f36](messages/2026-11-06-web-850eacdf3f36.md) · 10 tiri · versione 0.3.1
