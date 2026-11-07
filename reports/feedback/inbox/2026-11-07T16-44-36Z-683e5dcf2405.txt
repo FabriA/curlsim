@@ -1,0 +1,29 @@
+CurlSim – giudizi sui tiri (versione 0.3.1, motore 0.2.0)
+Tiri valutati: 3
+
+Tiro 111 · Raise o freeze · pietra rimossa · 2,21 m/s · rotazione 3,5 giri · spazzata 1,0 s · ghiaccio hog-to-hog 14,5 s, curva 1,8 m · sweeper 2,15 m · urti normali · curva netta · esito: In gioco · pietre rimosse: 1 · hash 12be85f8
+  Urto: colpo pieno al 51% · velocità all'urto 0,93 m/s · tirata dopo l'urto 0,93 m · colpita 2,32 m (fuori gioco)
+  - La pietra colpita è avanzata… → Troppo
+  - Dopo l'urto, la pietra tirata è rimasta… → Troppo avanti
+  - Spazzata per 1,0 s: l'allungamento del tiro è… → Non so
+  - La riduzione della curva dovuta alla spazzata è… → Non so
+
+Tiro 7 · Raise o freeze · pietra rimossa · 2,47 m/s · rotazione 3,5 giri · spazzata 0,2 s · ghiaccio hog-to-hog 14,5 s, curva 1,2 m · sweeper 2,15 m · urti normali · curva netta · esito: In gioco · pietre rimosse: 1 · hash 31620991
+  Urto: colpo pieno al 7% · velocità all'urto 1,41 m/s · tirata dopo l'urto 1,86 m · colpita 1,44 m
+  - La pietra colpita è avanzata… → Troppo
+  - Dopo l'urto, la pietra tirata è rimasta… → Giusto
+
+Tiro 13 · Raise o freeze · 2,04 m/s · rotazione 3,5 giri · spazzata 5,9 s · ghiaccio hog-to-hog 14,5 s, curva 1,2 m · sweeper 2,15 m · urti normali · curva netta · esito: In gioco · hash 74abd732
+  Urto: colpo pieno al 97% · velocità all'urto 0,74 m/s · tirata dopo l'urto 0,01 m · colpita 0,96 m
+  - La pietra colpita è avanzata… → Troppo
+  - Dopo l'urto, la pietra tirata è rimasta… → Giusto
+  - Spazzata per 5,9 s: l'allungamento del tiro è… → Giusto
+  - La riduzione della curva dovuta alla spazzata è… → Giusto
+
+Replay (da incollare in «Carica replay o posizione» per rivedere il tiro identico):
+
+Tiro 111: {"format":"curling-replay","version":1,"engineVersion":"0.2.0","params":{"curlV0":0.1,"spinRatioRef":0.1,"sweepFriction":0.9202966120205112,"sweepCurl":0.85,"restitution":0.95,"stoneFriction":0.2,"inertiaK":0.5,"curlExp":1,"spinGain":0.2,"mu":0.007411714778538704,"curlK":0.011468071746639908,"spinRef":0.7785304129687596,"restitutionSecondary":0.97},"team":1,"stonesBefore":[{"id":6,"team":0,"x":-0.16491615058250672,"y":18.496806772556802},{"id":7,"team":0,"x":0.7089269418565519,"y":12.227886356706263},{"id":8,"team":1,"x":1.1503761639658476,"y":18.111696654677043},{"id":9,"team":0,"x":0.5074688596314857,"y":17.15506208468134}],"shot":{"broomX":-0.15066487405720208,"broomY":17.312655459320116,"speed":2.22,"spin":1,"spinRate":1.5778677450762377,"spinTurns":3.5},"skill":{"lineSigma":0.35,"lineSigmaTakeout":0.18,"stopNoise":{"p":[0.3,0.63,0.07],"sigma":[0.35,1.05,3.5000000000000004]}},"seed":353627,"release":{"x":-0.03284070075927628,"y":-10.872,"vx":-0.007148947596572496,"vy":2.211903365315824,"w":1.5778677450762377},"sweep":[[15249,16292]],"result":{"hash":"12be85f8","ticks":26210,"sweepTime":1.04,"swept":[[15.25,16.29]]}}
+
+Tiro 7: {"format":"curling-replay","version":1,"engineVersion":"0.2.0","params":{"curlV0":0.1,"spinRatioRef":0.1,"sweepFriction":0.9202966120205112,"sweepCurl":0.85,"restitution":0.95,"stoneFriction":0.2,"inertiaK":0.5,"curlExp":1,"spinGain":0.2,"mu":0.007411714778538704,"curlK":0.007505171583034098,"spinRef":0.7785304129687596,"restitutionSecondary":0.97},"team":0,"stonesBefore":[{"id":1,"team":1,"x":-0.8575220908610194,"y":18.358063112528836},{"id":2,"team":1,"x":-0.08750842077431699,"y":17.533051425025747},{"id":3,"team":0,"x":1.457481851404947,"y":18.273224344902005},{"id":4,"team":1,"x":-0.018271319924444814,"y":15.902389605052658}],"shot":{"broomX":0.3205364814069549,"broomY":16.80421463303717,"speed":2.47,"spin":-1,"spinRate":1.5778677450762377,"spinTurns":3.5},"skill":{"lineSigma":0.35,"lineSigmaTakeout":0.18,"stopNoise":{"p":[0.3,0.63,0.07],"sigma":[0.35,1.05,3.5000000000000004]}},"seed":54002,"release":{"x":-0.015305150484215334,"y":-10.872,"vx":-0.0037179293499614067,"vy":2.468311576806731,"w":-1.5778677450762377},"sweep":[[9450,9689]],"result":{"hash":"31620991","ticks":21376,"sweepTime":0.24,"swept":[[9.45,9.69]]}}
+
+Tiro 13: {"format":"curling-replay","version":1,"engineVersion":"0.2.0","params":{"curlV0":0.1,"spinRatioRef":0.1,"sweepFriction":0.9202966120205112,"sweepCurl":0.85,"restitution":0.95,"stoneFriction":0.2,"inertiaK":0.5,"curlExp":1,"spinGain":0.2,"mu":0.007411714778538704,"curlK":0.007505171583034098,"spinRef":0.7785304129687596,"restitutionSecondary":0.97},"team":0,"stonesBefore":[{"id":2,"team":1,"x":1.1747958373216878,"y":18.21687027506781},{"id":3,"team":0,"x":1.6726217685566458,"y":18.35868121130838},{"id":4,"team":1,"x":-0.018271319924444814,"y":15.902389605052658},{"id":5,"team":0,"x":0.16144694595839365,"y":19.1793630007741},{"id":7,"team":0,"x":1.8395033749704497,"y":17.40793103709662},{"id":8,"team":1,"x":0.057687032896609085,"y":14.692436984631005}],"shot":{"broomX":1.2697680932845747,"broomY":17.298997579269745,"speed":2.05,"spin":-1,"spinRate":1.5778677450762377,"spinTurns":3.5},"skill":{"lineSigma":0.35,"lineSigmaTakeout":0.18,"stopNoise":{"p":[0.3,0.63,0.07],"sigma":[0.35,1.05,3.5000000000000004]}},"seed":54008,"release":{"x":0.18642917893649022,"y":-10.872,"vx":0.03745047057861322,"vy":2.0411731345924307,"w":-1.5778677450762377},"sweep":[[13016,21649]],"result":{"hash":"74abd732","ticks":28036,"sweepTime":5.89,"swept":[[13.02,18.9]]}}
