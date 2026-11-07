@@ -50,10 +50,15 @@ tests/           calibrazione, plausibilità, urti, regole, determinismo
 ## Modello fisico v1
 
 - **Decelerazione:** attrito costante `μ·g`; `μ` si ricava in forma chiusa dal tempo hog-to-hog di un draw al tee.
-- **Curl:** accelerazione laterale `K / √(v + v₀)` verso destra per rotazione oraria, più forte a bassa velocità;
-  quasi indipendente dall'intensità della rotazione. `K` si calibra per bisezione sulla curva di un draw.
+- **Curl (dal motore 0.3.0):** accelerazione laterale `K · A(giri) / (v + v₀)^n(giri)` verso destra per rotazione oraria,
+  più forte a bassa velocità. Forma `n` e quantità `A` dipendono dai giri (tabella `SPIN_CURVE`): fino a 2 giri la pietra
+  curva subito e di più (n 0,5, +25%), con 3–5 giri ha il finale netto (n 1, curva del profilo), con 10 giri va dritta
+  più a lungo e chiude più forte (n 1,5, +25%), lo spinner con 25 giri curva quasi tutto nel finale (+50%). La deriva
+  non supera il 90% dell'attrito, così ogni pietra si ferma e la curva massima ha un tetto (circa 2,2 m). `K` si calibra
+  per bisezione sulla curva di un draw con 3,5 giri. I replay dei motori precedenti (curva `K / √(v + v₀)`, oppure
+  le curve «netta» e «molto netta») si riproducono come prima.
 - **Linea di tiro:** parte dalla staffa (hack) all'estremità di consegna e passa per la scopa dello skip; il moto libero inizia quando la pietra raggiunge la hog line di consegna.
-- **Rotazione:** decresce in proporzione alla velocità. Tre livelli, espressi in giri su un draw dal rilascio all'arresto: bassa (1–2, predefinito 1,5), normale (3–4, predefinito 3,5), alta (5–8, predefinito 6,5); oppure un numero di giri a scelta.
+- **Rotazione:** decresce in proporzione alla velocità. Quattro livelli, espressi in giri su un draw dal rilascio all'arresto: bassa (1–2, predefinito 1,5), normale (3–4, predefinito 3,5), alta (5–8, predefinito 6,5), spinner (25); oppure un numero di giri a scelta, fino a 80.
 - **Spazzata:** riduce attrito e curl della pietra spazzata. L'effetto dipende dal livello degli sweeper, espresso
   come metri guadagnati spazzando una guardia a 1,9 m/s dal rilascio all'arresto: principianti 1,0–1,7 m
   (predefinito 1,35), club 1,8–2,5 m (2,15), élite 2,6–3,1 m (2,85), oppure un valore a scelta. Il fattore d'attrito
@@ -64,7 +69,8 @@ tests/           calibrazione, plausibilità, urti, regole, determinismo
   peso 30 cm, valori di Brunner), club (20/10 cm, 60 cm), principiante (35/18 cm, 105 cm), oppure valori a scelta.
   spazza solo chi tira, solo la pietra appena consegnata, solo davanti alla tee line.
 - **Urti:** impulso normale con restituzione e impulso tangenziale con attrito di Coulomb tra le pietre
-  (scambio di rotazione); più passate per le catene.
+  (scambio di rotazione); più passate per le catene. Con «Normali, urti lenti smorzati» (predefiniti) la restituzione
+  vale 0,55 fino a 0,4 m/s di velocità relativa e sale in modo lineare fino a quella normale (0,95 / 0,97) a 1,1 m/s.
 
 I valori sono approssimazioni su valori tipici di gioco, da validare con misure su ghiaccio.
 

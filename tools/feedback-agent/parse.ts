@@ -143,7 +143,7 @@ function parseShotLine(n: number, rest: string): ParsedShot {
     ice: { hogToHog: num(field(/hog-to-hog\s+(\d+(?:,\d+)?)\s+s/)), curl: num(field(/curva\s+(\d+(?:,\d+)?)\s+m/)) },
     sweepGain: num(field(/sweeper\s+(\d+(?:,\d+)?)\s+m/)),
     collisions: field(/·\s+urti\s+(\p{L}+)/u) ?? null,
-    curve: field(/·\s+curva\s+(molto netta|netta|classica)/u) ?? null,
+    curve: field(/·\s+curva\s+(molto netta|netta|classica|dai giri)/u) ?? null,
     outcome: field(/esito:\s+(.+?)\s+·\s+hash/) ?? "",
     hash: field(/hash\s+([0-9a-f]{8})/) ?? null,
     impact: null,

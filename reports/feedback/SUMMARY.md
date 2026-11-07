@@ -1,13 +1,13 @@
 # Segnalazioni sul realismo
 
-Aggiornato il 2026-11-07 21:39 UTC · motore 0.2.0 · messaggi elaborati: 23 · tiri valutati: 67
+Aggiornato il 2026-11-07 21:39 UTC · motore 0.3.0 · messaggi elaborati: 23 · tiri valutati: 67
 
 Tiri per impostazione (urti e forma della curva): normali, curva molto netta 5 · normali, curva netta 31 · normali 25 · vivaci 6. Le statistiche sono separate per impostazione.
 
 ## Indicazioni
 
 - [urti normali] Chiusura finale troppo dolce: accentuare la deriva a bassa velocità (ridurre curlV0) (71% delle risposte).
-- [urti normali, curva netta] Nei raise la pietra colpita avanza troppo: ridurre la restituzione degli urti con la pietra tirata (85% delle risposte).
+- [urti normali, curva netta] Nei raise la pietra colpita avanza troppo: confrontare con gli urti lenti smorzati (vedi la tabella per velocità d'impatto) (85% delle risposte).
 - [urti vivaci] «Dopo l'urto, la distanza percorsa dalla pietra tirata è…»: 80% di 5 risposte dice «Troppo lungo». Da verificare rivedendo i replay di quei tiri.
 
 ## Replay
@@ -32,6 +32,15 @@ Un replay diverso con lo stesso motore indica un problema di determinismo: va co
 | normali, curva netta | mezza pietra | 3 | 2,32 | 0 | 3 | 0 | 0 |
 | normali, curva netta | sottile | 3 | 2,04 | 0 | 3 | 0 | 0 |
 | vivaci | pieno | 2 | 0,09 | 0 | 0 | 2 | 0 |
+
+## Pietra colpita nei raise, per velocità d'impatto
+
+| Urti | Velocità all'urto | Tiri | Colpita dopo l'urto, media (m) | Troppo | Giusto | Troppo poco | Non so |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| normali | sotto 0,5 m/s | 6 | 0,63 | 6 | 0 | 0 | 0 |
+| normali | 0,5–0,8 m/s | 7 | 1,61 | 7 | 0 | 0 | 0 |
+| normali | 0,8–1,2 m/s | 9 | 3,06 | 3 | 5 | 0 | 1 |
+| normali | sopra 1,2 m/s | 5 | 1,69 | 2 | 3 | 0 | 0 |
 
 ## Risposte per domanda
 
@@ -105,3 +114,4 @@ Un replay diverso con lo stesso motore indica un problema di determinismo: va co
 - [2026-11-05 · web-2580227929ee](messages/2026-11-05-web-2580227929ee.md) · 3 tiri · versione 0.3.0
 - [2026-11-04 · da8a94fc0dcd](messages/2026-11-04-da8a94fc0dcd.md) · 3 tiri · versione 0.2.2
 - [2026-11-04 · 91dfda604e18](messages/2026-11-04-91dfda604e18.md) · 1 tiri · versione 0.2.2
+

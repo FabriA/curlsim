@@ -2,7 +2,7 @@
  * Rapporti in Markdown: un riepilogo complessivo e una scheda per ogni messaggio elaborato.
  */
 import { ENGINE_VERSION } from "../../src/core/params";
-import { collisionsOf, curveOf, questionStats, settingsOf, recommendations, rollStats, type Dataset, type ShotRecord } from "./evaluate";
+import { collisionsOf, curveOf, questionStats, settingsOf, raiseStats, recommendations, rollStats, type Dataset, type ShotRecord } from "./evaluate";
 
 const n2 = (v: number | null | undefined, d = 2) => (v === null || v === undefined ? "—" : v.toFixed(d).replace(".", ","));
 const pct = (v: number) => `${Math.round(v * 100)}%`;
@@ -45,6 +45,17 @@ export function summaryMarkdown(ds: Dataset): string {
       out.push(`| ${esc(r.collisions)} | ${r.band} | ${r.n} | ${n2(r.meanShooterTravel)} | ${c("Troppo corto")} | ${c("Giusto")} | ${c("Troppo lungo")} | ${c("Non so")} |`);
     }
   } else out.push("Ancora nessun giudizio sul rotolamento con le misure dell'urto.");
+  out.push("");
+
+  out.push("## Pietra colpita nei raise, per velocità d'impatto", "");
+  const ra = raiseStats(shots);
+  if (ra.length) {
+    out.push("| Urti | Velocità all'urto | Tiri | Colpita dopo l'urto, media (m) | Troppo | Giusto | Troppo poco | Non so |", "| --- | --- | --- | --- | --- | --- | --- | --- |");
+    for (const r of ra) {
+      const c = (k: string) => r.counts[k] ?? 0;
+      out.push(`| ${esc(r.collisions)} | ${r.band} | ${r.n} | ${n2(r.meanTargetTravel)} | ${c("Troppo")} | ${c("Giusto")} | ${c("Troppo poco")} | ${c("Non so")} |`);
+    }
+  } else out.push("Ancora nessun giudizio sui raise con le misure dell'urto.");
   out.push("");
 
   out.push("## Risposte per domanda", "");

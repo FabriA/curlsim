@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { formatReport, type FeedbackRecord, type ShotFacts } from "../src/lab/feedback-model";
 import { REFERENCE_HASH, referenceReplay } from "../src/core/reference";
+import { COLLISIONS, CURVES } from "../src/core/params";
 import { parseReport } from "../tools/feedback-agent/parse";
-import { addReport, band, collisionsOf, curveOf, emptyDataset, questionKey, questionStats, recommendations, rollStats, settingsOf } from "../tools/feedback-agent/evaluate";
+import { addReport, band, collisionsOf, curveOf, emptyDataset, impactSpeedBand, questionKey, questionStats, recommendations, rollStats, settingsOf } from "../tools/feedback-agent/evaluate";
 import { messageMarkdown, summaryMarkdown } from "../tools/feedback-agent/report";
 
 const fmt = (n: number, d: number) => n.toFixed(d).replace(".", ",");
@@ -139,5 +140,21 @@ describe("forma della curva nei rapporti", () => {
     expect(settingsOf({ replay: r })).toBe(collisionsOf({ replay: r }));
     const late = { ...r, params: { ...r.params, curlExp: 1 as const, spinGain: 0.2 } };
     expect(settingsOf({ replay: late })).toBe(`${collisionsOf({ replay: late })}, curva netta`);
+  });
+});
+
+describe("modello 0.4 nei rapporti", () => {
+  it("urti smorzati e curva dai giri si riconoscono dal replay", () => {
+    const r = referenceReplay();
+    const p = { ...r, params: { ...r.params, ...COLLISIONS.soft, ...CURVES.spin } };
+    expect(collisionsOf({ replay: p })).toBe("smorzati");
+    expect(curveOf({ replay: p })).toBe("dai giri");
+    expect(settingsOf({ replay: p })).toBe("smorzati, curva dai giri");
+  });
+  it("fasce di velocità d'impatto", () => {
+    expect(impactSpeedBand(0.3)).toBe("sotto 0,5 m/s");
+    expect(impactSpeedBand(0.7)).toBe("0,5–0,8 m/s");
+    expect(impactSpeedBand(1)).toBe("0,8–1,2 m/s");
+    expect(impactSpeedBand(2)).toBe("sopra 1,2 m/s");
   });
 });

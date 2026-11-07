@@ -60,6 +60,35 @@ function advanceStone(s: Stone, p: IceParams, swept: boolean): void {
   let spinFactor = s.w / (p.spinRatioRef * v);
   if (spinFactor > 1) spinFactor = 1;
   else if (spinFactor < -1) spinFactor = -1;
+  const vv = v + p.curlV0;
+  let aLat: number;
+  if (p.spinCurve && p.curlNorm) {
+    // Dalla 0.4: forma e quantità dipendono dai giri (rapporto ω/v rispetto alla rotazione normale).
+    const c = p.spinCurve;
+    const turns = ((s.w < 0 ? -s.w : s.w) / v / (p.spinRef ?? 1)) * c.refTurns;
+    const T = c.turns;
+    const last = T.length - 1;
+    let n = c.exp[last];
+    let gain = c.gain[last];
+    if (turns <= T[0]) {
+      n = c.exp[0];
+      gain = c.gain[0];
+    } else if (turns < T[last]) {
+      let i = 0;
+      while (turns > T[i + 1]) i++;
+      const f = (turns - T[i]) / (T[i + 1] - T[i]);
+      n = c.exp[i] + (c.exp[i + 1] - c.exp[i]) * f;
+      gain = c.gain[i] + (c.gain[i + 1] - c.gain[i]) * f;
+    }
+    // 1/v^n tra le forme con esponente multiplo di 0,5, ciascuna normalizzata alla stessa curva totale.
+    const q = Math.sqrt(vv);
+    const m = (n - 0.5) * 2;
+    const i0 = m >= 2 ? 2 : m >= 1 ? 1 : 0;
+    const f = m - i0;
+    const basis = (k: number) => p.curlNorm![k] / (k === 0 ? q : k === 1 ? vv : k === 2 ? vv * q : vv * vv);
+    const shape = f > 0 ? basis(i0) * (1 - f) + basis(i0 + 1) * f : basis(i0);
+    aLat = spinFactor * p.curlK * gain * (swept ? p.sweepCurl : 1) * shape;
+  } else {
   // Curva «finale più netto»: più rotazione per metro, più curva (il «grab» con molti giri).
   if (p.spinGain) {
     // Limitato: dopo un urto una pietra quasi ferma può girare molto (rapporto giri/metro enorme),
@@ -71,9 +100,9 @@ function advanceStone(s: Stone, p: IceParams, swept: boolean): void {
     spinFactor = spinFactor * k;
   }
   // La deriva cresce quando la pietra rallenta: come 1/√v (classica), 1/v o 1/v^1,5 (finale più netto).
-  const vv = v + p.curlV0;
   const slow = p.curlExp === 1 ? vv : p.curlExp === 1.5 ? vv * Math.sqrt(vv) : Math.sqrt(vv);
-  let aLat = (spinFactor * p.curlK * (swept ? p.sweepCurl : 1)) / slow;
+  aLat = (spinFactor * p.curlK * (swept ? p.sweepCurl : 1)) / slow;
+  }
   // La deriva nasce dall'attrito e non può superarlo: con la curva «netta» a velocità quasi nulla
   // la spinta laterale ricostruirebbe a ogni tick la velocità persa e la pietra non si fermerebbe
   // mai. Con 0,9 la velocità di equilibrio resta sotto la soglia di arresto. Con la curva classica
@@ -137,7 +166,16 @@ function resolveCollisions(world: World): void {
         any = true;
 
         // Impulso normale per masse uguali (m = 1).
-        const e = a.id === world.deliveredId || b.id === world.deliveredId ? p.restitution : eSecondary;
+        let e = a.id === world.deliveredId || b.id === world.deliveredId ? p.restitution : eSecondary;
+        // Dalla 0.4, se richiesto: urti lenti meno elastici.
+        const si = p.slowImpact;
+        if (si) {
+          const rx = a.vx - b.vx;
+          const ry = a.vy - b.vy;
+          const sp = Math.sqrt(rx * rx + ry * ry);
+          if (sp <= si.from) e = si.e;
+          else if (sp < si.to) e = si.e + ((e - si.e) * (sp - si.from)) / (si.to - si.from);
+        }
         const jn = ((1 + e) * vn) / 2;
         a.vx -= jn * nx;
         a.vy -= jn * ny;

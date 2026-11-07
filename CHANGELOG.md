@@ -2,7 +2,28 @@
 
 ## Non ancora rilasciato
 
-Fase 3. Motore fisico invariato (0.2.0).
+Fase 3. **Motore fisico 0.3.0:** curva che dipende dai giri e urti lenti smorzati. I replay registrati con i motori precedenti si riproducono come prima (l'app avvisa che il motore è diverso).
+
+- **Curva dai giri** (motore 0.3.0), dalle indicazioni dei tester e dalla letteratura (Shegelski et al.: con 70–80 rotazioni circa il doppio della curva che con 5). Al posto del menu «Curva del draw», forma e quantità della curva dipendono dai giri. Sul ghiaccio normale (curva del profilo 1,2 m), draw al tee:
+
+  | Giri | Curva | Negli ultimi 3 m | Il 10% della curva è raggiunto a | Arresto rispetto al tiro dritto |
+  | --- | --- | --- | --- | --- |
+  | 1,5 | 1,50 m (+25%) | 42% | 15,4 m dall'arresto | −0,11 m |
+  | 3,5 (riferimento) | 1,20 m | 50% | 13,8 m | −0,11 m |
+  | 6,5 | 1,32 m (+10%) | 56% | 12,8 m | −0,19 m |
+  | 10 | 1,50 m (+25%) | 59% | 12,0 m | −0,27 m |
+  | 25 (spinner) | 1,80 m (+50%) | 61% | 11,4 m | −0,40 m |
+  | 50 | 2,00 m | 61% | 11,5 m | −0,47 m |
+
+  - Con 3–5 giri è la curva «Finale più netto» provata dai tester (inizio e chiusura giudicati giusti 6 volte su 6).
+  - La deriva non supera il 90% dell'attrito: con moltissimi giri la curva arriva a un tetto di circa 2,2 m (80 giri sul ghiaccio normale escono dal lato se tirati dal centro).
+  - Nuovo livello di rotazione «Spinner (oltre 20 giri)», 25 giri; il campo dei giri arriva a 80.
+  - Con più di 5 giri, sotto il peso compare quanto la pietra si ferma più corta rispetto al tiro dritto.
+  - Domande del giudizio riscritte per rotazione bassa e alta, e una nuova per lo spinner.
+  - Non si simula la perdita o l'inversione della rotazione con pochissimi giri.
+- **Urti lenti smorzati** (motore 0.3.0), nuova impostazione predefinita «Normali, urti lenti smorzati»: dai giudizi sui raise la pietra colpita andava troppo lontano in tutti i 12 urti sotto 0,8 m/s, mentre sopra 0,9 m/s andava bene. Ora la restituzione vale 0,55 fino a 0,4 m/s di velocità relativa e sale fino a quella di «Normali» a 1,1 m/s. Sui 13 raise lenti già giudicati la pietra colpita percorre in media il 72% di prima; sopra 0,9 m/s la differenza resta sotto l'8%; bocciate e catene di freeze non cambiano. «Normali» e «Vivaci» restano selezionabili per il confronto.
+- **Agente dei giudizi:** nuova tabella «Pietra colpita nei raise, per velocità d'impatto»; le indicazioni sulla curva fanno riferimento alla tabella dei giri invece che a curlV0; i replay di motori precedenti si ricontrollano (identico se l'hash coincide).
+- **Domanda più chiara** sulla distanza dopo l'urto: «la pietra tirata (la tua, non quella colpita)».
 
 - **Partita a più end** (al posto di «End a due»): numero di end a scelta (8 predefiniti), tabellone end per end con totale, hammer che passa secondo R5 a, extra end in caso di parità (un extra end nullo ne richiede un altro) o pareggio se l'extra end è disattivato, risultato finale e «Nuova partita».
 - **Giocatori:** livello di tiro e di spazzata per lead, second, third e skip, oppure uno per tutta la squadra. Il giocatore al tiro dipende dal numero della pietra; spazzano i due compagni che non tengono la scopa.
@@ -13,7 +34,7 @@ Fase 3. Motore fisico invariato (0.2.0).
 - **Urti con un campione registrato:** il suono fornito (colpo secco, energia tra 300 e 1000 Hz) a ogni urto, con volume e brillantezza che seguono la forza dell'urto e un'altezza variata di ±4%. Il modello sintetico del granito resta come riserva se il campione non si carica.
 - **Uscita dalla pista:** una pietra che esce dal gioco sulla linea laterale o in fondo fa un suono suo (il colpo sintetico originale), non più quello dell'urto tra pietre.
 - **Più lingue:** italiano, inglese, tedesco e francese. Il selettore in alto a destra mostra solo la bandiera; il cambio è immediato, senza ricaricare la pagina, e non perde le risposte già scelte nel riquadro dei giudizi. Alla prima apertura vale la lingua del browser; la scelta resta memorizzata.
-- **Curva del draw a scelta** (riquadro Ghiaccio), come per gli urti, per confrontare le versioni sulla base dei giudizi («la curva inizia troppo presto», «finale troppo dolce», «con molti giri curva poco»):
+- **Curva del draw a scelta** (riquadro Ghiaccio, sostituita poi dalla curva dai giri), come per gli urti, per confrontare le versioni sulla base dei giudizi («la curva inizia troppo presto», «finale troppo dolce», «con molti giri curva poco»):
   - «Classica (fino alla 0.3.1)»: deriva come 1/√v; il 41% della curva negli ultimi 3 m.
   - «Finale più netto» (predefinita): deriva come 1/v e curva che cresce con i giri; il 50% della curva negli ultimi 3 m.
   - «Finale molto netto»: deriva come 1/v^1,5; il 59% della curva negli ultimi 3 m, arresto circa 20 cm più corto a parità di peso.

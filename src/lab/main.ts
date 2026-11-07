@@ -4,7 +4,7 @@
  */
 import { calibrate, spinRateForTurns, stopForSpeed, speedToStopAt, sweepFrictionForGain } from "../core/calibrate";
 import { BACK_LINE_OUTSIDE, FAR_HOG_INSIDE, HACK_Y, HOUSE_RADIUS, RELEASE_Y, STONE_RADIUS, TEE_Y } from "../core/geometry";
-import { APP_VERSION, BASE_PARAMS, COLLISIONS, collisionLevelOf, CURVES, curveLevelOf, DT, ENGINE_VERSION, PROFILES, SHOT_PRECISION, SPIN_TURNS, SWEEP_GAIN, type CollisionLevel, type CurveLevel, type IceParams, type Precision, type ProfileId, type ShotLevel, type SkillLevel, type SpinLevel } from "../core/params";
+import { APP_VERSION, BASE_PARAMS, COLLISIONS, collisionLevelOf, CURVES, curveLevelOf, DT, ENGINE_VERSION, PROFILES, SHOT_PRECISION, SPIN_TURNS, SWEEP_GAIN, TAKEOUT_SPEED, type CollisionLevel, type IceParams, type Precision, type ProfileId, type ShotLevel, type SkillLevel, type SpinLevel } from "../core/params";
 import { REFERENCE_HASH, referenceReplay } from "../core/reference";
 import { makeReplay, runReplay, Sim, skillFromPrecision, validateReplay, type Replay, type Skill, type StonePlacement } from "../core/sim";
 import { bindText, getLanguage, initialLanguage, num, onLanguageChange, setLanguage, t, tIn, tt, type Lang, type Text } from "../i18n";
@@ -98,7 +98,7 @@ function recalibrate(): void {
   bindText($("derived"), tt("ice.calibrating"));
   // Lascia ridisegnare l'interfaccia prima del calcolo (circa mezzo secondo).
   setTimeout(() => {
-    state.params = calibrate(readTargets(), { ...BASE_PARAMS, ...CURVES[curveLevel()] });
+    state.params = calibrate(readTargets(), { ...BASE_PARAMS, ...CURVES.spin });
     bindText($("derived"), tt("ice.derived", { mu: state.params.mu.toFixed(5), k: state.params.curlK.toFixed(5) }));
     updateWeightMarks();
     updateShotReadout();
@@ -182,13 +182,28 @@ function syncSpinLevel(): void {
   updateShotReadout();
 }
 
+/** Quanto più corta si ferma la pietra con i giri attuali rispetto al tiro dritto (m); 0 se non serve. */
+function spinShortfall(v: number): number {
+  const turns = currentTurns();
+  if (!state.params || turns <= SPIN_TURNS.normal + 1.5 || v >= TAKEOUT_SPEED) return 0;
+  const straight = stopForSpeed(state.params, v);
+  if (straight > BACK_LINE_OUTSIDE + STONE_RADIUS) return 0;
+  const sim = new Sim(state.params, [], 0, { x: 0, y: RELEASE_Y, vx: 0, vy: v, w: spinRateForTurns(state.params, turns) });
+  sim.runToEnd();
+  const stop = sim.metrics.stop;
+  return stop ? straight - stop.y : 0;
+}
+
 function updateShotReadout(): void {
   if (!state.params) return;
   const w = currentSpinRate();
   $("spin-rate").textContent = t("shot.spinRate", { w: num(w, 2), rps: num(w / (2 * Math.PI), 2) });
   const v = currentSpeed();
   $("weight-value").textContent = t("shot.weightValue", { v: num(v, 2) });
-  const where = describeStop(stopForSpeed(state.params, v));
+  let where = describeStop(stopForSpeed(state.params, v));
+  // Con molti giri la curva si concentra nel finale e la pietra si ferma più corta del tiro dritto.
+  const short = spinShortfall(v);
+  if (short >= 0.05) where += ` (${t("shot.spinShort", { turns: num(currentTurns(), 1), d: num(short, 2) })})`;
   $("weight-stop").textContent = t("shot.weightStop", { where });
   // Comandi flottanti su telefono: stesso peso e stessa rotazione dei comandi del riquadro Tiro.
   $<HTMLInputElement>("fab-weight").value = String(v);
@@ -255,17 +270,13 @@ function shotParams(): IceParams {
 /** Etichetta degli urti per il rapporto (sempre in italiano), ricavata dai valori usati davvero nel tiro. */
 function collisionsLabel(p: IceParams): string {
   const lvl = collisionLevelOf(p);
-  if (lvl) return tIn("it", lvl === "normal" ? "fb.collisions.normal" : "fb.collisions.lively");
+  if (lvl) return tIn("it", `fb.collisions.${lvl}` as Key);
   return tIn("it", "fb.collisions.custom", { e: String(p.restitution).replace(".", ","), e2: String(p.restitutionSecondary ?? p.restitution).replace(".", ",") });
 }
 
-function curveLevel(): CurveLevel {
-  const v = $<HTMLSelectElement>("curve").value;
-  return v === "classic" || v === "later" ? v : "late";
-}
-
 function collisionLevel(): CollisionLevel {
-  return $<HTMLSelectElement>("collisions").value === "lively" ? "lively" : "normal";
+  const v = $<HTMLSelectElement>("collisions").value;
+  return v === "lively" || v === "normal" ? v : "soft";
 }
 
 function updateSweepReadout(): void {

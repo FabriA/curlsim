@@ -92,11 +92,11 @@ export function questionsFor(kind: ShotKind, f: ShotFacts, fmt: (n: number, d: n
     q.push({ id: "sweep.length", text: "fb.q.sweepLength", params: { s: fmt(f.sweepTime, 1) }, answers: SCALE_TOO_MUCH });
     q.push({ id: "sweep.curl", text: "fb.q.sweepCurl", answers: SCALE_TOO_MUCH });
   }
-  // Rotazione bassa o alta, solo sui tiri senza urti: la curva dipende poco dalla rotazione nel modello.
+  // Rotazione bassa, alta o spinner, solo sui tiri senza urti: dalla 0.4 forma e quantità della curva dipendono dai giri.
   if (!f.hit && (f.spinTurns <= 2 || f.spinTurns >= 5)) {
     q.push({
       id: "spin.curl",
-      text: f.spinTurns <= 2 ? "fb.q.spinLow" : "fb.q.spinHigh",
+      text: f.spinTurns <= 2 ? "fb.q.spinLow" : f.spinTurns >= 20 ? "fb.q.spinner" : "fb.q.spinHigh",
       params: { turns: fmt(f.spinTurns, 1) },
       answers: ["fb.a.shouldCurlMore", "fb.a.similarOk", "fb.a.shouldCurlLess", "fb.a.dontKnow"],
     });

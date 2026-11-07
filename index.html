@@ -94,20 +94,12 @@
       <label class="field">
         <span data-t="ice.collisions"></span>
         <select id="collisions">
-          <option value="normal" selected data-t="ice.collisions.normal"></option>
+          <option value="soft" selected data-t="ice.collisions.soft"></option>
+          <option value="normal" data-t="ice.collisions.normal"></option>
           <option value="lively" data-t="ice.collisions.lively"></option>
         </select>
       </label>
       <p class="hint" data-t="ice.collisionsHint"></p>
-      <label class="field">
-        <span data-t="ice.curve"></span>
-        <select id="curve">
-          <option value="classic" data-t="ice.curve.classic"></option>
-          <option value="late" selected data-t="ice.curve.late"></option>
-          <option value="later" data-t="ice.curve.later"></option>
-        </select>
-      </label>
-      <p class="hint" data-t="ice.curveHint"></p>
       <p id="derived" class="hint mono"></p>
     </div>
     </details>
@@ -160,10 +152,11 @@
             <option value="low" data-t="spin.low"></option>
             <option value="normal" selected data-t="spin.normal"></option>
             <option value="high" data-t="spin.high"></option>
+            <option value="spinner" data-t="spin.spinner"></option>
             <option value="custom" data-t="spin.custom"></option>
           </select>
         </label>
-        <label class="field"><span data-t="shot.spinTurns"></span><input id="spin-turns" type="number" min="0" max="10" step="0.5" value="3.5"></label>
+        <label class="field"><span data-t="shot.spinTurns"></span><input id="spin-turns" type="number" min="0" max="80" step="0.5" value="3.5"></label>
       </div>
       <p id="spin-rate" class="hint mono"></p>
       <label class="field">

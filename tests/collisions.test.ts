@@ -188,8 +188,51 @@ describe("vivacità degli urti", () => {
 describe("riconoscimento dell'impostazione degli urti", () => {
   it("riconosce Normali, Vivaci e i replay fino alla 0.2.2", () => {
     expect(collisionLevelOf(COLLISIONS.normal)).toBe("normal");
+    expect(collisionLevelOf(COLLISIONS.soft)).toBe("soft");
+    expect(collisionLevelOf({ restitution: 0.95, restitutionSecondary: 0.97 })).toBe("normal");
     expect(collisionLevelOf(COLLISIONS.lively)).toBe("lively");
     expect(collisionLevelOf({ restitution: 0.9 })).toBe("lively");
     expect(collisionLevelOf({ restitution: 0.85, restitutionSecondary: 0.6 })).toBeNull();
+  });
+});
+
+describe("urti lenti smorzati", () => {
+  const soft = { ...noFriction, ...COLLISIONS.soft };
+  const normal = { ...noFriction, ...COLLISIONS.normal };
+  function hit(p: typeof params, v: number): number {
+    const a = createStone(0, 0, 0, 0);
+    const b = createStone(1, 1, 0, 1);
+    a.vy = v;
+    a.moving = true;
+    const w: World = { params: p, stones: [a, b], tick: 0, deliveredId: 0 };
+    runUntil(w, 5000);
+    return b.vy;
+  }
+
+  it("urto lento: la pietra colpita parte più piano (restituzione 0,55 fino a 0,4 m/s)", () => {
+    expect(hit(soft, 0.25)).toBeCloseTo((0.25 * 1.55) / 2, 6);
+    // A 0,5 m/s la strada della colpita (∝ v²) cala di circa un terzo.
+    const r = (hit(soft, 0.5) / hit(normal, 0.5)) ** 2;
+    expect(r).toBeGreaterThan(0.6);
+    expect(r).toBeLessThan(0.75);
+  });
+
+  it("urto veloce: nessuna differenza da 1,1 m/s in su", () => {
+    expect(hit(soft, 1.1)).toBe(hit(normal, 1.1));
+    expect(hit(soft, 3)).toBe(hit(normal, 3));
+  });
+
+  it("fila di tre pietre in freeze colpita in pieno: esce solo l'ultima, come con «Normali»", () => {
+    const freeze: [number, number][] = [[0, 1], [0, 1 + 2 * STONE_RADIUS + 0.01], [0, 1 + 4 * STONE_RADIUS + 0.02]];
+    const st = [createStone(0, 0, 0, 0), ...freeze.map(([x, y], i) => createStone(i + 1, 1, x, y))];
+    st[0].vy = 2.2;
+    st[0].moving = true;
+    const start = st.map((s) => [s.x, s.y]);
+    runUntil({ params: { ...params, ...COLLISIONS.soft }, stones: st, tick: 0, deliveredId: 0 }, 60000);
+    const [shooter, first, middle, last] = st.map((s, i) => Math.hypot(s.x - start[i][0], s.y - start[i][1]));
+    expect(first).toBeLessThan(0.05);
+    expect(middle).toBeLessThan(0.05);
+    expect(shooter - (1 - 2 * STONE_RADIUS)).toBeLessThan(0.05);
+    expect(last).toBeGreaterThan(10);
   });
 });

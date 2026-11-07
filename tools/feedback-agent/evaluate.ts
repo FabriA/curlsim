@@ -58,8 +58,9 @@ export function checkShot(shot: ParsedShot, message: string, date: string, repor
       const { sim, hash } = runReplay(shot.replay);
       rerunHash = hash;
       const expected = shot.replay.result?.hash ?? shot.hash;
-      if (shot.replay.engineVersion !== ENGINE_VERSION) replayCheck = "motore diverso";
-      else replayCheck = expected && expected === hash ? "identico" : "diverso";
+      // I motori successivi riproducono i replay precedenti: se l'hash coincide il replay è identico.
+      if (expected && expected === hash) replayCheck = "identico";
+      else replayCheck = shot.replay.engineVersion !== ENGINE_VERSION ? "motore diverso" : "diverso";
       const m = sim.metrics.impact;
       if (!impact && m) {
         impact = {
@@ -117,7 +118,7 @@ export function collisionsOf(s: Pick<ShotRecord, "replay" | "collisions">): stri
   const p = s.replay?.params;
   if (p) {
     const lvl = collisionLevelOf(p);
-    if (lvl) return lvl === "normal" ? "normali" : "vivaci";
+    if (lvl) return { soft: "smorzati", normal: "normali", lively: "vivaci" }[lvl];
     const e2 = p.restitutionSecondary ?? p.restitution;
     if (p.restitution === 0.85 && e2 === 0.6) return "normali (prima versione, 0,85/0,6)";
     return `personalizzati (${String(p.restitution).replace(".", ",")}/${String(e2).replace(".", ",")})`;
@@ -127,7 +128,7 @@ export function collisionsOf(s: Pick<ShotRecord, "replay" | "collisions">): stri
 
 /** Forma della curva di un tiro: dal replay se c'è, altrimenti dal rapporto; prima della 0.3.2 era la classica. */
 export function curveOf(s: Pick<ShotRecord, "replay" | "curve">): string {
-  if (s.replay?.params) return { classic: "classica", late: "netta", later: "molto netta" }[curveLevelOf(s.replay.params)];
+  if (s.replay?.params) return { classic: "classica", late: "netta", later: "molto netta", spin: "dai giri" }[curveLevelOf(s.replay.params)];
   return s.curve ?? "classica";
 }
 
@@ -196,13 +197,47 @@ export interface RollStats {
   counts: Record<string, number>;
 }
 
-const ROLL_QUESTION = "Dopo l'urto, la distanza percorsa dalla pietra tirata è…";
+const ROLL_QUESTION = "Dopo l'urto, la distanza percorsa dalla pietra tirata";
+const RAISE_QUESTION = "La pietra colpita è avanzata…";
+
+export type ImpactSpeedBand = "sotto 0,5 m/s" | "0,5–0,8 m/s" | "0,8–1,2 m/s" | "sopra 1,2 m/s";
+
+export function impactSpeedBand(v: number): ImpactSpeedBand {
+  return v < 0.5 ? "sotto 0,5 m/s" : v < 0.8 ? "0,5–0,8 m/s" : v < 1.2 ? "0,8–1,2 m/s" : "sopra 1,2 m/s";
+}
+
+export interface RaiseStats {
+  band: ImpactSpeedBand;
+  collisions: string;
+  n: number;
+  meanTargetTravel: number;
+  counts: Record<string, number>;
+}
+
+/** Giudizi sulla strada della pietra colpita nei raise, per velocità d'impatto: gli urti lenti e veloci si comportano diversamente. */
+export function raiseStats(shots: ShotRecord[]): RaiseStats[] {
+  const out = new Map<string, RaiseStats>();
+  for (const s of shots) {
+    const a = s.answers.find((x) => x.question === RAISE_QUESTION);
+    if (!a || !s.impact) continue;
+    const b = impactSpeedBand(s.impact.speed);
+    const c = collisionsOf(s);
+    const key = `${b}\u0000${c}`;
+    let st = out.get(key);
+    if (!st) out.set(key, (st = { band: b, collisions: c, n: 0, meanTargetTravel: 0, counts: {} }));
+    st.meanTargetTravel = (st.meanTargetTravel * st.n + s.impact.targetTravel) / (st.n + 1);
+    st.n++;
+    st.counts[a.answer] = (st.counts[a.answer] ?? 0) + 1;
+  }
+  const order: ImpactSpeedBand[] = ["sotto 0,5 m/s", "0,5–0,8 m/s", "0,8–1,2 m/s", "sopra 1,2 m/s"];
+  return [...out.values()].sort((x, y) => x.collisions.localeCompare(y.collisions) || order.indexOf(x.band) - order.indexOf(y.band));
+}
 
 /** Giudizi sul rotolamento della tirata dopo l'urto, raggruppati per pienezza del colpo. */
 export function rollStats(shots: ShotRecord[]): RollStats[] {
   const out = new Map<string, RollStats>();
   for (const s of shots) {
-    const a = s.answers.find((x) => questionKey(x.question) === questionKey(ROLL_QUESTION));
+    const a = s.answers.find((x) => x.question.startsWith(ROLL_QUESTION));
     if (!a || !s.impact) continue;
     const b = band(s.impact.fullness);
     const c = settingsOf(s);
@@ -222,13 +257,16 @@ export function recommendations(qs: QuestionStats[], rs: RollStats[]): string[] 
   const groups = [...new Set([...qs.map((q) => q.collisions), ...rs.map((r) => r.collisions)])].sort();
   const rec: string[] = [];
   for (const c of groups) {
-    const lines = recommendationsFor(qs.filter((q) => q.collisions === c), rs.filter((r) => r.collisions === c));
+    const lines = recommendationsFor(qs.filter((q) => q.collisions === c), rs.filter((r) => r.collisions === c), c);
     for (const l of lines) rec.push(groups.length > 1 || c !== "normali" ? `[urti ${c}] ${l}` : l);
   }
   return rec;
 }
 
-function recommendationsFor(qs: QuestionStats[], rs: RollStats[]): string[] {
+function recommendationsFor(qs: QuestionStats[], rs: RollStats[], group: string): string[] {
+  /** Dalla 0.4 la forma della curva dipende dai giri (SPIN_CURVE): le indicazioni su curlV0 valgono solo per la classica. */
+  const spinModel = group.includes("curva dai giri");
+  const damped = group.startsWith("smorzati");
   const rec: string[] = [];
   /** Domande per cui è già stata data un'indicazione specifica. */
   const covered = new Set<string>();
@@ -244,7 +282,7 @@ function recommendationsFor(qs: QuestionStats[], rs: RollStats[]): string[] {
   if (partialLong.length) rec.push(`Rotolamento troppo lungo nei colpi ${partialLong.map((r) => r.band).join(" e ")}: candidato l'aumento dell'attrito tra le pietre (stoneFriction, oggi 0,2).`);
   if (fullLong) rec.push("Rotolamento troppo lungo anche nei colpi pieni: la restituzione non spiega il difetto; rivedere la perdita di energia dopo l'urto.");
   if (partialShort.length) rec.push(`Rotolamento troppo corto nei colpi ${partialShort.map((r) => r.band).join(" e ")}: candidata la riduzione dell'attrito tra le pietre.`);
-  if (partialLong.length || fullLong || partialShort.length) covered.add(questionKey(ROLL_QUESTION));
+  if (partialLong.length || fullLong || partialShort.length) for (const q of qs) if (q.question.startsWith(ROLL_QUESTION)) covered.add(q.question);
 
   const s = (needle: string, text: Record<string, string>) => {
     const g = sig(needle);
@@ -253,14 +291,25 @@ function recommendationsFor(qs: QuestionStats[], rs: RollStats[]): string[] {
       covered.add(qs.find((q) => q.question.startsWith(needle))!.question);
     }
   };
-  s("Il punto in cui la pietra inizia a curvare", {
-    "Troppo presto": "La curva inizia troppo presto: ridurre il peso della deriva ad alta velocità (aumentare curlV0)",
-    "Troppo tardi": "La curva inizia troppo tardi: anticipare la deriva (ridurre curlV0)",
-  });
-  s("La chiusura finale della curva", {
-    "Troppo brusca": "Chiusura finale troppo brusca: ammorbidire la deriva a bassa velocità (aumentare curlV0)",
-    "Troppo dolce": "Chiusura finale troppo dolce: accentuare la deriva a bassa velocità (ridurre curlV0)",
-  });
+  if (spinModel) {
+    s("Il punto in cui la pietra inizia a curvare", {
+      "Troppo presto": "La curva inizia troppo presto: alzare gli esponenti di SPIN_CURVE per le rotazioni giudicate (forma più tardiva)",
+      "Troppo tardi": "La curva inizia troppo tardi: abbassare gli esponenti di SPIN_CURVE per le rotazioni giudicate",
+    });
+    s("La chiusura finale della curva", {
+      "Troppo brusca": "Chiusura finale troppo brusca: abbassare gli esponenti di SPIN_CURVE per le rotazioni giudicate",
+      "Troppo dolce": "Chiusura finale troppo dolce: alzare gli esponenti di SPIN_CURVE per le rotazioni giudicate",
+    });
+  } else {
+    s("Il punto in cui la pietra inizia a curvare", {
+      "Troppo presto": "La curva inizia troppo presto: ridurre il peso della deriva ad alta velocità (aumentare curlV0)",
+      "Troppo tardi": "La curva inizia troppo tardi: anticipare la deriva (ridurre curlV0)",
+    });
+    s("La chiusura finale della curva", {
+      "Troppo brusca": "Chiusura finale troppo brusca: ammorbidire la deriva a bassa velocità (aumentare curlV0)",
+      "Troppo dolce": "Chiusura finale troppo dolce: accentuare la deriva a bassa velocità (ridurre curlV0)",
+    });
+  }
   s("Con un hog-to-hog di # s", {
     "Troppo corto": "Tiri più corti del previsto per il tempo hog-to-hog impostato: verificare la calibrazione di μ e la relazione peso/tempo",
     "Troppo lungo": "Tiri più lunghi del previsto per il tempo hog-to-hog impostato: verificare la calibrazione di μ e la relazione peso/tempo",
@@ -279,17 +328,16 @@ function recommendationsFor(qs: QuestionStats[], rs: RollStats[]): string[] {
     "Troppo poco": "Le bocciate curvano troppo poco: aumentare la deriva ad alta velocità",
   });
   s("La pietra colpita è avanzata", {
-    Troppo: "Nei raise la pietra colpita avanza troppo: ridurre la restituzione degli urti con la pietra tirata",
+    Troppo: damped
+      ? "Nei raise la pietra colpita avanza ancora troppo con gli urti lenti smorzati: abbassare SLOW_IMPACT.e o alzare le soglie (vedi la tabella per velocità d'impatto)"
+      : "Nei raise la pietra colpita avanza troppo: confrontare con gli urti lenti smorzati (vedi la tabella per velocità d'impatto)",
     "Troppo poco": "Nei raise la pietra colpita avanza troppo poco: aumentare la restituzione degli urti con la pietra tirata",
   });
-  s("Con rotazione bassa", {
-    "Dovrebbe curvare di più": "Con rotazione bassa la curva dovrebbe crescere: introdurre una dipendenza della deriva dalla rotazione",
-    "Dovrebbe curvare di meno": "Con rotazione bassa la curva dovrebbe ridursi: aumentare spinRatioRef",
-  });
-  s("Con rotazione alta", {
-    "Dovrebbe curvare di più": "Con rotazione alta la curva dovrebbe crescere: introdurre una dipendenza della deriva dalla rotazione",
-    "Dovrebbe curvare di meno": "Con rotazione alta la curva dovrebbe ridursi: introdurre una dipendenza della deriva dalla rotazione",
-  });
+  const more = spinModel ? "alzare il guadagno di SPIN_CURVE per quei giri" : "introdurre una dipendenza della deriva dalla rotazione (fatto nella 0.4: curva dai giri)";
+  const less = spinModel ? "abbassare il guadagno di SPIN_CURVE per quei giri" : "introdurre una dipendenza della deriva dalla rotazione (fatto nella 0.4: curva dai giri)";
+  s("Con rotazione bassa", { "Dovrebbe curvare di più": `Con rotazione bassa la curva dovrebbe crescere: ${more}`, "Dovrebbe curvare di meno": `Con rotazione bassa la curva dovrebbe ridursi: ${less}` });
+  s("Con rotazione alta", { "Dovrebbe curvare di più": `Con rotazione alta la curva dovrebbe crescere: ${more}`, "Dovrebbe curvare di meno": `Con rotazione alta la curva dovrebbe ridursi: ${less}` });
+  s("Spinner", { "Dovrebbe curvare di più": `Lo spinner dovrebbe curvare di più: ${more} (attenzione al tetto dato dall'attrito)`, "Dovrebbe curvare di meno": `Lo spinner dovrebbe curvare di meno: ${less}` });
 
   // Ogni altro segnale netto, anche senza le misure dell'urto: da guardare a mano.
   for (const q of qs) {

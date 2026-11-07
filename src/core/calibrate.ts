@@ -59,10 +59,35 @@ export function measureDrawCurl(params: IceParams, spin: 1 | -1 = 1, turns = SPI
 /** Rapporto ω/v della rotazione normale: dipende solo dalla geometria (giri sul percorso del draw al tee). */
 export const NORMAL_SPIN_RATIO = (2 * Math.PI * SPIN_TURNS.normal) / D_TOTAL;
 
+/**
+ * Fattori che danno la stessa curva totale alle forme 1/(v+v₀)^n, n = 0,5 · 1 · 1,5 · 2, su un draw al
+ * tee (decelerazione costante, traiettoria quasi dritta): la curva vale ∫ v/(v+v₀)^n dv da 0 a V, a
+ * meno di costanti. Integrale con Simpson, solo operazioni elementari e radici quadrate.
+ */
+export function curlNormFor(params: IceParams): number[] {
+  const V = speedToStopAt(params, TEE_Y);
+  const v0 = params.curlV0;
+  const N = 2000;
+  const h = V / N;
+  const I = [0, 0, 0, 0];
+  for (let i = 0; i <= N; i++) {
+    const v = i * h;
+    const w = i === 0 || i === N ? 1 : i % 2 === 1 ? 4 : 2;
+    const u = v + v0;
+    const q = Math.sqrt(u);
+    I[0] += (w * v) / q;
+    I[1] += (w * v) / u;
+    I[2] += (w * v) / (u * q);
+    I[3] += (w * v) / (u * u);
+  }
+  return [I[1] / I[0], 1, I[1] / I[2], I[1] / I[3]];
+}
+
 export function calibrate(t: IceTargets, base: Partial<IceParams> & typeof BASE_PARAMS = BASE_PARAMS): IceParams {
   const mu = decelerationFor(t.hogToHog) / G;
   const params: IceParams = { ...base, mu, curlK: 0 };
-  if (params.spinGain) params.spinRef = NORMAL_SPIN_RATIO;
+  if (params.spinGain || params.spinCurve) params.spinRef = NORMAL_SPIN_RATIO;
+  if (params.spinCurve) params.curlNorm = curlNormFor(params);
   let lo = 0;
   let hi = 0.05;
   for (let i = 0; i < 30; i++) {
