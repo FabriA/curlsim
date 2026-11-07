@@ -1,20 +1,20 @@
 # Segnalazioni sul realismo
 
-Aggiornato il 2026-11-07 16:57 UTC · motore 0.2.0 · messaggi elaborati: 22 · tiri valutati: 64
+Aggiornato il 2026-11-07 21:39 UTC · motore 0.2.0 · messaggi elaborati: 23 · tiri valutati: 67
 
-Tiri per impostazione (urti e forma della curva): normali, curva molto netta 5 · normali, curva netta 28 · normali 25 · vivaci 6. Le statistiche sono separate per impostazione.
+Tiri per impostazione (urti e forma della curva): normali, curva molto netta 5 · normali, curva netta 31 · normali 25 · vivaci 6. Le statistiche sono separate per impostazione.
 
 ## Indicazioni
 
 - [urti normali] Chiusura finale troppo dolce: accentuare la deriva a bassa velocità (ridurre curlV0) (71% delle risposte).
-- [urti normali, curva netta] Nei raise la pietra colpita avanza troppo: ridurre la restituzione degli urti con la pietra tirata (83% delle risposte).
+- [urti normali, curva netta] Nei raise la pietra colpita avanza troppo: ridurre la restituzione degli urti con la pietra tirata (85% delle risposte).
 - [urti vivaci] «Dopo l'urto, la distanza percorsa dalla pietra tirata è…»: 80% di 5 risposte dice «Troppo lungo». Da verificare rivedendo i replay di quei tiri.
 
 ## Replay
 
 | Esito della riesecuzione | Tiri |
 | --- | --- |
-| Identico all'hash registrato | 59 |
+| Identico all'hash registrato | 62 |
 | Diverso dall'hash registrato | 2 |
 | Registrato con un altro motore | 0 |
 | Senza replay | 3 |
@@ -37,8 +37,8 @@ Un replay diverso con lo stesso motore indica un problema di determinismo: va co
 
 | Domanda | Impostazione | Risposte | Distribuzione | Segnale |
 | --- | --- | --- | --- | --- |
-| La pietra colpita è avanzata… | normali, curva netta | 13 | Troppo 10 · Giusto 2 · Non so 1 | Troppo (83%) |
-| Dopo l'urto, la pietra tirata è rimasta… | normali, curva netta | 13 | Giusto 11 · Troppo avanti 2 | — |
+| La pietra colpita è avanzata… | normali, curva netta | 14 | Troppo 11 · Giusto 2 · Non so 1 | Troppo (85%) |
+| Dopo l'urto, la pietra tirata è rimasta… | normali, curva netta | 14 | Giusto 12 · Troppo avanti 2 | — |
 | La pietra colpita è avanzata… | normali | 12 | Troppo 7 · Giusto 5 | — |
 | Dopo l'urto, la pietra tirata è rimasta… | normali | 12 | Giusto 12 | — |
 | Spazzata per # s: l'allungamento del tiro è… | normali | 8 | Giusto 6 · Troppo poco 1 · Non so 1 | — |
@@ -46,17 +46,17 @@ Un replay diverso con lo stesso motore indica un problema di determinismo: va co
 | La curva di questo colpo è… | normali, curva netta | 8 | Giusto 8 | — |
 | Dopo l'urto, la direzione della pietra tirata è… | normali, curva netta | 8 | Credibile 7 · Dovrebbe andare più dritta 1 | — |
 | Dopo l'urto, la distanza percorsa dalla pietra tirata è… | normali, curva netta | 8 | Giusto 8 | — |
+| Il punto in cui la pietra inizia a curvare davvero arriva… | normali, curva netta | 8 | Giusto 7 · Troppo presto 1 | — |
+| La chiusura finale della curva è… | normali, curva netta | 8 | Giusto 7 · Troppo dolce 1 | — |
 | Spazzata per # s: l'allungamento del tiro è… | normali, curva netta | 8 | Giusto 7 · Non so 1 | — |
 | La riduzione della curva dovuta alla spazzata è… | normali, curva netta | 8 | Giusto 7 · Non so 1 | — |
 | Il punto in cui la pietra inizia a curvare davvero arriva… | normali | 7 | Troppo presto 4 · Giusto 3 | — |
 | La chiusura finale della curva è… | normali | 7 | Troppo dolce 5 · Giusto 2 | Troppo dolce (71%) |
 | Con un hog-to-hog di # s, per questo peso il tiro è risultato… | normali | 7 | Giusto 7 | — |
-| Il punto in cui la pietra inizia a curvare davvero arriva… | normali, curva netta | 6 | Giusto 6 | — |
-| La chiusura finale della curva è… | normali, curva netta | 6 | Giusto 6 | — |
+| Con un hog-to-hog di # s, per questo peso il tiro è risultato… | normali, curva netta | 7 | Giusto 7 | — |
 | La curva di questo colpo è… | vivaci | 5 | Giusto 5 | — |
 | Dopo l'urto, la direzione della pietra tirata è… | vivaci | 5 | Credibile 5 | — |
 | Dopo l'urto, la distanza percorsa dalla pietra tirata è… | vivaci | 5 | Troppo lungo 4 · Giusto 1 | Troppo lungo (80%) |
-| Con un hog-to-hog di # s, per questo peso il tiro è risultato… | normali, curva netta | 5 | Giusto 5 | — |
 | La curva di questo colpo è… | normali | 4 | Giusto 4 | — |
 | Dopo l'urto, la direzione della pietra tirata è… | normali | 3 | Credibile 3 | — |
 | Dopo l'urto, la distanza percorsa dalla pietra tirata è… | normali | 3 | Giusto 2 · Non so 1 | — |
@@ -71,14 +71,18 @@ Un replay diverso con lo stesso motore indica un problema di determinismo: va co
 | La curva di questo colpo è… | normali, curva molto netta | 1 | Giusto 1 | — |
 | Dopo l'urto, la direzione della pietra tirata è… | normali, curva molto netta | 1 | Non so 1 | — |
 | Dopo l'urto, la distanza percorsa dalla pietra tirata è… | normali, curva molto netta | 1 | Non so 1 | — |
+| Con rotazione bassa (# giri) la curva è quasi uguale a quella normale. Secondo te la pietra… | normali, curva netta | 1 | Dovrebbe curvare di più 1 | — |
+| Con rotazione alta (# giri) la curva è quasi uguale a quella normale. Secondo te la pietra… | normali, curva netta | 1 | Dovrebbe curvare di più 1 | — |
 
 ## Commenti
 
+- 2026-11-07 · tiro 2 · Draw: https://www.reddit.com/r/Curling/comments/1r76c1t/why_do_curlers_rotate_their_stones_so_much/
 - 2026-11-06 · tiro 7 · Draw: Con un alto numero di giri dovrebbe curvare di più alla fine ("grab")
 - 2026-11-05 · tiro 3 · Raise o freeze · pietra rimossa: La seconda pietra colpita si è spostata troppo, circa il 30-40% in più di quanto atteso
 
 ## Messaggi
 
+- [2026-11-07 · web-7d45e153ba29](messages/2026-11-07-web-7d45e153ba29.md) · 3 tiri · versione 0.3.1
 - [2026-11-07 · web-ab172e1fc1ec](messages/2026-11-07-web-ab172e1fc1ec.md) · 1 tiri · versione 0.3.1
 - [2026-11-07 · web-683e5dcf2405](messages/2026-11-07-web-683e5dcf2405.md) · 3 tiri · versione 0.3.1
 - [2026-11-06 · web-7de07978b3ee](messages/2026-11-06-web-7de07978b3ee.md) · 1 tiri · versione 0.3.1
