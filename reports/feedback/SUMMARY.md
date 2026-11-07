@@ -1,20 +1,20 @@
 # Segnalazioni sul realismo
 
-Aggiornato il 2026-11-07 16:45 UTC · motore 0.2.0 · messaggi elaborati: 21 · tiri valutati: 63
+Aggiornato il 2026-11-07 16:57 UTC · motore 0.2.0 · messaggi elaborati: 22 · tiri valutati: 64
 
-Tiri per impostazione (urti e forma della curva): normali, curva molto netta 5 · normali, curva netta 27 · normali 25 · vivaci 6. Le statistiche sono separate per impostazione.
+Tiri per impostazione (urti e forma della curva): normali, curva molto netta 5 · normali, curva netta 28 · normali 25 · vivaci 6. Le statistiche sono separate per impostazione.
 
 ## Indicazioni
 
 - [urti normali] Chiusura finale troppo dolce: accentuare la deriva a bassa velocità (ridurre curlV0) (71% delle risposte).
-- [urti normali, curva netta] Nei raise la pietra colpita avanza troppo: ridurre la restituzione degli urti con la pietra tirata (82% delle risposte).
+- [urti normali, curva netta] Nei raise la pietra colpita avanza troppo: ridurre la restituzione degli urti con la pietra tirata (83% delle risposte).
 - [urti vivaci] «Dopo l'urto, la distanza percorsa dalla pietra tirata è…»: 80% di 5 risposte dice «Troppo lungo». Da verificare rivedendo i replay di quei tiri.
 
 ## Replay
 
 | Esito della riesecuzione | Tiri |
 | --- | --- |
-| Identico all'hash registrato | 58 |
+| Identico all'hash registrato | 59 |
 | Diverso dall'hash registrato | 2 |
 | Registrato con un altro motore | 0 |
 | Senza replay | 3 |
@@ -37,10 +37,10 @@ Un replay diverso con lo stesso motore indica un problema di determinismo: va co
 
 | Domanda | Impostazione | Risposte | Distribuzione | Segnale |
 | --- | --- | --- | --- | --- |
+| La pietra colpita è avanzata… | normali, curva netta | 13 | Troppo 10 · Giusto 2 · Non so 1 | Troppo (83%) |
+| Dopo l'urto, la pietra tirata è rimasta… | normali, curva netta | 13 | Giusto 11 · Troppo avanti 2 | — |
 | La pietra colpita è avanzata… | normali | 12 | Troppo 7 · Giusto 5 | — |
 | Dopo l'urto, la pietra tirata è rimasta… | normali | 12 | Giusto 12 | — |
-| La pietra colpita è avanzata… | normali, curva netta | 12 | Troppo 9 · Giusto 2 · Non so 1 | Troppo (82%) |
-| Dopo l'urto, la pietra tirata è rimasta… | normali, curva netta | 12 | Giusto 10 · Troppo avanti 2 | — |
 | Spazzata per # s: l'allungamento del tiro è… | normali | 8 | Giusto 6 · Troppo poco 1 · Non so 1 | — |
 | La riduzione della curva dovuta alla spazzata è… | normali | 8 | Giusto 5 · Troppo poco 2 · Non so 1 | — |
 | La curva di questo colpo è… | normali, curva netta | 8 | Giusto 8 | — |
@@ -79,6 +79,7 @@ Un replay diverso con lo stesso motore indica un problema di determinismo: va co
 
 ## Messaggi
 
+- [2026-11-07 · web-ab172e1fc1ec](messages/2026-11-07-web-ab172e1fc1ec.md) · 1 tiri · versione 0.3.1
 - [2026-11-07 · web-683e5dcf2405](messages/2026-11-07-web-683e5dcf2405.md) · 3 tiri · versione 0.3.1
 - [2026-11-06 · web-7de07978b3ee](messages/2026-11-06-web-7de07978b3ee.md) · 1 tiri · versione 0.3.1
 - [2026-11-06 · web-93146648e1ef](messages/2026-11-06-web-93146648e1ef.md) · 1 tiri · versione 0.3.1
