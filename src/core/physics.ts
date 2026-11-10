@@ -41,10 +41,30 @@ export function createStone(id: number, team: Team, x: number, y: number): Stone
   return { id, team, x, y, vx: 0, vy: 0, w: 0, moving: false, inPlay: true, hitStone: false };
 }
 
+/**
+ * Comando di spazzata di un tick (dal motore 0.4.0). `push` = 0: Hard, due sweeper davanti alla
+ * pietra; −1 o +1: un solo sweeper su un lato, la pietra è spinta verso sinistra (−1) o destra (+1)
+ * rispetto alla direzione di moto. `level` = intensità, da 0 a 1.
+ */
+export interface SweepCmd {
+  push: -1 | 0 | 1;
+  level: number;
+}
+
+/** La spazzata Hard a piena intensità: è la spazzata dei motori precedenti. */
+export const SWEEP_HARD: SweepCmd = { push: 0, level: 1 };
+
 /** Avanza di un tick una singola pietra in movimento. */
-function advanceStone(s: Stone, p: IceParams, swept: boolean): void {
+function advanceStone(s: Stone, p: IceParams, sweep: SweepCmd | null): void {
   const v = Math.sqrt(s.vx * s.vx + s.vy * s.vy);
-  const aLong = p.mu * G * (swept ? p.sweepFriction : 1);
+  // Riduzione dell'attrito: piena con Hard al 100% (come prima), in proporzione all'intensità,
+  // e solo per la quota di un singolo sweeper quando si spazza da un lato.
+  let fr = 1;
+  if (sweep) {
+    const share = sweep.push === 0 ? 1 : p.sweepSideShare ?? 0.6;
+    fr = sweep.level === 1 && share === 1 ? p.sweepFriction : 1 - (1 - p.sweepFriction) * sweep.level * share;
+  }
+  const aLong = p.mu * G * fr;
   const dv = aLong * DT;
   if (v <= dv || v < STOP_SPEED) {
     s.vx = 0;
@@ -58,6 +78,13 @@ function advanceStone(s: Stone, p: IceParams, swept: boolean): void {
 
   // Deriva laterale verso destra per rotazione oraria, più forte a bassa velocità.
   let spinFactor = s.w / (p.spinRatioRef * v);
+  // Effetto della spazzata sulla curva naturale: Hard la riduce (come prima); da un lato la riduce solo
+  // se spinge contro la curva (Straight), mentre spingendo verso la curva (Curl) la lascia com'è.
+  let sc = 1;
+  if (sweep) {
+    if (sweep.push === 0) sc = sweep.level === 1 ? p.sweepCurl : 1 - (1 - p.sweepCurl) * sweep.level;
+    else if (sweep.push * s.w < 0) sc = 1 - (1 - p.sweepCurl) * sweep.level;
+  }
   if (spinFactor > 1) spinFactor = 1;
   else if (spinFactor < -1) spinFactor = -1;
   const vv = v + p.curlV0;
@@ -87,7 +114,7 @@ function advanceStone(s: Stone, p: IceParams, swept: boolean): void {
     const f = m - i0;
     const basis = (k: number) => p.curlNorm![k] / (k === 0 ? q : k === 1 ? vv : k === 2 ? vv * q : vv * vv);
     const shape = f > 0 ? basis(i0) * (1 - f) + basis(i0 + 1) * f : basis(i0);
-    aLat = spinFactor * p.curlK * gain * (swept ? p.sweepCurl : 1) * shape;
+    aLat = spinFactor * p.curlK * gain * sc * shape;
   } else {
   // Curva «finale più netto»: più rotazione per metro, più curva (il «grab» con molti giri).
   if (p.spinGain) {
@@ -101,12 +128,15 @@ function advanceStone(s: Stone, p: IceParams, swept: boolean): void {
   }
   // La deriva cresce quando la pietra rallenta: come 1/√v (classica), 1/v o 1/v^1,5 (finale più netto).
   const slow = p.curlExp === 1 ? vv : p.curlExp === 1.5 ? vv * Math.sqrt(vv) : Math.sqrt(vv);
-  aLat = (spinFactor * p.curlK * (swept ? p.sweepCurl : 1)) / slow;
+  aLat = (spinFactor * p.curlK * sc) / slow;
   }
   // La deriva nasce dall'attrito e non può superarlo: con la curva «netta» a velocità quasi nulla
   // la spinta laterale ricostruirebbe a ogni tick la velocità persa e la pietra non si fermerebbe
   // mai. Con 0,9 la velocità di equilibrio resta sotto la soglia di arresto. Con la curva classica
   // la deriva resta sempre molto sotto l'attrito: nessun effetto.
+  // Spazzata da un lato: l'asimmetria d'attrito tra i due lati spinge la pietra (Sonobe et al. 2024),
+  // in proporzione alla riduzione d'attrito ottenuta.
+  if (sweep && sweep.push !== 0 && p.sweepDir) aLat += sweep.push * p.sweepDir * p.mu * G * (1 - fr);
   const aLatMax = 0.9 * aLong;
   if (aLat > aLatMax) aLat = aLatMax;
   else if (aLat < -aLatMax) aLat = -aLatMax;
@@ -214,9 +244,9 @@ function resolveCollisions(world: World): void {
 }
 
 /** Avanza il mondo di un tick. `sweptId` è la pietra spazzata in questo tick, o null. */
-export function stepWorld(world: World, sweptId: number | null): void {
+export function stepWorld(world: World, sweptId: number | null, sweep: SweepCmd = SWEEP_HARD): void {
   for (const s of world.stones) {
-    if (s.inPlay && s.moving) advanceStone(s, world.params, s.id === sweptId);
+    if (s.inPlay && s.moving) advanceStone(s, world.params, s.id === sweptId ? sweep : null);
   }
   resolveCollisions(world);
   world.tick++;

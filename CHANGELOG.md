@@ -2,8 +2,17 @@
 
 ## Non ancora rilasciato
 
-Fase 3. **Motore fisico 0.3.0:** curva che dipende dai giri e urti lenti smorzati. I replay registrati con i motori precedenti si riproducono come prima (l'app avvisa che il motore è diverso).
+Fase 3. **Motore fisico 0.4.0** (spazzata direzionale) e **0.3.0** curva che dipende dai giri e urti lenti smorzati. I replay registrati con i motori precedenti si riproducono come prima (l'app avvisa che il motore è diverso).
 
+- **Comandi di tiro nuovi** (senza proposta automatica dello skip):
+  - schede del tipo di tiro (Guardia, Draw, Freeze, Raise, Bocciata, Peel) che impostano il peso di partenza: Guardia ferma 1,5 m prima della casa, Draw al tee, Freeze 30 cm prima del tee, Raise fino alla hack line, Bocciata 3,0 m/s, Peel 3,8 m/s;
+  - peso espresso in secondi, back-to-hog o tee-to-hog a scelta (impostazione «Tempo del peso», ricordata dal browser), con − e + da 0,05 s; la velocità in m/s resta accanto;
+  - mirino al posto della scopa: si trascina sulla casa (o si tocca un punto).
+- **Spazzata direzionale** (motore 0.4.0): sotto la casa, durante il tiro, un pad a tre zone. Al centro Hard (due sweeper), ai lati Curl (più curva) e Straight (meno curva) con un solo sweeper; il lato di Curl segue la rotazione. L'altezza del dito è l'intensità, dal 100% in alto al 30% in basso. Da tastiera: Spazio = Hard, frecce ← → = spazzata da quel lato.
+  - Modello: con un solo sweeper la riduzione d'attrito è il 60% di quella di Hard e l'asimmetria tra i due lati spinge la pietra lontano dal lato spazzato (Sonobe et al. 2024). Spostamento laterale di una guardia spazzata da un lato dal rilascio all'arresto: 0,10 / 0,20 / 0,30 m per principianti / club / élite (ipotesi da tarare). Straight riduce anche la curva naturale, Curl no.
+  - Su un draw corto di 4 m spazzato fino al tee (sweeper di club): Hard +2,1 m in lunghezza; Curl +31 cm di curva e +1,2 m; Straight −26 cm di curva e +1,3 m.
+  - Il replay registra i comandi con modo e intensità (`sweepCmds`); i replay precedenti si riproducono identici (Hard al 100% è la spazzata di prima).
+  - Il rapporto riporta i secondi per modo e chiede un giudizio su Curl e Straight; l'agente ha le indicazioni corrispondenti.
 - **Curva dai giri** (motore 0.3.0), dalle indicazioni dei tester e dalla letteratura (Shegelski et al.: con 70–80 rotazioni circa il doppio della curva che con 5). Al posto del menu «Curva del draw», forma e quantità della curva dipendono dai giri. Sul ghiaccio normale (curva del profilo 1,2 m), draw al tee:
 
   | Giri | Curva | Negli ultimi 3 m | Il 10% della curva è raggiunto a | Arresto rispetto al tiro dritto |

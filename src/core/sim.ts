@@ -5,7 +5,7 @@
  */
 import { DT, ENGINE_VERSION, G, MAX_TICKS, STOP_MIXTURE, TAKEOUT_SPEED, type IceParams, type Precision } from "./params";
 import { FAR_HOG_OUTSIDE, HACK_POINT, RELEASE_Y, STONE_RADIUS, TEE_Y } from "./geometry";
-import { createStone, isAtRest, stepWorld, type Team, type World } from "./physics";
+import { createStone, isAtRest, stepWorld, SWEEP_HARD, type SweepCmd, type Team, type World } from "./physics";
 import { applyBoundaryRules, applyHogRule, type Removal } from "./rules";
 import { createRng, gaussian } from "./rng";
 
@@ -79,6 +79,11 @@ export interface Replay {
   /** Intervalli [inizio, fine) in tick in cui il comando di spazzata era attivo. */
   sweep: [number, number][];
   /**
+   * Dal motore 0.4.0: comandi di spazzata [inizio, fine, spinta, intensità]. Se c'è, la riproduzione
+   * segue questo campo; `sweep` resta per compatibilità (stessi intervalli, senza modo).
+   */
+  sweepCmds?: SweepRecord[];
+  /**
    * Esito, scritto a fine tiro. `sweepTime` e `swept` sono informativi: dicono quando la
    * spazzata ha agito davvero (in secondi dal rilascio); per rieseguire il tiro conta `sweep`.
    */
@@ -98,6 +103,8 @@ export interface ShotMetrics {
   rotations: number;
   /** Tempo di spazzata effettiva (s). */
   sweepTime: number;
+  /** Tempo di spazzata effettiva per modo (s): Hard, Curl (spinta verso la curva), Straight (contro). */
+  sweepModes: { hard: number; curl: number; straight: number };
   removals: Removal[];
   ticks: number;
   /** Primo urto della pietra tirata, o null se non ha colpito nulla. Solo misura: non cambia il tiro. */
@@ -172,6 +179,9 @@ export class Sim {
   readonly trace = new Map<number, { x: number; y: number; swept?: boolean }[]>();
   /** Intervalli [inizio, fine) in tick in cui la spazzata ha agito davvero sulla pietra tirata. */
   readonly swept: [number, number][] = [];
+  /** Comandi di spazzata ricevuti, con modo e intensità. */
+  readonly sweepCmds: SweepRecord[] = [];
+  private cmdNow: SweepCmd | null = null;
   private sweptNow = false;
   done = false;
   private sweepOn = false;
@@ -196,6 +206,7 @@ export class Sim {
       maxLateral: 0,
       rotations: 0,
       sweepTime: 0,
+      sweepModes: { hard: 0, curl: 0, straight: 0 },
       removals: [],
       ticks: 0,
       impact: null,
@@ -218,17 +229,31 @@ export class Sim {
     return d.inPlay && d.moving && d.y < TEE_Y;
   }
 
-  /** Avanza di un tick con lo stato del comando di spazzata. */
-  step(sweepInput: boolean): void {
+  /** Avanza di un tick con il comando di spazzata: true = Hard al 100% (come prima del motore 0.4.0). */
+  step(input: boolean | SweepCmd | null): void {
     if (this.done) return;
     const w = this.world;
+    const cmd: SweepCmd | null = input === true ? SWEEP_HARD : input || null;
+    const sweepInput = cmd !== null;
+    const changed = cmd !== this.cmdNow && !(cmd && this.cmdNow && cmd.push === this.cmdNow.push && cmd.level === this.cmdNow.level);
+    if (changed) {
+      if (this.cmdNow) this.sweepCmds[this.sweepCmds.length - 1][1] = w.tick;
+      if (cmd) this.sweepCmds.push([w.tick, MAX_TICKS, cmd.push, cmd.level]);
+      this.cmdNow = cmd;
+    }
     if (sweepInput !== this.sweepOn) {
       if (sweepInput) this.sweep.push([w.tick, MAX_TICKS]);
       else this.sweep[this.sweep.length - 1][1] = w.tick;
       this.sweepOn = sweepInput;
     }
     const swept = sweepInput && this.canSweep();
-    if (swept) this.metrics.sweepTime += DT;
+    if (swept) {
+      this.metrics.sweepTime += DT;
+      const m = this.metrics.sweepModes;
+      if (cmd!.push === 0) m.hard += DT;
+      else if (cmd!.push * this.delivered.w < 0) m.straight += DT;
+      else m.curl += DT;
+    }
     if (swept !== this.sweptNow) {
       if (swept) this.swept.push([w.tick, w.tick]);
       else this.swept[this.swept.length - 1][1] = w.tick;
@@ -239,7 +264,7 @@ export class Sim {
     const yBefore = d.y;
     const wasHit = d.hitStone;
     const pre = wasHit ? null : { x: d.x, y: d.y, vx: d.vx, vy: d.vy, others: w.stones.map((s) => ({ id: s.id, x: s.x, y: s.y, hit: s.hitStone })) };
-    stepWorld(w, swept ? this.deliveredId : null);
+    stepWorld(w, swept ? this.deliveredId : null, cmd ?? SWEEP_HARD);
     if (pre && d.hitStone) this.recordImpact(pre);
     else if (this.metrics.impact) this.trackImpact();
     this.metrics.removals.push(...applyBoundaryRules(w));
@@ -312,6 +337,8 @@ export class Sim {
     const w = this.world;
     if (this.sweepOn) this.sweep[this.sweep.length - 1][1] = w.tick;
     this.sweepOn = false;
+    if (this.cmdNow) this.sweepCmds[this.sweepCmds.length - 1][1] = w.tick;
+    this.cmdNow = null;
     if (this.sweptNow) this.swept[this.swept.length - 1][1] = w.tick;
     this.sweptNow = false;
     this.metrics.removals.push(...applyHogRule(w, this.deliveredId));
@@ -327,14 +354,9 @@ export class Sim {
     this.done = true;
   }
 
-  /** Avanza fino a fine tiro seguendo un programma di spazzata registrato. */
-  runToEnd(schedule: [number, number][] = []): void {
-    while (!this.done) {
-      const t = this.world.tick;
-      let on = false;
-      for (const [a, b] of schedule) if (t >= a && t < b) on = true;
-      this.step(on);
-    }
+  /** Avanza fino a fine tiro seguendo un programma di spazzata registrato (comandi, se ci sono). */
+  runToEnd(schedule: [number, number][] = [], cmds?: SweepRecord[]): void {
+    while (!this.done) this.step(sweepAt(this.world.tick, schedule, cmds));
   }
 
   /** Pietre in gioco a fine tiro, pronte per il tiro successivo. */
@@ -366,10 +388,23 @@ export function makeReplay(
   };
 }
 
+/** Comando di spazzata registrato: [tick d'inizio, tick di fine (escluso), spinta, intensità]. */
+export type SweepRecord = [number, number, -1 | 0 | 1, number];
+
+/** Comando di spazzata al tick `t` secondo un replay: i comandi, se ci sono, altrimenti Hard negli intervalli. */
+export function sweepAt(t: number, schedule: [number, number][], cmds?: SweepRecord[]): SweepCmd | null {
+  if (cmds) {
+    for (const [a, b, push, level] of cmds) if (t >= a && t < b) return push === 0 && level === 1 ? SWEEP_HARD : { push, level };
+    return null;
+  }
+  for (const [a, b] of schedule) if (t >= a && t < b) return SWEEP_HARD;
+  return null;
+}
+
 /** Riesegue un replay senza interfaccia e restituisce simulazione e hash finale. */
 export function runReplay(r: Replay): { sim: Sim; hash: string } {
   const sim = new Sim(r.params, r.stonesBefore, r.team, r.release);
-  sim.runToEnd(r.sweep);
+  sim.runToEnd(r.sweep, r.sweepCmds);
   return { sim, hash: hashWorld(sim.world) };
 }
 
@@ -404,6 +439,7 @@ export function validateReplay(x: unknown): x is Replay {
     !!r.params &&
     Array.isArray(r.stonesBefore) &&
     !!r.release &&
-    Array.isArray(r.sweep)
+    Array.isArray(r.sweep) &&
+    (r.sweepCmds === undefined || (Array.isArray(r.sweepCmds) && r.sweepCmds.every((c) => Array.isArray(c) && c.length === 4 && [-1, 0, 1].includes(c[2]) && typeof c[3] === "number")))
   );
 }

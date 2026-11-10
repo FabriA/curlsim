@@ -522,3 +522,57 @@ body:not([data-mode="end"]) .end-only { display: none !important; }
 .skill-grid { display: grid; grid-template-columns: auto 1fr 1fr; gap: 6px 8px; align-items: center; margin-top: 6px; }
 .skill-grid .skill-head { font-size: var(--step--1); color: var(--muted); }
 .skill-grid select { width: 100%; min-width: 0; }
+
+/* Tipi di tiro: schede che impostano il peso di partenza. */
+.shot-types { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.shot-types button { min-height: 44px; font-size: var(--step-0); }
+.shot-types button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+.weight-step { display: flex; align-items: center; gap: 8px; }
+.weight-step .value { flex: 1; text-align: center; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.weight-step .step { width: 44px; height: 44px; padding: 0; font-size: 1.25rem; line-height: 1; }
+
+/* Pad di spazzata (proposta A): tre zone, l'altezza del dito è l'intensità. */
+.sweep-pad {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  height: 132px;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: pointer;
+}
+.sweep-pad .zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background: linear-gradient(color-mix(in srgb, var(--accent) 18%, transparent), color-mix(in srgb, var(--accent) 4%, transparent));
+  border-right: 1px solid var(--rule);
+  pointer-events: none;
+}
+.sweep-pad .zone:last-of-type { border-right: 0; }
+.sweep-pad .zone-hard { background: linear-gradient(color-mix(in srgb, var(--accent) 28%, transparent), color-mix(in srgb, var(--accent) 7%, transparent)); }
+.sweep-pad .zone b { font-family: var(--font-display); font-size: var(--step-1); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.sweep-pad .zone span { font-size: var(--step--1); color: var(--muted); }
+.sweep-pad .zone.active { background: var(--accent); }
+.sweep-pad .zone.active b, .sweep-pad .zone.active span { color: var(--accent-fg); }
+.pad-strong, .pad-light { position: absolute; left: 8px; font-size: 11px; font-weight: 600; color: var(--muted); pointer-events: none; }
+.pad-strong { top: 6px; }
+.pad-light { bottom: 6px; }
+.pad-dot {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  margin: -15px 0 0 -15px;
+  border-radius: 50%;
+  background: var(--accent-fg);
+  border: 3px solid var(--fg);
+  pointer-events: none;
+}
+.pad-status { position: absolute; right: 8px; bottom: 6px; font-family: var(--font-mono); font-size: 11px; color: var(--muted); pointer-events: none; }
+.sweep-pad .zone.active ~ .pad-status { color: var(--fg); }

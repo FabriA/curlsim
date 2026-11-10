@@ -318,6 +318,14 @@ function recommendationsFor(qs: QuestionStats[], rs: RollStats[], group: string)
     Troppo: "La spazzata allunga troppo: ridurre i guadagni dei livelli degli sweeper",
     "Troppo poco": "La spazzata allunga troppo poco: aumentare i guadagni dei livelli degli sweeper",
   });
+  s("Spazzata Curl per", {
+    Troppo: "La spazzata Curl aumenta troppo la curva: ridurre gli spostamenti laterali di SWEEP_DIR",
+    "Troppo poco": "La spazzata Curl aumenta poco la curva: aumentare gli spostamenti laterali di SWEEP_DIR",
+  });
+  s("Spazzata Straight per", {
+    Troppo: "La spazzata Straight riduce troppo la curva: ridurre SWEEP_DIR o avvicinare sweepCurl a 1",
+    "Troppo poco": "La spazzata Straight riduce poco la curva: aumentare SWEEP_DIR",
+  });
   s("La riduzione della curva dovuta alla spazzata", {
     Troppa: "La spazzata riduce troppo la curva: avvicinare sweepCurl a 1 (oggi 0,85)",
     Troppo: "La spazzata riduce troppo la curva: avvicinare sweepCurl a 1 (oggi 0,85)",

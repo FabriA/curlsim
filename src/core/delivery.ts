@@ -7,7 +7,7 @@
  * e rilascia la pietra alla velocità del tiro. La decelerazione è una stima, da verificare
  * con tempi reali.
  */
-import { BACK_LINE_OUTSIDE, HACK_POINT, RELEASE_Y } from "./geometry";
+import { BACK_LINE_OUTSIDE, HACK_POINT, RELEASE_Y, TEE_Y } from "./geometry";
 import type { Release } from "./sim";
 
 /** Decelerazione della scivolata del tiratore con la pietra in mano (m/s²), stima. */
@@ -53,4 +53,24 @@ export function deliveryPosition(d: Delivery, t: number): { x: number; y: number
 export function deliveryStartsOnHackLine(d: Delivery): boolean {
   const cross = (d.start.x - HACK_POINT.x) * d.uy - (d.start.y - HACK_POINT.y) * d.ux;
   return Math.abs(cross) < 1e-9;
+}
+
+/** Intertempi usati per esprimere il peso: dalla back line o dalla tee line di consegna alla hog line. */
+export type SplitKind = "bh" | "th";
+
+/** Distanza (m) dalla linea di partenza dell'intertempo al rilascio, per un tiro dritto. */
+export function splitDistance(kind: SplitKind): number {
+  return RELEASE_Y - (kind === "bh" ? DELIVERY_BACK_Y : -TEE_Y);
+}
+
+/** Intertempo (s) di un tiro dritto con velocità di rilascio `v`, con lo stesso modello di planDelivery. */
+export function splitTime(v: number, kind: SplitKind, decel = DELIVERY_DECEL): number {
+  const d = splitDistance(kind);
+  if (decel <= 0) return d / v;
+  return (Math.sqrt(v * v + 2 * decel * d) - v) / decel;
+}
+
+/** Velocità di rilascio (m/s) che dà l'intertempo `t`: d = v·t + a·t²/2. */
+export function speedForSplit(t: number, kind: SplitKind, decel = DELIVERY_DECEL): number {
+  return splitDistance(kind) / t - (decel * t) / 2;
 }

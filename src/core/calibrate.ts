@@ -4,7 +4,7 @@
  *  - curlK si cerca per bisezione simulando lo stesso draw finché la curva
  *    raggiunge il valore richiesto.
  */
-import { BASE_PARAMS, G, REF_GUARD_SPEED, SPIN_TURNS, type IceParams, type IceTargets } from "./params";
+import { BASE_PARAMS, G, REF_GUARD_SPEED, SPIN_TURNS, SWEEP_DIR, SWEEP_GAIN, SWEEP_SIDE_SHARE, type IceParams, type IceTargets } from "./params";
 import { FAR_HOG_OUTSIDE, RELEASE_Y, TEE_Y } from "./geometry";
 import { Sim } from "./sim";
 
@@ -37,6 +37,34 @@ export function stopForSpeed(params: IceParams, speed: number): number {
 export function sweepFrictionForGain(params: IceParams, gain: number, speed = REF_GUARD_SPEED): number {
   const d = (speed * speed) / (2 * params.mu * G);
   return d / (d + Math.max(0, gain));
+}
+
+/**
+ * Spostamento laterale (m) di una spazzata da un lato per sweeper che guadagnano `gain` metri con
+ * Hard: tra i livelli di SWEEP_DIR in proporzione al guadagno, mai sotto zero.
+ */
+export function sweepDirTargetForGain(gain: number): number {
+  const lo = SWEEP_GAIN.beginner;
+  const hi = SWEEP_GAIN.elite;
+  const d = SWEEP_DIR.beginner + ((gain - lo) * (SWEEP_DIR.elite - SWEEP_DIR.beginner)) / (hi - lo);
+  return Math.max(0, d);
+}
+
+/**
+ * Coefficiente della spinta laterale (sweepDir) che sposta di `target` metri la guardia di
+ * riferimento spazzata da un solo sweeper al 100% dal rilascio all'arresto. Con decelerazione
+ * costante a e spinta laterale costante b la pietra si ferma dopo T = v/a; l'attrito agisce anche
+ * sulla velocità laterale (è opposto alla velocità), quindi lo spostamento vale b·T²/4.
+ * Richiede sweepFriction già impostato.
+ */
+export function sweepDirFor(params: IceParams, target: number, speed = REF_GUARD_SPEED): number {
+  const share = params.sweepSideShare ?? SWEEP_SIDE_SHARE;
+  const reduction = (1 - params.sweepFriction) * share;
+  if (reduction <= 0 || target <= 0) return 0;
+  const a = params.mu * G * (1 - reduction);
+  const t = speed / a;
+  const b = (4 * target) / (t * t);
+  return b / (params.mu * G * reduction);
 }
 
 /**

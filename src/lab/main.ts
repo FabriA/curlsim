@@ -2,11 +2,11 @@
  * Laboratorio 2D – fase 1.
  * Tira, spazza, osserva traiettorie e tempi, salva e riesegui i tiri.
  */
-import { calibrate, spinRateForTurns, stopForSpeed, speedToStopAt, sweepFrictionForGain } from "../core/calibrate";
+import { calibrate, spinRateForTurns, stopForSpeed, speedToStopAt, sweepDirFor, sweepDirTargetForGain, sweepFrictionForGain } from "../core/calibrate";
 import { BACK_LINE_OUTSIDE, FAR_HOG_INSIDE, HACK_Y, HOUSE_RADIUS, RELEASE_Y, STONE_RADIUS, TEE_Y } from "../core/geometry";
-import { APP_VERSION, BASE_PARAMS, COLLISIONS, collisionLevelOf, CURVES, curveLevelOf, DT, ENGINE_VERSION, PROFILES, SHOT_PRECISION, SPIN_TURNS, SWEEP_GAIN, TAKEOUT_SPEED, type CollisionLevel, type IceParams, type Precision, type ProfileId, type ShotLevel, type SkillLevel, type SpinLevel } from "../core/params";
+import { APP_VERSION, BASE_PARAMS, COLLISIONS, collisionLevelOf, CURVES, curveLevelOf, DT, ENGINE_VERSION, PROFILES, SHOT_PRECISION, SPIN_TURNS, SWEEP_GAIN, SWEEP_SIDE_SHARE, TAKEOUT_SPEED, type CollisionLevel, type IceParams, type Precision, type ProfileId, type ShotLevel, type SkillLevel, type SpinLevel } from "../core/params";
 import { REFERENCE_HASH, referenceReplay } from "../core/reference";
-import { makeReplay, runReplay, Sim, skillFromPrecision, validateReplay, type Replay, type Skill, type StonePlacement } from "../core/sim";
+import { makeReplay, runReplay, Sim, skillFromPrecision, sweepAt, validateReplay, type Replay, type Skill, type StonePlacement } from "../core/sim";
 import { bindText, getLanguage, initialLanguage, num, onLanguageChange, setLanguage, t, tIn, tt, type Lang, type Text } from "../i18n";
 import type { Key } from "../i18n/it";
 import { HOUSE_VIEW, Renderer, SHEET_VIEW, type DrawStone, type Scene } from "./render";
@@ -15,9 +15,9 @@ import { FeedbackPanel } from "./feedback";
 import { mountLanguagePicker } from "./lang-picker";
 import { Sound } from "./audio";
 import { EndMode, isMatchFile, type MatchFile } from "./end-mode";
-import { deliveryPosition, planDelivery, type Delivery } from "../core/delivery";
+import { deliveryPosition, planDelivery, speedForSplit, splitTime, type Delivery, type SplitKind } from "../core/delivery";
 import { makeScenario, validateScenario, type PlacementCheck } from "../core/placement";
-import type { Team } from "../core/physics";
+import { SWEEP_HARD, type SweepCmd, type Team } from "../core/physics";
 
 const MAX_STONES = 16;
 
@@ -57,8 +57,14 @@ const state = {
   playback: null as Replay | null,
   pendingReplay: null as Replay | null,
   log: [] as LogEntry[],
-  sweepKey: false,
+  /** Tasti di spazzata tenuti premuti: Spazio (Hard) e frecce (da un lato). */
+  keys: { space: false, left: false, right: false },
+  /** Pulsante «Spazza» del riquadro (Hard). */
   sweepButton: false,
+  /** Comando del pad di spazzata sotto la casa, o null se il dito non è sul pad. */
+  sweepPad: null as SweepCmd | null,
+  /** Posizione del dito sul pad (frazioni della larghezza e dell'altezza). */
+  padDot: null as { x: number; y: number } | null,
   angles: new Map<number, number>(),
   lastFrame: 0,
   tickDebt: 0,
@@ -117,33 +123,61 @@ function applyProfile(id: ProfileId): void {
 // ——— Peso ———
 const weightSlider = () => $<HTMLInputElement>("weight");
 
-function weightMarks(): { key: Key; v: number }[] {
+/**
+ * Tipi di tiro: ognuno imposta un peso di partenza, che poi si ritocca. Guardia: ferma 1,5 m prima
+ * della casa; Draw e Freeze: al tee; Raise: peso fino alla hack line; Bocciata e Peel: 3,0 e 3,8 m/s.
+ */
+function shotTypes(): { key: Key; v: number }[] {
   const p = state.params!;
   return [
-    { key: "weight.guard", v: speedToStopAt(p, TEE_Y - HOUSE_RADIUS - 1.5) },
-    { key: "weight.tee", v: speedToStopAt(p, TEE_Y) },
-    { key: "weight.back", v: speedToStopAt(p, BACK_LINE_OUTSIDE - STONE_RADIUS) },
-    { key: "weight.hack", v: speedToStopAt(p, HACK_Y) },
-    { key: "weight.takeout", v: 3.0 },
-    { key: "weight.peel", v: 3.8 },
+    { key: "type.guard", v: speedToStopAt(p, TEE_Y - HOUSE_RADIUS - 1.5) },
+    { key: "type.draw", v: speedToStopAt(p, TEE_Y) },
+    { key: "type.freeze", v: speedToStopAt(p, TEE_Y - 0.3) },
+    { key: "type.raise", v: speedToStopAt(p, HACK_Y) },
+    { key: "type.takeout", v: 3.0 },
+    { key: "type.peel", v: 3.8 },
   ];
 }
 
 function updateWeightMarks(): void {
-  const box = $("weight-marks");
+  const box = $("shot-types");
   box.replaceChildren();
-  for (const m of weightMarks()) {
+  for (const m of shotTypes()) {
     const b = document.createElement("button");
     b.type = "button";
-    b.className = "mark";
-    b.innerHTML = `<span>${t(m.key)}</span><b>${num(m.v, 2)}</b>`;
-    b.addEventListener("click", () => {
-      weightSlider().value = m.v.toFixed(2);
-      updateShotReadout();
-      draw();
-    });
+    b.textContent = t(m.key);
+    b.dataset.v = m.v.toFixed(2);
+    b.setAttribute("aria-pressed", "false");
+    b.addEventListener("click", () => setSpeed(m.v));
     box.append(b);
   }
+  markShotType();
+}
+
+/** Evidenzia il tipo di tiro che corrisponde al peso attuale. */
+function markShotType(): void {
+  const v = currentSpeed().toFixed(2);
+  document.querySelectorAll<HTMLButtonElement>("#shot-types button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === v)));
+}
+
+function setSpeed(v: number): void {
+  const s = weightSlider();
+  const clamped = Math.max(Number(s.min), Math.min(Number(s.max), v));
+  s.value = clamped.toFixed(2);
+  updateShotReadout();
+  draw();
+}
+
+const SPLIT_KEY = "curlsim.splitKind";
+function splitKind(): SplitKind {
+  return $<HTMLSelectElement>("split-kind").value === "th" ? "th" : "bh";
+}
+
+/** Ritocco del peso di 0,05 s sull'intertempo scelto: più tempo = meno peso. */
+function nudgeWeight(dt: number): void {
+  const k = splitKind();
+  const now = Math.round(splitTime(currentSpeed(), k) * 100) / 100;
+  setSpeed(speedForSplit(now + dt, k));
 }
 
 function describeStop(y: number): string {
@@ -199,7 +233,10 @@ function updateShotReadout(): void {
   const w = currentSpinRate();
   $("spin-rate").textContent = t("shot.spinRate", { w: num(w, 2), rps: num(w / (2 * Math.PI), 2) });
   const v = currentSpeed();
-  $("weight-value").textContent = t("shot.weightValue", { v: num(v, 2) });
+  const kind = splitKind();
+  const split = t("shot.weightValue", { t: num(splitTime(v, kind), 2), kind: t(kind === "th" ? "split.th" : "split.bh"), v: num(v, 2) });
+  $("weight-value").textContent = split;
+  markShotType();
   let where = describeStop(stopForSpeed(state.params, v));
   // Con molti giri la curva si concentra nel finale e la pietra si ferma più corta del tiro dritto.
   const short = spinShortfall(v);
@@ -207,7 +244,7 @@ function updateShotReadout(): void {
   $("weight-stop").textContent = t("shot.weightStop", { where });
   // Comandi flottanti su telefono: stesso peso e stessa rotazione dei comandi del riquadro Tiro.
   $<HTMLInputElement>("fab-weight").value = String(v);
-  $("fab-weight-value").textContent = `${num(v, 2)} m/s`;
+  $("fab-weight-value").textContent = split;
   $("fab-weight-stop").textContent = `· ${where}`;
   $("fab-spin").textContent = t(currentSpin() === 1 ? "fab.spinCw" : "fab.spinCcw");
   const bx = state.broom.x;
@@ -264,7 +301,9 @@ function syncSweepLevel(): void {
 /** Parametri del tiro: ghiaccio calibrato più l'effetto della spazzata del livello scelto. */
 function shotParams(): IceParams {
   const ice = state.params!;
-  return { ...ice, sweepFriction: sweepFrictionForGain(ice, activeSweepGain()), ...COLLISIONS[collisionLevel()] };
+  const gain = activeSweepGain();
+  const p: IceParams = { ...ice, sweepFriction: sweepFrictionForGain(ice, gain), sweepSideShare: SWEEP_SIDE_SHARE, ...COLLISIONS[collisionLevel()] };
+  return { ...p, sweepDir: sweepDirFor(p, sweepDirTargetForGain(gain)) };
 }
 
 /** Etichetta degli urti per il rapporto (sempre in italiano), ricavata dai valori usati davvero nel tiro. */
@@ -343,8 +382,19 @@ function startSim(replay: Replay, playback: Replay | null): void {
   requestAnimationFrame(frame);
 }
 
-function sweepInput(): boolean {
-  return state.sweepKey || state.sweepButton;
+/** Comando di spazzata dal vivo: il pad prima di tutto, poi frecce, Spazio e pulsante (Hard). */
+function sweepInput(): SweepCmd | null {
+  if (state.sweepPad) return state.sweepPad;
+  const k = state.keys;
+  if (k.left !== k.right) return { push: k.left ? -1 : 1, level: 1 };
+  if (k.space || state.sweepButton) return SWEEP_HARD;
+  return null;
+}
+
+/** Comando di spazzata del tick attuale: dal replay in riproduzione, altrimenti dal vivo. */
+function currentSweep(sim: Sim): SweepCmd | null {
+  if (state.playback) return sweepAt(sim.world.tick, state.playback.sweep, state.playback.sweepCmds);
+  return sweepInput();
 }
 
 function frame(now: number): void {
@@ -374,17 +424,11 @@ function frame(now: number): void {
   state.tickDebt += simTime / DT;
   const ticks = Math.floor(state.tickDebt);
   state.tickDebt -= ticks;
-  const schedule = state.playback?.sweep;
   let impact = 0;
   let board = 0;
   for (let i = 0; i < ticks && !sim.done; i++) {
     const before = sim.world.stones.map((s) => [s.vx, s.vy, s.inPlay ? 1 : 0]);
-    let on: boolean;
-    if (schedule) {
-      const tk = sim.world.tick;
-      on = schedule.some(([a, b]) => tk >= a && tk < b);
-    } else on = sweepInput();
-    sim.step(on);
+    sim.step(currentSweep(sim));
     // Urto: un salto di velocità in un solo passo (l'attrito del ghiaccio toglie molto meno).
     // Una pietra che esce dal gioco (sponda, linea laterale, fondo) si ferma di colpo: è un altro suono.
     sim.world.stones.forEach((s, k) => {
@@ -397,9 +441,9 @@ function frame(now: number): void {
       if (s.moving) state.angles.set(s.id, (state.angles.get(s.id) ?? 0) + s.w * DT);
     }
   }
-  const sweepActive = !!(sim && !sim.done && sim.canSweep() && (schedule ? playbackSweeping(sim) : sweepInput()));
+  const sweepActive = !!(sim && !sim.done && sim.canSweep() && currentSweep(sim));
   $("sweep-btn").classList.toggle("active", sweepActive);
-  $("fab-sweep").classList.toggle("active", sweepActive);
+  renderPad();
   const moving = sim.done ? [] : sim.world.stones.filter((s) => s.moving && s.inPlay).map((s) => ({ id: s.id, speed: Math.hypot(s.vx, s.vy) }));
   sound.update(moving, sweepActive, impact, board);
   if (sim.done) sound.silence();
@@ -443,6 +487,9 @@ function finishShot(): void {
   const sim = state.sim!;
   const replay = state.pendingReplay!;
   replay.sweep = state.playback ? state.playback.sweep.map((x) => [...x] as [number, number]) : sim.sweep.map((x) => [...x] as [number, number]);
+  const cmds = state.playback ? state.playback.sweepCmds : sim.sweepCmds;
+  if (cmds) replay.sweepCmds = cmds.map((x) => [...x] as typeof x);
+  else delete replay.sweepCmds;
   const hash = runReplay(replay).hash;
   replay.result = { hash, ticks: sim.metrics.ticks, sweepTime: Math.round(sim.metrics.sweepTime * 100) / 100, swept: sim.sweptSeconds() };
   state.stones = sim.placements();
@@ -498,6 +545,7 @@ function finishShot(): void {
     hit: sim.delivered.hitStone,
     removedOthers: others,
     sweepTime: m.sweepTime,
+    sweepModes: { ...m.sweepModes },
     spinTurns: replay.shot.spinTurns ?? SPIN_TURNS.normal,
     stopped: !!m.stop,
     outcome: outcomeText(outcome, "it"),
@@ -529,8 +577,7 @@ function stopShot(): void {
   state.pendingReplay = null;
   state.playback = null;
   state.splits = { bh: null, hh: null, running: false };
-  state.sweepKey = false;
-  state.sweepButton = false;
+  releaseSweep();
   // Nell'end la posizione valida è quella decisa dalle regole; il tiro fermato non conta.
   const start = endMode?.active ? endMode.stones() : state.lastSetup?.stones ?? state.stones;
   resetTo(start);
@@ -636,7 +683,7 @@ function scene(): Scene {
     predictedStopY: state.params && !sim ? stopForSpeed(state.params, currentSpeed()) : null,
     highlight,
     ...(endMode?.active && !sim ? endMode.sceneExtras() : endMode?.active ? { fgz: endMode.sceneExtras().fgz } : {}),
-    sweeping: !!sim && !sim.done && sim.canSweep() && (state.playback ? playbackSweeping(sim) : sweepInput()),
+    sweeping: sim && !sim.done && sim.canSweep() ? currentSweep(sim) : null,
   };
 }
 
@@ -662,12 +709,6 @@ function bindTrails(): void {
     }
     draw();
   });
-}
-
-/** Nella riproduzione la spazzata segue il programma registrato nel replay. */
-function playbackSweeping(sim: Sim): boolean {
-  const tk = sim.world.tick;
-  return !!state.playback?.sweep.some(([a, b]) => tk >= a && tk < b);
 }
 
 function collectTraces(sim: Sim): Scene["traces"] {
@@ -809,13 +850,14 @@ function setBusy(b: boolean): void {
   $("fab-spin").hidden = b;
   $("fab-weight-row").hidden = b;
   $("fab-rate").hidden = b || !feedback?.hasPending;
-  $("fab-sweep").hidden = !b || !!state.playback;
+  $("sweep-pad").hidden = !b || !!state.playback;
   $("fab-stop").hidden = !b;
   $("stop").hidden = !b;
   if (!b) {
-    $("fab-sweep").classList.remove("active");
+    releaseSweep();
     $("sweep-btn").classList.remove("active");
   }
+  renderPad();
   endMode?.render();
 }
 
@@ -853,32 +895,115 @@ function bindSweepButton(btn: HTMLElement): void {
   btn.addEventListener("contextmenu", (e) => e.preventDefault());
 }
 
+/** Smette di spazzare: pad, tasti e pulsante. */
+function releaseSweep(): void {
+  state.sweepButton = false;
+  state.sweepPad = null;
+  state.keys = { space: false, left: false, right: false };
+  renderPad();
+}
+
+/** Rotazione del tiro in corso (o di quello impostato): decide da che parte stanno Curl e Straight. */
+function shotSpin(): 1 | -1 {
+  return state.pendingReplay?.shot.spin ?? currentSpin();
+}
+
+/**
+ * Pad di spazzata: la zona centrale è Hard, quelle laterali spingono la pietra verso il loro lato.
+ * Il lato verso cui la pietra curva è Curl, l'altro Straight; l'altezza del dito è l'intensità,
+ * dal 100% in alto al 30% in basso, a passi del 10%.
+ */
+function padCommand(ev: PointerEvent): SweepCmd {
+  const r = $("sweep-pad").getBoundingClientRect();
+  const fx = Math.max(0, Math.min(0.999, (ev.clientX - r.left) / r.width));
+  const fy = Math.max(0, Math.min(1, (ev.clientY - r.top) / r.height));
+  const zone = Math.floor(fx * 3) - 1;
+  const level = Math.round((1 - 0.7 * fy) * 10) / 10;
+  state.padDot = { x: fx, y: fy };
+  return { push: zone as -1 | 0 | 1, level };
+}
+
+function bindSweepPad(): void {
+  const pad = $("sweep-pad");
+  pad.addEventListener("pointerdown", (ev) => {
+    ev.preventDefault();
+    try {
+      pad.setPointerCapture(ev.pointerId);
+    } catch {
+      /* alcuni browser non lo permettono */
+    }
+    state.sweepPad = padCommand(ev);
+    renderPad();
+  });
+  pad.addEventListener("pointermove", (ev) => {
+    if (!state.sweepPad) return;
+    state.sweepPad = padCommand(ev);
+    renderPad();
+  });
+  const off = () => {
+    state.sweepPad = null;
+    state.padDot = null;
+    renderPad();
+  };
+  for (const e of ["pointerup", "pointercancel", "lostpointercapture"]) pad.addEventListener(e, off);
+  pad.addEventListener("contextmenu", (e) => e.preventDefault());
+}
+
+/** Etichette e stato del pad: zone laterali secondo la rotazione, zona attiva, dito e intensità. */
+function renderPad(): void {
+  const spin = shotSpin();
+  // Rotazione oraria (+1): la pietra curva a destra, quindi Curl è a destra.
+  const right: Key = spin === 1 ? "sweep.curl" : "sweep.straight";
+  const left: Key = spin === 1 ? "sweep.straight" : "sweep.curl";
+  $("zone-right-name").textContent = t(right);
+  $("zone-right-sub").textContent = t(right === "sweep.curl" ? "sweep.curlSub" : "sweep.straightSub");
+  $("zone-left-name").textContent = t(left);
+  $("zone-left-sub").textContent = t(left === "sweep.curl" ? "sweep.curlSub" : "sweep.straightSub");
+  const sim = state.sim;
+  const cmd = sim && !state.playback ? sweepInput() : null;
+  document.querySelectorAll<HTMLElement>("#sweep-pad .zone").forEach((z) => z.classList.toggle("active", !!cmd && Number(z.dataset.zone) === cmd.push));
+  const dot = $("pad-dot");
+  dot.hidden = !state.padDot;
+  if (state.padDot) {
+    dot.style.left = `${state.padDot.x * 100}%`;
+    dot.style.top = `${state.padDot.y * 100}%`;
+  }
+  const mode: Key = !cmd ? "sweep.hard" : cmd.push === 0 ? "sweep.hard" : cmd.push === 1 ? right : left;
+  $("pad-status").textContent = cmd ? t("sweep.status", { mode: t(mode), p: Math.round(cmd.level * 100) }) : "";
+}
+
 function bindSweepInputs(): void {
   bindSweepButton($("sweep-btn"));
-  bindSweepButton($("fab-sweep"));
-  window.addEventListener("blur", () => {
-    state.sweepButton = false;
-    state.sweepKey = false;
-  });
+  bindSweepPad();
+  window.addEventListener("blur", releaseSweep);
   document.addEventListener("visibilitychange", () => {
-    if (document.hidden) {
-      state.sweepButton = false;
-      state.sweepKey = false;
-    }
+    if (document.hidden) releaseSweep();
   });
-  window.addEventListener("keydown", (e) => {
-    if (e.code !== "Space") return;
+  const typing = (e: KeyboardEvent) => {
     const tag = (e.target as HTMLElement).tagName;
-    if (tag === "TEXTAREA" || tag === "INPUT" || tag === "SELECT" || tag === "SUMMARY") return;
-    e.preventDefault();
-    if (!state.sim && !e.repeat) {
-      throwStone();
-      return;
-    }
-    state.sweepKey = true;
+    return tag === "TEXTAREA" || tag === "INPUT" || tag === "SELECT" || tag === "SUMMARY";
+  };
+  window.addEventListener("keydown", (e) => {
+    if (typing(e)) return;
+    if (e.code === "Space") {
+      e.preventDefault();
+      if (!state.sim && !e.repeat) {
+        throwStone();
+        return;
+      }
+      state.keys.space = true;
+    } else if ((e.code === "ArrowLeft" || e.code === "ArrowRight") && state.sim) {
+      e.preventDefault();
+      state.keys[e.code === "ArrowLeft" ? "left" : "right"] = true;
+    } else return;
+    renderPad();
   });
   window.addEventListener("keyup", (e) => {
-    if (e.code === "Space") state.sweepKey = false;
+    if (e.code === "Space") state.keys.space = false;
+    else if (e.code === "ArrowLeft") state.keys.left = false;
+    else if (e.code === "ArrowRight") state.keys.right = false;
+    else return;
+    renderPad();
   });
 }
 
@@ -941,6 +1066,7 @@ function relocalize(): void {
   endMode?.renderSkills();
   langPicker?.refresh();
   renderSoundButton();
+  renderPad();
   draw();
 }
 
@@ -983,10 +1109,30 @@ function init(): void {
     updateShotReadout();
     draw();
   });
-  for (const id of ["spin-cw", "spin-ccw"]) $(id).addEventListener("change", updateShotReadout);
+  $("w-less").addEventListener("click", () => nudgeWeight(0.05));
+  $("w-more").addEventListener("click", () => nudgeWeight(-0.05));
+  const sk = $<HTMLSelectElement>("split-kind");
+  try {
+    if (localStorage.getItem(SPLIT_KEY) === "th") sk.value = "th";
+  } catch {
+    /* memoria del browser non disponibile */
+  }
+  sk.addEventListener("change", () => {
+    try {
+      localStorage.setItem(SPLIT_KEY, splitKind());
+    } catch {
+      /* niente */
+    }
+    updateShotReadout();
+  });
+  for (const id of ["spin-cw", "spin-ccw"]) $(id).addEventListener("change", () => {
+    updateShotReadout();
+    renderPad();
+  });
   $("fab-spin").addEventListener("click", () => {
     $<HTMLInputElement>(currentSpin() === 1 ? "spin-ccw" : "spin-cw").checked = true;
     updateShotReadout();
+    renderPad();
   });
   $<HTMLInputElement>("fab-weight").addEventListener("input", (e) => {
     weightSlider().value = (e.target as HTMLInputElement).value;

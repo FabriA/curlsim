@@ -10,7 +10,7 @@
 export const APP_VERSION = "0.3.1";
 
 /** Versione del motore: entra in ogni replay. Cambiarla quando cambia il comportamento fisico. */
-export const ENGINE_VERSION = "0.3.0";
+export const ENGINE_VERSION = "0.4.0";
 
 /** Passo temporale fisso (s). */
 export const DT = 0.001;
@@ -54,6 +54,13 @@ export interface IceParams {
   sweepFriction: number;
   /** Fattore sulla deriva durante la spazzata (< 1). */
   sweepCurl: number;
+  /**
+   * Spazzata da un lato (dal motore 0.4.0): spinta laterale = sweepDir · μg · (riduzione d'attrito).
+   * Ricavata dal livello degli sweeper con sweepDirFor (calibrate.ts). Senza, nessuna spinta.
+   */
+  sweepDir?: number;
+  /** Quota della riduzione d'attrito ottenuta da un solo sweeper su un lato (rispetto a Hard). */
+  sweepSideShare?: number;
   /** Coefficiente di restituzione negli urti in cui una delle due pietre è quella tirata. */
   restitution: number;
   /**
@@ -208,6 +215,15 @@ export const REF_GUARD_SPEED = 1.9;
  * così il guadagno resta lo stesso su ogni profilo di ghiaccio.
  */
 export const SWEEP_GAIN: Record<SkillLevel, number> = { beginner: 1.35, club: 2.15, elite: 2.85 };
+/**
+ * Spazzata da un lato (Curl o Straight): spostamento laterale (m) di una guardia spazzata da un solo
+ * sweeper, al 100%, dal rilascio all'arresto. Ipotesi da tarare con i giudizi: Sonobe et al. (2024)
+ * misurano circa 7 cm su 6,5 m con pietre lente e senza rotazione.
+ */
+export const SWEEP_DIR: Record<SkillLevel, number> = { beginner: 0.1, club: 0.2, elite: 0.3 };
+/** Quota dell'effetto sull'attrito di un solo sweeper rispetto a due (Hard). */
+export const SWEEP_SIDE_SHARE = 0.6;
+
 export const SWEEP_GAIN_RANGE: Record<SkillLevel, [number, number]> = { beginner: [1.0, 1.7], club: [1.8, 2.5], elite: [2.6, 3.1] };
 
 /** Velocità di rilascio da cui un tiro è un colpo (bocciata) e non un tiro a peso da draw (m/s). */

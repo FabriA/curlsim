@@ -159,12 +159,27 @@
         <label class="field"><span data-t="shot.spinTurns"></span><input id="spin-turns" type="number" min="0" max="80" step="0.5" value="3.5"></label>
       </div>
       <p id="spin-rate" class="hint mono"></p>
-      <label class="field">
-        <span data-t="shot.weight"></span>
-        <input id="weight" type="range" min="1.6" max="3.8" step="0.01" value="2.03">
-        <span class="value" id="weight-value"></span>
+      <div class="field">
+        <span data-t="shot.types"></span>
+        <div id="shot-types" class="shot-types"></div>
+        <p class="hint" data-t="shot.typesHint"></p>
+      </div>
+      <div class="field">
+        <span id="weight-label" data-t="shot.weight"></span>
+        <div class="weight-step">
+          <button id="w-less" class="step" type="button" data-t-label="shot.weightLess">−</button>
+          <span class="value" id="weight-value"></span>
+          <button id="w-more" class="step" type="button" data-t-label="shot.weightMore">+</button>
+        </div>
+        <input id="weight" type="range" min="1.6" max="3.8" step="0.01" value="2.03" aria-labelledby="weight-label">
+      </div>
+      <label class="field inline">
+        <span data-t="shot.splitKind"></span>
+        <select id="split-kind">
+          <option value="bh" selected data-t="split.bh"></option>
+          <option value="th" data-t="split.th"></option>
+        </select>
       </label>
-      <div id="weight-marks" class="marks"></div>
       <p id="weight-stop" class="hint"></p>
       <div class="actions inline-actions">
         <button id="throw" class="primary" type="button" data-t="shot.throw"></button>
@@ -252,7 +267,6 @@
       <div class="fab-row">
         <button id="fab-spin" class="fab-spin" type="button" data-t-label="fab.spinLabel"></button>
         <button id="fab-throw" class="primary" type="button" data-t="shot.throw"></button>
-        <button id="fab-sweep" class="sweep" type="button" data-t="shot.sweep" hidden></button>
         <button id="fab-rate" type="button" data-t="fb.rate" hidden></button>
         <button id="fab-stop" class="stop" type="button" data-t="shot.stop" hidden></button>
       </div>
@@ -260,6 +274,15 @@
         <span class="fab-weight-label"><b id="fab-weight-value"></b> <span id="fab-weight-stop"></span></span>
         <input id="fab-weight" type="range" min="1.6" max="3.8" step="0.01" value="2.03" data-t-label="fab.weightLabel">
       </label>
+      <div id="sweep-pad" class="sweep-pad" role="group" data-t-aria="sweep.padLabel" aria-label="Pad di spazzata" hidden>
+        <div class="zone" data-zone="-1"><b id="zone-left-name"></b><span id="zone-left-sub"></span></div>
+        <div class="zone zone-hard" data-zone="0"><b data-t="sweep.hard"></b><span data-t="sweep.hardSub"></span></div>
+        <div class="zone" data-zone="1"><b id="zone-right-name"></b><span id="zone-right-sub"></span></div>
+        <span class="pad-strong" data-t="sweep.strong" aria-hidden="true"></span>
+        <span class="pad-light" data-t="sweep.light" aria-hidden="true"></span>
+        <span id="pad-dot" class="pad-dot" hidden></span>
+        <span id="pad-status" class="pad-status" aria-live="polite"></span>
+      </div>
     </div>
   </section>
 

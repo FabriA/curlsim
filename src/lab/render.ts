@@ -3,6 +3,7 @@
  * Due viste: la pista intera (striscia verticale) e la casa di gioco ingrandita.
  * I colori arrivano dai token CSS, così il disegno segue il tema chiaro o scuro.
  */
+import type { SweepCmd } from "../core/physics";
 import {
   BACK_LINE_OUTSIDE,
   BACK_LINE_WIDTH,
@@ -41,7 +42,8 @@ export interface Scene {
   broom: { x: number; y: number };
   /** Punto d'arresto previsto (dritto, senza spazzata) per il peso scelto. */
   predictedStopY: number | null;
-  sweeping: boolean;
+  /** Spazzata della pietra tirata in questo istante (modo e intensità), o null. */
+  sweeping: SweepCmd | null;
   /** Pietra trascinata: anello verde se la posizione è valida, rosso se no. */
   highlight?: { id: number; ok: boolean } | null;
   /** Free guard zone in vigore: si evidenzia l'area tra hog line e tee line, casa esclusa. */
@@ -198,7 +200,7 @@ export class Renderer {
     }
 
     this.drawBroom(pal, scene.broom.x, scene.broom.y);
-    for (const s of scene.stones) this.drawStone(pal, s, scene.sweeping && !!s.delivered);
+    for (const s of scene.stones) this.drawStone(pal, s, s.delivered ? scene.sweeping : null);
     for (const id of scene.counting ?? []) {
       const s = scene.stones.find((x) => x.id === id);
       if (!s) continue;
@@ -309,31 +311,36 @@ export class Renderer {
     ctx.restore();
   }
 
+  /** Mirino: cerchio con croce dove lo skip tiene la scopa, trascinabile sulla casa. */
   private drawBroom(pal: Palette, x: number, y: number): void {
     const ctx = this.ctx;
     const cx = this.X(x);
     const cy = this.Y(y);
-    const r = Math.max(5, 0.13 * this.scale);
+    const r = Math.max(6, 0.16 * this.scale);
     ctx.save();
-    ctx.fillStyle = pal.broom;
-    ctx.globalAlpha = 0.9;
-    // Testa della scopa: un pad rettangolare arrotondato.
-    const w = r * 2.2;
-    const h = r * 0.9;
+    ctx.strokeStyle = pal.broom;
+    ctx.lineWidth = Math.max(1.5, r * 0.14);
     ctx.beginPath();
-    ctx.roundRect(cx - w / 2, cy - h / 2, w, h, h / 2);
-    ctx.fill();
-    ctx.globalAlpha = 1;
-    ctx.strokeStyle = pal.ice;
-    ctx.lineWidth = Math.max(1, r * 0.12);
-    ctx.beginPath();
-    ctx.moveTo(cx - w * 0.32, cy);
-    ctx.lineTo(cx + w * 0.32, cy);
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
     ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(cx - r * 1.6, cy);
+    ctx.lineTo(cx - r * 0.45, cy);
+    ctx.moveTo(cx + r * 0.45, cy);
+    ctx.lineTo(cx + r * 1.6, cy);
+    ctx.moveTo(cx, cy - r * 1.6);
+    ctx.lineTo(cx, cy - r * 0.45);
+    ctx.moveTo(cx, cy + r * 0.45);
+    ctx.lineTo(cx, cy + r * 1.6);
+    ctx.stroke();
+    ctx.fillStyle = pal.broom;
+    ctx.beginPath();
+    ctx.arc(cx, cy, Math.max(1.5, r * 0.12), 0, Math.PI * 2);
+    ctx.fill();
     ctx.restore();
   }
 
-  private drawStone(pal: Palette, s: DrawStone, sweeping: boolean): void {
+  private drawStone(pal: Palette, s: DrawStone, sweeping: SweepCmd | null): void {
     const ctx = this.ctx;
     const cx = this.X(s.x);
     const cy = this.Y(s.y);
@@ -341,17 +348,21 @@ export class Renderer {
     if (sweeping) {
       ctx.save();
       ctx.fillStyle = pal.sweep;
-      ctx.globalAlpha = 0.35;
+      ctx.globalAlpha = 0.15 + 0.3 * sweeping.level;
       // Davanti alla pietra, nella direzione del moto: le scope lavorano sul ghiaccio che la pietra sta per attraversare.
       const v = Math.hypot(s.vx ?? 0, s.vy ?? 0);
       const ux = v > 1e-6 ? (s.vx ?? 0) / v : 0;
       const uy = v > 1e-6 ? (s.vy ?? 0) / v : 1;
       // In coordinate canvas l'asse y è invertito.
-      const ax = cx + ux * r * 2.2;
-      const ay = cy - uy * r * 2.2;
+      // Da un lato: un solo sweeper, sul lato opposto a quello verso cui la pietra è spinta
+      // (la pietra si allontana dal lato spazzato). Destra del moto = (uy, −ux).
+      const side = -sweeping.push * r * 0.75;
+      const ax = cx + ux * r * 2.2 + uy * side;
+      const ay = cy - uy * r * 2.2 + ux * side;
       const rot = Math.atan2(-uy, ux) + Math.PI / 2;
       ctx.beginPath();
-      ctx.ellipse(ax, ay, r * 1.3, r * 0.7, rot, 0, Math.PI * 2);
+      if (sweeping.push === 0) ctx.ellipse(ax, ay, r * 1.3, r * 0.7, rot, 0, Math.PI * 2);
+      else ctx.ellipse(ax, ay, r * 0.75, r * 0.6, rot, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     }

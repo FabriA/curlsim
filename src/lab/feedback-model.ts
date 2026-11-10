@@ -18,6 +18,8 @@ export interface ShotFacts {
   /** Pietre avversarie o proprie rimosse dal tiro. */
   removedOthers: number;
   sweepTime: number;
+  /** Dal motore 0.4.0: secondi di spazzata per modo. */
+  sweepModes?: { hard: number; curl: number; straight: number };
   spinTurns: number;
   stopped: boolean;
   outcome: string;
@@ -72,8 +74,7 @@ export function questionsFor(kind: ShotKind, f: ShotFacts, fmt: (n: number, d: n
       if (f.stopped) q.push({ id: "draw.weight", text: "fb.q.weightRef", params: { hh: fmt(f.ice.hogToHog, 1) }, answers: SCALE_LENGTH });
       break;
     case "sweptDraw":
-      q.push({ id: "sweep.length", text: "fb.q.sweepLength", params: { s: fmt(f.sweepTime, 1) }, answers: SCALE_TOO_MUCH });
-      q.push({ id: "sweep.curl", text: "fb.q.sweepCurl", answers: SCALE_TOO_MUCH });
+      q.push(...sweepQuestions(f, fmt));
       break;
     case "takeout":
       q.push({ id: "takeout.curl", text: "fb.q.takeoutCurl", answers: SCALE_TOO_MUCH });
@@ -88,10 +89,7 @@ export function questionsFor(kind: ShotKind, f: ShotFacts, fmt: (n: number, d: n
       break;
   }
   // Spazzata: domande anche sui tiri con urto, se si è spazzato abbastanza.
-  if (kind !== "sweptDraw" && f.sweepTime >= SWEEP_MIN_TIME) {
-    q.push({ id: "sweep.length", text: "fb.q.sweepLength", params: { s: fmt(f.sweepTime, 1) }, answers: SCALE_TOO_MUCH });
-    q.push({ id: "sweep.curl", text: "fb.q.sweepCurl", answers: SCALE_TOO_MUCH });
-  }
+  if (kind !== "sweptDraw" && f.sweepTime >= SWEEP_MIN_TIME) q.push(...sweepQuestions(f, fmt));
   // Rotazione bassa, alta o spinner, solo sui tiri senza urti: dalla 0.4 forma e quantità della curva dipendono dai giri.
   if (!f.hit && (f.spinTurns <= 2 || f.spinTurns >= 5)) {
     q.push({
@@ -101,6 +99,19 @@ export function questionsFor(kind: ShotKind, f: ShotFacts, fmt: (n: number, d: n
       answers: ["fb.a.shouldCurlMore", "fb.a.similarOk", "fb.a.shouldCurlLess", "fb.a.dontKnow"],
     });
   }
+  return q;
+}
+
+/**
+ * Domande sulla spazzata: allungamento sul tempo totale; riduzione della curva per Hard; dal motore
+ * 0.4.0 una domanda per Curl e una per Straight, se usati per almeno SWEEP_MIN_TIME secondi.
+ */
+function sweepQuestions(f: ShotFacts, fmt: (n: number, d: number) => string): Question[] {
+  const q: Question[] = [{ id: "sweep.length", text: "fb.q.sweepLength", params: { s: fmt(f.sweepTime, 1) }, answers: SCALE_TOO_MUCH }];
+  const m = f.sweepModes;
+  if ((m ? m.hard : f.sweepTime) >= SWEEP_MIN_TIME) q.push({ id: "sweep.curl", text: "fb.q.sweepCurl", answers: SCALE_TOO_MUCH });
+  if (m && m.curl >= SWEEP_MIN_TIME) q.push({ id: "sweep.dirCurl", text: "fb.q.sweepDirCurl", params: { s: fmt(m.curl, 1) }, answers: SCALE_TOO_MUCH });
+  if (m && m.straight >= SWEEP_MIN_TIME) q.push({ id: "sweep.dirStraight", text: "fb.q.sweepDirStraight", params: { s: fmt(m.straight, 1) }, answers: SCALE_TOO_MUCH });
   return q;
 }
 
@@ -140,6 +151,9 @@ export function formatReport(
     const f = r.facts;
     lines.push(
       `Tiro ${f.n} · ${shotLabel(r.kind, f, label, words.removed)} · ${fmt(f.speed, 2)} m/s · rotazione ${fmt(f.spinTurns, 1)} giri · spazzata ${fmt(f.sweepTime, 1)} s` +
+        (f.sweepModes && (f.sweepModes.curl > 0 || f.sweepModes.straight > 0)
+          ? ` (hard ${fmt(f.sweepModes.hard, 1)} s, curl ${fmt(f.sweepModes.curl, 1)} s, straight ${fmt(f.sweepModes.straight, 1)} s)`
+          : "") +
         ` · ghiaccio hog-to-hog ${fmt(f.ice.hogToHog, 1)} s, curva ${fmt(f.ice.curl, 1)} m · sweeper ${fmt(f.sweepGain, 2)} m` +
         (f.collisions ? ` · urti ${f.collisions}` : "") +
         (f.curve ? ` · curva ${f.curve}` : "") +
