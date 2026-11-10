@@ -1,8 +1,8 @@
 # Segnalazioni sul realismo
 
-Aggiornato il 2026-11-07 21:39 UTC · motore 0.3.0 · messaggi elaborati: 23 · tiri valutati: 67
+Aggiornato il 2026-11-10 13:08 UTC · motore 0.4.0 · messaggi elaborati: 24 · tiri valutati: 68
 
-Tiri per impostazione (urti e forma della curva): normali, curva molto netta 5 · normali, curva netta 31 · normali 25 · vivaci 6. Le statistiche sono separate per impostazione.
+Tiri per impostazione (urti e forma della curva): normali, curva molto netta 5 · normali, curva netta 31 · normali 25 · smorzati, curva dai giri 1 · vivaci 6. Le statistiche sono separate per impostazione.
 
 ## Indicazioni
 
@@ -14,7 +14,7 @@ Tiri per impostazione (urti e forma della curva): normali, curva molto netta 5 �
 
 | Esito della riesecuzione | Tiri |
 | --- | --- |
-| Identico all'hash registrato | 62 |
+| Identico all'hash registrato | 63 |
 | Diverso dall'hash registrato | 2 |
 | Registrato con un altro motore | 0 |
 | Senza replay | 3 |
@@ -82,6 +82,10 @@ Un replay diverso con lo stesso motore indica un problema di determinismo: va co
 | Dopo l'urto, la distanza percorsa dalla pietra tirata è… | normali, curva molto netta | 1 | Non so 1 | — |
 | Con rotazione bassa (# giri) la curva è quasi uguale a quella normale. Secondo te la pietra… | normali, curva netta | 1 | Dovrebbe curvare di più 1 | — |
 | Con rotazione alta (# giri) la curva è quasi uguale a quella normale. Secondo te la pietra… | normali, curva netta | 1 | Dovrebbe curvare di più 1 | — |
+| Spazzata per # s: l'allungamento del tiro è… | smorzati, curva dai giri | 1 | Giusto 1 | — |
+| La riduzione della curva dovuta alla spazzata è… | smorzati, curva dai giri | 1 | Giusto 1 | — |
+| Spazzata Curl per # s: l'aumento della curva è… | smorzati, curva dai giri | 1 | Giusto 1 | — |
+| Spazzata Straight per # s: la riduzione della curva è… | smorzati, curva dai giri | 1 | Non so 1 | — |
 
 ## Commenti
 
@@ -91,6 +95,7 @@ Un replay diverso con lo stesso motore indica un problema di determinismo: va co
 
 ## Messaggi
 
+- [2026-11-10 · web-89c47f9736f6](messages/2026-11-10-web-89c47f9736f6.md) · 1 tiri · versione 0.3.1
 - [2026-11-07 · web-7d45e153ba29](messages/2026-11-07-web-7d45e153ba29.md) · 3 tiri · versione 0.3.1
 - [2026-11-07 · web-ab172e1fc1ec](messages/2026-11-07-web-ab172e1fc1ec.md) · 1 tiri · versione 0.3.1
 - [2026-11-07 · web-683e5dcf2405](messages/2026-11-07-web-683e5dcf2405.md) · 3 tiri · versione 0.3.1
@@ -114,4 +119,3 @@ Un replay diverso con lo stesso motore indica un problema di determinismo: va co
 - [2026-11-05 · web-2580227929ee](messages/2026-11-05-web-2580227929ee.md) · 3 tiri · versione 0.3.0
 - [2026-11-04 · da8a94fc0dcd](messages/2026-11-04-da8a94fc0dcd.md) · 3 tiri · versione 0.2.2
 - [2026-11-04 · 91dfda604e18](messages/2026-11-04-91dfda604e18.md) · 1 tiri · versione 0.2.2
-
