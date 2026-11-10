@@ -18,6 +18,7 @@ import { EndMode, isMatchFile, type MatchFile } from "./end-mode";
 import { deliveryPosition, planDelivery, speedForSplit, splitTime, type Delivery, type SplitKind } from "../core/delivery";
 import { makeScenario, validateScenario, type PlacementCheck } from "../core/placement";
 import { SWEEP_HARD, type SweepCmd, type Team } from "../core/physics";
+import { executionError, hasExecutionNoise, type ExecutionError } from "../core/execution";
 
 const MAX_STONES = 16;
 
@@ -72,6 +73,8 @@ const state = {
   delivery: null as { plan: Delivery; t: number } | null,
   /** Intertempi dell'ultimo tiro, mostrati sopra la casa. */
   splits: { bh: null as number | null, hh: null as number | null, running: false },
+  /** Errore di esecuzione dell'ultimo tiro (abilità non perfetta), o null. */
+  execErr: null as ExecutionError | null,
   lastSetup: null as { stones: StonePlacement[] } | null,
   lastTraces: [] as Scene["traces"],
 };
@@ -369,6 +372,7 @@ function startSim(replay: Replay, playback: Replay | null): void {
   state.sim = new Sim(replay.params, replay.stonesBefore, replay.team, replay.release);
   state.delivery = { plan: planDelivery(replay.release), t: 0 };
   state.splits = { bh: null, hh: null, running: true };
+  state.execErr = hasExecutionNoise(replay) ? executionError(replay) : null;
   state.tickDebt = 0;
   state.lastFrame = performance.now();
   sound.unlock();
@@ -464,6 +468,10 @@ function updateSplits(): void {
   const sim = state.sim;
   const bh = $("split-bh");
   const hh = $("split-hh");
+  // L'errore del tiratore si vede dopo il rilascio.
+  const errBox = $("split-err");
+  errBox.hidden = !state.execErr || !!dl;
+  if (state.execErr && !dl) errBox.textContent = `${t("err.label")}: ${errorText(state.execErr)}`;
   if (dl) {
     bh.textContent = num(dl.t, 2);
     bh.dataset.state = "running";
@@ -680,6 +688,7 @@ function scene(): Scene {
     stones,
     traces: showTrails() ? traces : [],
     broom: state.broom,
+    aimActual: state.execErr && !state.delivery ? { x: state.execErr.aimX, y: state.execErr.aimY } : null,
     predictedStopY: state.params && !sim ? stopForSpeed(state.params, currentSpeed()) : null,
     highlight,
     ...(endMode?.active && !sim ? endMode.sceneExtras() : endMode?.active ? { fgz: endMode.sceneExtras().fgz } : {}),
@@ -749,13 +758,14 @@ function renderLog(): void {
       num(e.curl, 2),
       num(e.turns, 1),
       num(e.sweep, 1),
+      hasExecutionNoise(e.replay) ? errorText(executionError(e.replay), true) : "—",
       outcomeText(e.outcome),
       e.hash,
     ];
     cells.forEach((c, i) => {
       const td = document.createElement("td");
       td.textContent = c;
-      if (i === 11) td.className = "mono";
+      if (i === 12) td.className = "mono";
       tr.append(td);
     });
     tr.tabIndex = 0;
@@ -763,6 +773,29 @@ function renderLog(): void {
     tr.addEventListener("click", () => showReplay(e.replay));
     body.append(tr);
   }
+}
+
+/**
+ * Errore del tiratore in parole: linea al mirino e peso. Nei draw il peso è la differenza
+ * d'arresto (corto o lungo); nelle bocciate la differenza sull'intertempo scelto.
+ */
+function errorText(e: ExecutionError, compact = false): string {
+  const cm = (m: number) => String(Math.round(Math.abs(m) * 100));
+  const line = Math.abs(e.line) < 0.005 ? t("err.onLine") : t(e.line < 0 ? "err.left" : "err.right", { d: cm(e.line) });
+  let weight: string;
+  if (e.length !== null) {
+    weight = Math.abs(e.length) < 0.005 ? t("err.exactWeight") : t(e.length < 0 ? "err.short" : "err.long", { d: cm(e.length) });
+  } else {
+    const k = splitKind();
+    const dt = splitTime(e.speed, k) - splitTime(e.intendedSpeed, k);
+    weight = Math.abs(dt) < 0.005 ? t("err.exactWeight") : t(dt > 0 ? "err.slow" : "err.fast", { s: num(Math.abs(dt), 2), kind: t(k === "th" ? "split.th" : "split.bh") });
+  }
+  if (compact) {
+    const l = Math.abs(e.line) < 0.005 ? "0" : `${e.line < 0 ? "←" : "→"}${cm(e.line)}`;
+    const w = e.length !== null ? `${e.length < 0 ? "−" : "+"}${cm(e.length)}` : weight;
+    return e.length !== null ? `${l} · ${w} cm` : `${l} cm · ${w}`;
+  }
+  return `${line} · ${weight}`;
 }
 
 function showReplay(r: Replay): void {
@@ -1040,6 +1073,7 @@ function bindBroom(): void {
     if (state.sim || placement?.enabled) return;
     const p = houseR.eventToWorld(ev);
     state.broom = { x: Math.max(-2.2, Math.min(2.2, p.x)), y: Math.max(FAR_HOG_INSIDE + 0.5, Math.min(HACK_Y, p.y)) };
+    if (!state.sim) state.execErr = null;
     updateShotReadout();
     draw();
   };

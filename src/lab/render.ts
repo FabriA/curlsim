@@ -40,6 +40,8 @@ export interface Scene {
   stones: DrawStone[];
   traces: { team: 0 | 1; points: { x: number; y: number; swept?: boolean }[] }[];
   broom: { x: number; y: number };
+  /** Dove la linea effettiva del tiratore passa all'altezza del mirino (abilità non perfetta), o null. */
+  aimActual?: { x: number; y: number } | null;
   /** Punto d'arresto previsto (dritto, senza spazzata) per il peso scelto. */
   predictedStopY: number | null;
   /** Spazzata della pietra tirata in questo istante (modo e intensità), o null. */
@@ -200,6 +202,7 @@ export class Renderer {
     }
 
     this.drawBroom(pal, scene.broom.x, scene.broom.y);
+    if (scene.aimActual) this.drawAimActual(pal, scene.broom, scene.aimActual);
     for (const s of scene.stones) this.drawStone(pal, s, s.delivered ? scene.sweeping : null);
     for (const id of scene.counting ?? []) {
       const s = scene.stones.find((x) => x.id === id);
@@ -308,6 +311,31 @@ export class Renderer {
     ctx.moveTo(this.X(-0.45), this.Y(y));
     ctx.lineTo(this.X(0.45), this.Y(y));
     ctx.stroke();
+    ctx.restore();
+  }
+
+  /** Linea effettiva del tiratore: anello tratteggiato e trattino dal mirino, per vedere l'errore di linea. */
+  private drawAimActual(pal: Palette, broom: { x: number; y: number }, a: { x: number; y: number }): void {
+    const ctx = this.ctx;
+    const bx = this.X(broom.x);
+    const by = this.Y(broom.y);
+    const ax = this.X(a.x);
+    const ay = this.Y(a.y);
+    const r = Math.max(5, 0.11 * this.scale);
+    ctx.save();
+    ctx.strokeStyle = pal.broom;
+    ctx.globalAlpha = 0.75;
+    ctx.lineWidth = Math.max(1.2, r * 0.18);
+    ctx.setLineDash([Math.max(2, r * 0.45), Math.max(2, r * 0.35)]);
+    ctx.beginPath();
+    ctx.arc(ax, ay, r, 0, Math.PI * 2);
+    ctx.stroke();
+    if (Math.abs(ax - bx) > r) {
+      ctx.beginPath();
+      ctx.moveTo(bx + Math.sign(ax - bx) * r * 1.6, by);
+      ctx.lineTo(ax - Math.sign(ax - bx) * r, ay);
+      ctx.stroke();
+    }
     ctx.restore();
   }
 

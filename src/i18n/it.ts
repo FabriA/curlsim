@@ -338,6 +338,16 @@ export const it = {
   "sweep.status": "{mode} · {p}%",
   "fb.q.sweepDirCurl": "Spazzata Curl per {s} s: l'aumento della curva è…",
   "fb.q.sweepDirStraight": "Spazzata Straight per {s} s: la riduzione della curva è…",
+  "err.label": "Errore di tiro",
+  "err.left": "{d} cm a sinistra del mirino",
+  "err.right": "{d} cm a destra del mirino",
+  "err.onLine": "sulla linea del mirino",
+  "err.short": "{d} cm corto",
+  "err.long": "{d} cm lungo",
+  "err.exactWeight": "peso esatto",
+  "err.slow": "{s} s più lento ({kind})",
+  "err.fast": "{s} s più veloce ({kind})",
+  "log.err": "Errore",
 } as const;
 
 export type Key = keyof typeof it;
