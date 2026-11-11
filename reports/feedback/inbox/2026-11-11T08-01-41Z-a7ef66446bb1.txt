@@ -1,0 +1,14 @@
+CurlSim – giudizi sui tiri (versione 0.3.1, motore 0.4.0)
+Tiri valutati: 1
+
+Tiro 3 · Bocciata · 2,63 m/s · rotazione 3,5 giri · spazzata 6,6 s (hard 0,0 s, curl 6,6 s, straight 0,0 s) · ghiaccio hog-to-hog 14,5 s, curva 1,2 m · sweeper 2,15 m · urti smorzati · curva dai giri · esito: Fuori: linea laterale · pietre rimosse: 2 · hash b6ef010e
+  Urto: colpo pieno al 3% · velocità all'urto 1,71 m/s · tirata dopo l'urto 2,04 m (fuori gioco) · colpita 0,93 m (fuori gioco)
+  - La curva di questo colpo è… → Giusto
+  - Dopo l'urto, la direzione della pietra tirata è… → Credibile
+  - Dopo l'urto, la distanza percorsa dalla pietra tirata (la tua, non quella colpita) è… → Giusto
+  - Spazzata per 6,6 s: l'allungamento del tiro è… → Giusto
+  - Spazzata Curl per 6,6 s: l'aumento della curva è… → Giusto
+
+Replay (da incollare in «Carica replay o posizione» per rivedere il tiro identico):
+
+Tiro 3: {"format":"curling-replay","version":1,"engineVersion":"0.4.0","params":{"curlV0":0.1,"spinRatioRef":0.1,"sweepFriction":0.9202966120205112,"sweepCurl":0.85,"restitution":0.95,"stoneFriction":0.2,"inertiaK":0.5,"spinCurve":{"refTurns":3.5,"turns":[2,3,5,6.5,10,25,80],"exp":[0.5,1,1,1.3,1.5,1.7,1.7],"gain":[1.24,1,1,1.14,1.35,1.78,2.3]},"mu":0.007411714778538704,"curlK":0.007505171583034098,"spinRef":0.7785304129687596,"curlNorm":[0.9465751993733734,1,0.9620531741342393,0.8178964451583526],"sweepSideShare":0.6,"restitutionSecondary":0.97,"slowImpact":{"e":0.55,"from":0.4,"to":1.1},"sweepDir":0.3156597097478954},"team":0,"stonesBefore":[{"id":0,"team":1,"x":-0.5460055321463481,"y":13.63760372139349},{"id":1,"team":0,"x":-0.7317956592783902,"y":17.168664291743248},{"id":2,"team":1,"x":-0.2421436162857679,"y":17.065470476300664},{"id":4,"team":1,"x":0.8179751348185068,"y":17.622409631408726},{"id":6,"team":1,"x":1.341423010407218,"y":17.32179675583525}],"shot":{"broomX":0.7494444444444444,"broomY":17.21411111111111,"speed":2.63,"spin":1,"spinRate":1.5778677450762377,"spinTurns":3.5},"skill":{"lineSigma":0,"lineSigmaTakeout":0,"stopNoise":{"p":[0.3,0.63,0.07],"sigma":[0,0,0]}},"seed":247915,"release":{"x":0.19910274995351865,"y":-10.872,"vx":0.05152443006363158,"vy":2.6294952430279497,"w":1.5778677450762377},"sweep":[[6140,12774]],"sweepCmds":[[6140,6174,1,0.8],[6174,6207,1,0.9],[6207,12774,1,1]],"result":{"hash":"b6ef010e","ticks":16507,"sweepTime":6.63,"swept":[[6.14,12.77]]}}
