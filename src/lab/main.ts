@@ -776,7 +776,7 @@ function renderLog(): void {
 }
 
 /**
- * Errore del tiratore in parole: linea al mirino e peso. Nei draw il peso è la differenza
+ * Errore del tiratore in parole: linea alla scopa e peso. Nei draw il peso è la differenza
  * d'arresto (corto o lungo); nelle bocciate la differenza sull'intertempo scelto.
  */
 function errorText(e: ExecutionError, compact = false): string {

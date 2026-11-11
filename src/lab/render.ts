@@ -40,7 +40,7 @@ export interface Scene {
   stones: DrawStone[];
   traces: { team: 0 | 1; points: { x: number; y: number; swept?: boolean }[] }[];
   broom: { x: number; y: number };
-  /** Dove la linea effettiva del tiratore passa all'altezza del mirino (abilità non perfetta), o null. */
+  /** Dove la linea effettiva del tiratore passa all'altezza della scopa (abilità non perfetta), o null. */
   aimActual?: { x: number; y: number } | null;
   /** Punto d'arresto previsto (dritto, senza spazzata) per il peso scelto. */
   predictedStopY: number | null;
@@ -314,7 +314,7 @@ export class Renderer {
     ctx.restore();
   }
 
-  /** Linea effettiva del tiratore: anello tratteggiato e trattino dal mirino, per vedere l'errore di linea. */
+  /** Linea effettiva del tiratore: anello tratteggiato e trattino dalla scopa, per vedere l'errore di linea. */
   private drawAimActual(pal: Palette, broom: { x: number; y: number }, a: { x: number; y: number }): void {
     const ctx = this.ctx;
     const bx = this.X(broom.x);
@@ -330,40 +330,54 @@ export class Renderer {
     ctx.beginPath();
     ctx.arc(ax, ay, r, 0, Math.PI * 2);
     ctx.stroke();
-    if (Math.abs(ax - bx) > r) {
+    if (Math.abs(ax - bx) > 0.16 * Math.max(this.scale, 26) + r) {
       ctx.beginPath();
-      ctx.moveTo(bx + Math.sign(ax - bx) * r * 1.6, by);
+      ctx.moveTo(bx + Math.sign(ax - bx) * 0.16 * Math.max(this.scale, 26), by);
       ctx.lineTo(ax - Math.sign(ax - bx) * r, ay);
       ctx.stroke();
     }
     ctx.restore();
   }
 
-  /** Mirino: cerchio con croce dove lo skip tiene la scopa, trascinabile sulla casa. */
+  /**
+   * Scopa dello skip vista dall'alto, stilizzata: testa rettangolare (il pad) appoggiata sul punto di
+   * mira e manico inclinato verso l'alto. Il punto di mira è il centro del pad: non indica dove si
+   * ferma la pietra.
+   */
   private drawBroom(pal: Palette, x: number, y: number): void {
     const ctx = this.ctx;
     const cx = this.X(x);
     const cy = this.Y(y);
-    const r = Math.max(6, 0.16 * this.scale);
+    const k = Math.max(this.scale, 26);
+    const padW = 0.3 * k;
+    const padH = 0.1 * k;
     ctx.save();
+    ctx.translate(cx, cy);
+    // Manico: verso l'alto e un po' a destra, dal bordo del pad.
+    const ang = -Math.PI / 2 + 0.35;
     ctx.strokeStyle = pal.broom;
-    ctx.lineWidth = Math.max(1.5, r * 0.14);
+    ctx.lineCap = "round";
+    ctx.lineWidth = Math.max(2, 0.028 * k);
     ctx.beginPath();
-    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.moveTo(Math.cos(ang) * padH * 0.5, Math.sin(ang) * padH * 0.5);
+    ctx.lineTo(Math.cos(ang) * 0.75 * k, Math.sin(ang) * 0.75 * k);
     ctx.stroke();
+    // Impugnatura in fondo al manico.
+    ctx.lineWidth = Math.max(3, 0.045 * k);
     ctx.beginPath();
-    ctx.moveTo(cx - r * 1.6, cy);
-    ctx.lineTo(cx - r * 0.45, cy);
-    ctx.moveTo(cx + r * 0.45, cy);
-    ctx.lineTo(cx + r * 1.6, cy);
-    ctx.moveTo(cx, cy - r * 1.6);
-    ctx.lineTo(cx, cy - r * 0.45);
-    ctx.moveTo(cx, cy + r * 0.45);
-    ctx.lineTo(cx, cy + r * 1.6);
+    ctx.moveTo(Math.cos(ang) * 0.62 * k, Math.sin(ang) * 0.62 * k);
+    ctx.lineTo(Math.cos(ang) * 0.75 * k, Math.sin(ang) * 0.75 * k);
     ctx.stroke();
+    // Testa: pad scuro con il tessuto più chiaro al centro.
+    const r = padH * 0.35;
     ctx.fillStyle = pal.broom;
     ctx.beginPath();
-    ctx.arc(cx, cy, Math.max(1.5, r * 0.12), 0, Math.PI * 2);
+    roundedRect(ctx, -padW / 2, -padH / 2, padW, padH, r);
+    ctx.fill();
+    ctx.fillStyle = pal.ice;
+    ctx.globalAlpha = 0.35;
+    ctx.beginPath();
+    roundedRect(ctx, -padW / 2 + padH * 0.22, -padH * 0.22, padW - padH * 0.44, padH * 0.44, r * 0.5);
     ctx.fill();
     ctx.restore();
   }
@@ -418,4 +432,15 @@ export class Renderer {
       ctx.restore();
     }
   }
+}
+
+/** Rettangolo con angoli arrotondati (anche dove manca CanvasRenderingContext2D.roundRect). */
+function roundedRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number): void {
+  const rr = Math.min(r, w / 2, h / 2);
+  ctx.moveTo(x + rr, y);
+  ctx.arcTo(x + w, y, x + w, y + h, rr);
+  ctx.arcTo(x + w, y + h, x, y + h, rr);
+  ctx.arcTo(x, y + h, x, y, rr);
+  ctx.arcTo(x, y, x + w, y, rr);
+  ctx.closePath();
 }
