@@ -1,8 +1,8 @@
 # Segnalazioni sul realismo
 
-Aggiornato il 2026-11-10 20:34 UTC · motore 0.4.0 · messaggi elaborati: 25 · tiri valutati: 69
+Aggiornato il 2026-11-11 08:02 UTC · motore 0.4.0 · messaggi elaborati: 26 · tiri valutati: 70
 
-Tiri per impostazione (urti e forma della curva): normali, curva molto netta 5 · normali, curva netta 31 · normali 25 · smorzati, curva dai giri 2 · vivaci 6. Le statistiche sono separate per impostazione.
+Tiri per impostazione (urti e forma della curva): normali, curva molto netta 5 · normali, curva netta 31 · normali 25 · smorzati, curva dai giri 3 · vivaci 6. Le statistiche sono separate per impostazione.
 
 ## Indicazioni
 
@@ -14,7 +14,7 @@ Tiri per impostazione (urti e forma della curva): normali, curva molto netta 5 �
 
 | Esito della riesecuzione | Tiri |
 | --- | --- |
-| Identico all'hash registrato | 64 |
+| Identico all'hash registrato | 65 |
 | Diverso dall'hash registrato | 2 |
 | Registrato con un altro motore | 0 |
 | Senza replay | 3 |
@@ -31,6 +31,7 @@ Un replay diverso con lo stesso motore indica un problema di determinismo: va co
 | normali, curva netta | pieno | 2 | 0,39 | 0 | 2 | 0 | 0 |
 | normali, curva netta | mezza pietra | 3 | 2,32 | 0 | 3 | 0 | 0 |
 | normali, curva netta | sottile | 3 | 2,04 | 0 | 3 | 0 | 0 |
+| smorzati, curva dai giri | sottile | 1 | 2,04 | 0 | 1 | 0 | 0 |
 | vivaci | pieno | 2 | 0,09 | 0 | 0 | 2 | 0 |
 
 ## Pietra colpita nei raise, per velocità d'impatto
@@ -69,10 +70,11 @@ Un replay diverso con lo stesso motore indica un problema di determinismo: va co
 | La curva di questo colpo è… | normali | 4 | Giusto 4 | — |
 | Dopo l'urto, la direzione della pietra tirata è… | normali | 3 | Credibile 3 | — |
 | Dopo l'urto, la distanza percorsa dalla pietra tirata è… | normali | 3 | Giusto 2 · Non so 1 | — |
+| Spazzata per # s: l'allungamento del tiro è… | smorzati, curva dai giri | 3 | Giusto 3 | — |
 | Con rotazione alta (# giri) la curva è quasi uguale a quella normale. Secondo te la pietra… | normali | 2 | Dovrebbe curvare di più 2 | — |
 | Spazzata per # s: l'allungamento del tiro è… | normali, curva molto netta | 2 | Giusto 2 | — |
 | La riduzione della curva dovuta alla spazzata è… | normali, curva molto netta | 2 | Giusto 2 | — |
-| Spazzata per # s: l'allungamento del tiro è… | smorzati, curva dai giri | 2 | Giusto 2 | — |
+| Spazzata Curl per # s: l'aumento della curva è… | smorzati, curva dai giri | 2 | Giusto 2 | — |
 | Spazzata Straight per # s: la riduzione della curva è… | smorzati, curva dai giri | 2 | Non so 1 · Giusto 1 | — |
 | Il punto in cui la pietra inizia a curvare davvero arriva… | normali, curva molto netta | 1 | Giusto 1 | — |
 | La chiusura finale della curva è… | normali, curva molto netta | 1 | Troppo brusca 1 | — |
@@ -85,7 +87,9 @@ Un replay diverso con lo stesso motore indica un problema di determinismo: va co
 | Con rotazione bassa (# giri) la curva è quasi uguale a quella normale. Secondo te la pietra… | normali, curva netta | 1 | Dovrebbe curvare di più 1 | — |
 | Con rotazione alta (# giri) la curva è quasi uguale a quella normale. Secondo te la pietra… | normali, curva netta | 1 | Dovrebbe curvare di più 1 | — |
 | La riduzione della curva dovuta alla spazzata è… | smorzati, curva dai giri | 1 | Giusto 1 | — |
-| Spazzata Curl per # s: l'aumento della curva è… | smorzati, curva dai giri | 1 | Giusto 1 | — |
+| La curva di questo colpo è… | smorzati, curva dai giri | 1 | Giusto 1 | — |
+| Dopo l'urto, la direzione della pietra tirata è… | smorzati, curva dai giri | 1 | Credibile 1 | — |
+| Dopo l'urto, la distanza percorsa dalla pietra tirata (la tua, non quella colpita) è… | smorzati, curva dai giri | 1 | Giusto 1 | — |
 
 ## Commenti
 
@@ -95,6 +99,7 @@ Un replay diverso con lo stesso motore indica un problema di determinismo: va co
 
 ## Messaggi
 
+- [2026-11-11 · web-a7ef66446bb1](messages/2026-11-11-web-a7ef66446bb1.md) · 1 tiri · versione 0.3.1
 - [2026-11-10 · web-2dcc1e0583bc](messages/2026-11-10-web-2dcc1e0583bc.md) · 1 tiri · versione 0.3.1
 - [2026-11-10 · web-89c47f9736f6](messages/2026-11-10-web-89c47f9736f6.md) · 1 tiri · versione 0.3.1
 - [2026-11-07 · web-7d45e153ba29](messages/2026-11-07-web-7d45e153ba29.md) · 3 tiri · versione 0.3.1
