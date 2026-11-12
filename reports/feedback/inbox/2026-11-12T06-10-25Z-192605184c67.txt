@@ -1,0 +1,14 @@
+CurlSim – giudizi sui tiri (versione 0.3.1, motore 0.4.0)
+Tiri valutati: 1
+
+Tiro 2 · Raise o freeze · 2,03 m/s · rotazione 3,5 giri · spazzata 12,1 s (hard 0,0 s, curl 12,1 s, straight 0,0 s) · ghiaccio hog-to-hog 14,5 s, curva 1,2 m · sweeper 2,15 m · urti smorzati · curva dai giri · esito: In gioco · hash f8b024c9
+  Urto: colpo pieno al 67% · velocità all'urto 0,30 m/s · tirata dopo l'urto 0,08 m · colpita 0,32 m
+  - La pietra colpita è avanzata… → Giusto
+  - Dopo l'urto, la pietra tirata è rimasta… → Giusto
+  - Spazzata per 12,1 s: l'allungamento del tiro è… → Giusto
+  - Spazzata Curl per 12,1 s: l'aumento della curva è… → Troppo poco
+  Commento: stesso tiro del precedente ma spazzato negli ultimi secondi per aumentare il curl, ma il sasso ha curlato di meno di quello non scopato.
+
+Replay (da incollare in «Carica replay o posizione» per rivedere il tiro identico):
+
+Tiro 2: {"format":"curling-replay","version":1,"engineVersion":"0.4.0","params":{"curlV0":0.1,"spinRatioRef":0.1,"sweepFriction":0.9202966120205112,"sweepCurl":0.85,"restitution":0.95,"stoneFriction":0.2,"inertiaK":0.5,"spinCurve":{"refTurns":3.5,"turns":[2,3,5,6.5,10,25,80],"exp":[0.5,1,1,1.3,1.5,1.7,1.7],"gain":[1.24,1,1,1.14,1.35,1.78,2.3]},"mu":0.007411714778538704,"curlK":0.007505171583034098,"spinRef":0.7785304129687596,"curlNorm":[0.9465751993733734,1,0.9620531741342393,0.8178964451583526],"sweepSideShare":0.6,"restitutionSecondary":0.97,"slowImpact":{"e":0.55,"from":0.4,"to":1.1},"sweepDir":0.3156597097478954},"team":1,"stonesBefore":[{"id":0,"team":0,"x":-0.625860907876932,"y":17.379481651242823}],"shot":{"broomX":-1.8302236481435337,"broomY":17.396151009220034,"speed":2.03,"spin":1,"spinRate":1.5778677450762377,"spinTurns":3.5},"skill":{"lineSigma":0,"lineSigmaTakeout":0,"stopNoise":{"p":[0.3,0.63,0.07],"sigma":[0,0,0]}},"seed":3,"release":{"x":-0.4839269669091733,"y":-10.872,"vx":-0.09657115568526727,"vy":2.027701657515131,"w":1.5778677450762377},"sweep":[[11894,23967]],"sweepCmds":[[11894,23967,1,0.7]],"result":{"hash":"f8b024c9","ticks":27244,"sweepTime":12.07,"swept":[[11.89,23.97]]}}
