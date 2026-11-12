@@ -29,7 +29,8 @@
   "web-2dcc1e0583bc",
   "web-a7ef66446bb1",
   "web-1247ff8a506f",
-  "web-307b5d4ed95c"
+  "web-307b5d4ed95c",
+  "web-192605184c67"
  ],
  "shots": [
   {
@@ -9785,7 +9786,179 @@
     }
    },
    "warnings": []
+  },
+  {
+   "message": "web-192605184c67",
+   "date": "2026-11-12T06:10:25.000Z",
+   "app": "0.3.1",
+   "engine": "0.4.0",
+   "n": 2,
+   "kind": "Raise o freeze",
+   "speed": 2.03,
+   "spinTurns": 3.5,
+   "sweepTime": 12.1,
+   "collisions": "smorzati",
+   "curve": "dai giri",
+   "outcome": "In gioco",
+   "hash": "f8b024c9",
+   "answers": [
+    {
+     "question": "La pietra colpita è avanzata…",
+     "answer": "Giusto"
+    },
+    {
+     "question": "Dopo l'urto, la pietra tirata è rimasta…",
+     "answer": "Giusto"
+    },
+    {
+     "question": "Spazzata per 12,1 s: l'allungamento del tiro è…",
+     "answer": "Giusto"
+    },
+    {
+     "question": "Spazzata Curl per 12,1 s: l'aumento della curva è…",
+     "answer": "Troppo poco"
+    }
+   ],
+   "comment": "stesso tiro del precedente ma spazzato negli ultimi secondi per aumentare il curl, ma il sasso ha curlato di meno di quello non scopato.",
+   "replayCheck": "identico",
+   "rerunHash": "f8b024c9",
+   "impact": {
+    "fullness": 0.67,
+    "speed": 0.3,
+    "shooterTravel": 0.08,
+    "targetTravel": 0.32,
+    "shooterOut": false,
+    "targetOut": false
+   },
+   "replay": {
+    "format": "curling-replay",
+    "version": 1,
+    "engineVersion": "0.4.0",
+    "params": {
+     "curlV0": 0.1,
+     "spinRatioRef": 0.1,
+     "sweepFriction": 0.9202966120205112,
+     "sweepCurl": 0.85,
+     "restitution": 0.95,
+     "stoneFriction": 0.2,
+     "inertiaK": 0.5,
+     "spinCurve": {
+      "refTurns": 3.5,
+      "turns": [
+       2,
+       3,
+       5,
+       6.5,
+       10,
+       25,
+       80
+      ],
+      "exp": [
+       0.5,
+       1,
+       1,
+       1.3,
+       1.5,
+       1.7,
+       1.7
+      ],
+      "gain": [
+       1.24,
+       1,
+       1,
+       1.14,
+       1.35,
+       1.78,
+       2.3
+      ]
+     },
+     "mu": 0.007411714778538704,
+     "curlK": 0.007505171583034098,
+     "spinRef": 0.7785304129687596,
+     "curlNorm": [
+      0.9465751993733734,
+      1,
+      0.9620531741342393,
+      0.8178964451583526
+     ],
+     "sweepSideShare": 0.6,
+     "restitutionSecondary": 0.97,
+     "slowImpact": {
+      "e": 0.55,
+      "from": 0.4,
+      "to": 1.1
+     },
+     "sweepDir": 0.3156597097478954
+    },
+    "team": 1,
+    "stonesBefore": [
+     {
+      "id": 0,
+      "team": 0,
+      "x": -0.625860907876932,
+      "y": 17.379481651242823
+     }
+    ],
+    "shot": {
+     "broomX": -1.8302236481435337,
+     "broomY": 17.396151009220034,
+     "speed": 2.03,
+     "spin": 1,
+     "spinRate": 1.5778677450762377,
+     "spinTurns": 3.5
+    },
+    "skill": {
+     "lineSigma": 0,
+     "lineSigmaTakeout": 0,
+     "stopNoise": {
+      "p": [
+       0.3,
+       0.63,
+       0.07
+      ],
+      "sigma": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "seed": 3,
+    "release": {
+     "x": -0.4839269669091733,
+     "y": -10.872,
+     "vx": -0.09657115568526727,
+     "vy": 2.027701657515131,
+     "w": 1.5778677450762377
+    },
+    "sweep": [
+     [
+      11894,
+      23967
+     ]
+    ],
+    "sweepCmds": [
+     [
+      11894,
+      23967,
+      1,
+      0.7
+     ]
+    ],
+    "result": {
+     "hash": "f8b024c9",
+     "ticks": 27244,
+     "sweepTime": 12.07,
+     "swept": [
+      [
+       11.89,
+       23.97
+      ]
+     ]
+    }
+   },
+   "warnings": []
   }
  ],
- "updated": "2026-11-12 05:51 UTC"
+ "updated": "2026-11-12 06:10 UTC"
 }

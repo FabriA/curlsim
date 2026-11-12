@@ -1,8 +1,8 @@
 # Segnalazioni sul realismo
 
-Aggiornato il 2026-11-12 05:51 UTC · motore 0.4.0 · messaggi elaborati: 28 · tiri valutati: 76
+Aggiornato il 2026-11-12 06:10 UTC · motore 0.4.0 · messaggi elaborati: 29 · tiri valutati: 77
 
-Tiri per impostazione (urti e forma della curva): normali, curva molto netta 5 · normali, curva netta 31 · normali 25 · smorzati, curva dai giri 9 · vivaci 6. Le statistiche sono separate per impostazione.
+Tiri per impostazione (urti e forma della curva): normali, curva molto netta 5 · normali, curva netta 31 · normali 25 · smorzati, curva dai giri 10 · vivaci 6. Le statistiche sono separate per impostazione.
 
 ## Indicazioni
 
@@ -14,7 +14,7 @@ Tiri per impostazione (urti e forma della curva): normali, curva molto netta 5 �
 
 | Esito della riesecuzione | Tiri |
 | --- | --- |
-| Identico all'hash registrato | 71 |
+| Identico all'hash registrato | 72 |
 | Diverso dall'hash registrato | 2 |
 | Registrato con un altro motore | 0 |
 | Senza replay | 3 |
@@ -42,7 +42,7 @@ Un replay diverso con lo stesso motore indica un problema di determinismo: va co
 | normali | 0,5–0,8 m/s | 7 | 1,61 | 7 | 0 | 0 | 0 |
 | normali | 0,8–1,2 m/s | 9 | 3,06 | 3 | 5 | 0 | 1 |
 | normali | sopra 1,2 m/s | 5 | 1,69 | 2 | 3 | 0 | 0 |
-| smorzati | sotto 0,5 m/s | 1 | 0,55 | 0 | 1 | 0 | 0 |
+| smorzati | sotto 0,5 m/s | 2 | 0,44 | 0 | 2 | 0 | 0 |
 | smorzati | 0,5–0,8 m/s | 1 | 0,98 | 1 | 0 | 0 | 0 |
 | smorzati | 0,8–1,2 m/s | 1 | 2,43 | 1 | 0 | 0 | 0 |
 | smorzati | sopra 1,2 m/s | 1 | 2,64 | 0 | 1 | 0 | 0 |
@@ -64,18 +64,18 @@ Un replay diverso con lo stesso motore indica un problema di determinismo: va co
 | La chiusura finale della curva è… | normali, curva netta | 8 | Giusto 7 · Troppo dolce 1 | — |
 | Spazzata per # s: l'allungamento del tiro è… | normali, curva netta | 8 | Giusto 7 · Non so 1 | — |
 | La riduzione della curva dovuta alla spazzata è… | normali, curva netta | 8 | Giusto 7 · Non so 1 | — |
+| Spazzata per # s: l'allungamento del tiro è… | smorzati, curva dai giri | 8 | Giusto 7 · Troppo poco 1 | — |
 | Il punto in cui la pietra inizia a curvare davvero arriva… | normali | 7 | Troppo presto 4 · Giusto 3 | — |
 | La chiusura finale della curva è… | normali | 7 | Troppo dolce 5 · Giusto 2 | Troppo dolce (71%) |
 | Con un hog-to-hog di # s, per questo peso il tiro è risultato… | normali | 7 | Giusto 7 | — |
 | Con un hog-to-hog di # s, per questo peso il tiro è risultato… | normali, curva netta | 7 | Giusto 7 | — |
-| Spazzata per # s: l'allungamento del tiro è… | smorzati, curva dai giri | 7 | Giusto 6 · Troppo poco 1 | — |
 | La curva di questo colpo è… | vivaci | 5 | Giusto 5 | — |
 | Dopo l'urto, la direzione della pietra tirata è… | vivaci | 5 | Credibile 5 | — |
 | Dopo l'urto, la distanza percorsa dalla pietra tirata è… | vivaci | 5 | Troppo lungo 4 · Giusto 1 | Troppo lungo (80%) |
+| Spazzata Curl per # s: l'aumento della curva è… | smorzati, curva dai giri | 5 | Giusto 3 · Troppo poco 2 | — |
+| La pietra colpita è avanzata… | smorzati, curva dai giri | 5 | Giusto 3 · Troppo 2 | — |
+| Dopo l'urto, la pietra tirata è rimasta… | smorzati, curva dai giri | 5 | Giusto 5 | — |
 | La curva di questo colpo è… | normali | 4 | Giusto 4 | — |
-| Spazzata Curl per # s: l'aumento della curva è… | smorzati, curva dai giri | 4 | Giusto 3 · Troppo poco 1 | — |
-| La pietra colpita è avanzata… | smorzati, curva dai giri | 4 | Giusto 2 · Troppo 2 | — |
-| Dopo l'urto, la pietra tirata è rimasta… | smorzati, curva dai giri | 4 | Giusto 4 | — |
 | Dopo l'urto, la direzione della pietra tirata è… | normali | 3 | Credibile 3 | — |
 | Dopo l'urto, la distanza percorsa dalla pietra tirata è… | normali | 3 | Giusto 2 · Non so 1 | — |
 | La riduzione della curva dovuta alla spazzata è… | smorzati, curva dai giri | 3 | Giusto 3 | — |
@@ -103,6 +103,7 @@ Un replay diverso con lo stesso motore indica un problema di determinismo: va co
 
 ## Commenti
 
+- 2026-11-12 · tiro 2 · Raise o freeze: stesso tiro del precedente ma spazzato negli ultimi secondi per aumentare il curl, ma il sasso ha curlato di meno di quello non scopato.
 - 2026-11-12 · tiro 10 · Raise o freeze · pietra rimossa: Le reazioni dei sassi con take out mi sembra corretta; In generale ho difficoltà con la scelta della forza dei tiri con l'indicazione del tempo back-to-hog. Sarebbe possibile sostituirla o appaiarla anche con l'indicazione della velocità hot-to-hog? così aiuterebbe anche la lettura delle partite che si vedono alla TV, dove molto spesso si sente questa come indicazione di velocità di sasso richiesta.
 - 2026-11-12 · tiro 9 · Draw: Ho rifatto una guardia con esattamente la stessa velocità e scopa, modificando unicamente il numero di giri di rotazione. Risulta più corta la guardia con rotazione alta rispetto a rotazione normale ed inltre ha curlato di più. In pratica dovrebbe essere il contrario.
 - 2026-11-07 · tiro 2 · Draw: https://www.reddit.com/r/Curling/comments/1r76c1t/why_do_curlers_rotate_their_stones_so_much/
@@ -111,6 +112,7 @@ Un replay diverso con lo stesso motore indica un problema di determinismo: va co
 
 ## Messaggi
 
+- [2026-11-12 · web-192605184c67](messages/2026-11-12-web-192605184c67.md) · 1 tiri · versione 0.3.1
 - [2026-11-12 · web-307b5d4ed95c](messages/2026-11-12-web-307b5d4ed95c.md) · 3 tiri · versione 0.3.1
 - [2026-11-12 · web-1247ff8a506f](messages/2026-11-12-web-1247ff8a506f.md) · 3 tiri · versione 0.3.1
 - [2026-11-11 · web-a7ef66446bb1](messages/2026-11-11-web-a7ef66446bb1.md) · 1 tiri · versione 0.3.1
