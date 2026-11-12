@@ -1,8 +1,8 @@
 # Segnalazioni sul realismo
 
-Aggiornato il 2026-11-11 08:02 UTC · motore 0.4.0 · messaggi elaborati: 26 · tiri valutati: 70
+Aggiornato il 2026-11-12 05:30 UTC · motore 0.4.0 · messaggi elaborati: 27 · tiri valutati: 73
 
-Tiri per impostazione (urti e forma della curva): normali, curva molto netta 5 · normali, curva netta 31 · normali 25 · smorzati, curva dai giri 3 · vivaci 6. Le statistiche sono separate per impostazione.
+Tiri per impostazione (urti e forma della curva): normali, curva molto netta 5 · normali, curva netta 31 · normali 25 · smorzati, curva dai giri 6 · vivaci 6. Le statistiche sono separate per impostazione.
 
 ## Indicazioni
 
@@ -14,7 +14,7 @@ Tiri per impostazione (urti e forma della curva): normali, curva molto netta 5 �
 
 | Esito della riesecuzione | Tiri |
 | --- | --- |
-| Identico all'hash registrato | 65 |
+| Identico all'hash registrato | 68 |
 | Diverso dall'hash registrato | 2 |
 | Registrato con un altro motore | 0 |
 | Senza replay | 3 |
@@ -31,7 +31,7 @@ Un replay diverso con lo stesso motore indica un problema di determinismo: va co
 | normali, curva netta | pieno | 2 | 0,39 | 0 | 2 | 0 | 0 |
 | normali, curva netta | mezza pietra | 3 | 2,32 | 0 | 3 | 0 | 0 |
 | normali, curva netta | sottile | 3 | 2,04 | 0 | 3 | 0 | 0 |
-| smorzati, curva dai giri | sottile | 1 | 2,04 | 0 | 1 | 0 | 0 |
+| smorzati, curva dai giri | sottile | 2 | 1,54 | 0 | 2 | 0 | 0 |
 | vivaci | pieno | 2 | 0,09 | 0 | 0 | 2 | 0 |
 
 ## Pietra colpita nei raise, per velocità d'impatto
@@ -42,6 +42,7 @@ Un replay diverso con lo stesso motore indica un problema di determinismo: va co
 | normali | 0,5–0,8 m/s | 7 | 1,61 | 7 | 0 | 0 | 0 |
 | normali | 0,8–1,2 m/s | 9 | 3,06 | 3 | 5 | 0 | 1 |
 | normali | sopra 1,2 m/s | 5 | 1,69 | 2 | 3 | 0 | 0 |
+| smorzati | sotto 0,5 m/s | 1 | 0,55 | 0 | 1 | 0 | 0 |
 
 ## Risposte per domanda
 
@@ -67,15 +68,19 @@ Un replay diverso con lo stesso motore indica un problema di determinismo: va co
 | La curva di questo colpo è… | vivaci | 5 | Giusto 5 | — |
 | Dopo l'urto, la direzione della pietra tirata è… | vivaci | 5 | Credibile 5 | — |
 | Dopo l'urto, la distanza percorsa dalla pietra tirata è… | vivaci | 5 | Troppo lungo 4 · Giusto 1 | Troppo lungo (80%) |
+| Spazzata per # s: l'allungamento del tiro è… | smorzati, curva dai giri | 5 | Giusto 4 · Troppo poco 1 | — |
 | La curva di questo colpo è… | normali | 4 | Giusto 4 | — |
 | Dopo l'urto, la direzione della pietra tirata è… | normali | 3 | Credibile 3 | — |
 | Dopo l'urto, la distanza percorsa dalla pietra tirata è… | normali | 3 | Giusto 2 · Non so 1 | — |
-| Spazzata per # s: l'allungamento del tiro è… | smorzati, curva dai giri | 3 | Giusto 3 | — |
+| Spazzata Curl per # s: l'aumento della curva è… | smorzati, curva dai giri | 3 | Giusto 3 | — |
 | Con rotazione alta (# giri) la curva è quasi uguale a quella normale. Secondo te la pietra… | normali | 2 | Dovrebbe curvare di più 2 | — |
 | Spazzata per # s: l'allungamento del tiro è… | normali, curva molto netta | 2 | Giusto 2 | — |
 | La riduzione della curva dovuta alla spazzata è… | normali, curva molto netta | 2 | Giusto 2 | — |
-| Spazzata Curl per # s: l'aumento della curva è… | smorzati, curva dai giri | 2 | Giusto 2 | — |
+| La riduzione della curva dovuta alla spazzata è… | smorzati, curva dai giri | 2 | Giusto 2 | — |
 | Spazzata Straight per # s: la riduzione della curva è… | smorzati, curva dai giri | 2 | Non so 1 · Giusto 1 | — |
+| La curva di questo colpo è… | smorzati, curva dai giri | 2 | Giusto 2 | — |
+| Dopo l'urto, la direzione della pietra tirata è… | smorzati, curva dai giri | 2 | Credibile 2 | — |
+| Dopo l'urto, la distanza percorsa dalla pietra tirata (la tua, non quella colpita) è… | smorzati, curva dai giri | 2 | Giusto 2 | — |
 | Il punto in cui la pietra inizia a curvare davvero arriva… | normali, curva molto netta | 1 | Giusto 1 | — |
 | La chiusura finale della curva è… | normali, curva molto netta | 1 | Troppo brusca 1 | — |
 | Con un hog-to-hog di # s, per questo peso il tiro è risultato… | normali, curva molto netta | 1 | Giusto 1 | — |
@@ -86,19 +91,23 @@ Un replay diverso con lo stesso motore indica un problema di determinismo: va co
 | Dopo l'urto, la distanza percorsa dalla pietra tirata è… | normali, curva molto netta | 1 | Non so 1 | — |
 | Con rotazione bassa (# giri) la curva è quasi uguale a quella normale. Secondo te la pietra… | normali, curva netta | 1 | Dovrebbe curvare di più 1 | — |
 | Con rotazione alta (# giri) la curva è quasi uguale a quella normale. Secondo te la pietra… | normali, curva netta | 1 | Dovrebbe curvare di più 1 | — |
-| La riduzione della curva dovuta alla spazzata è… | smorzati, curva dai giri | 1 | Giusto 1 | — |
-| La curva di questo colpo è… | smorzati, curva dai giri | 1 | Giusto 1 | — |
-| Dopo l'urto, la direzione della pietra tirata è… | smorzati, curva dai giri | 1 | Credibile 1 | — |
-| Dopo l'urto, la distanza percorsa dalla pietra tirata (la tua, non quella colpita) è… | smorzati, curva dai giri | 1 | Giusto 1 | — |
+| La pietra colpita è avanzata… | smorzati, curva dai giri | 1 | Giusto 1 | — |
+| Dopo l'urto, la pietra tirata è rimasta… | smorzati, curva dai giri | 1 | Giusto 1 | — |
+| Il punto in cui la pietra inizia a curvare davvero arriva… | smorzati, curva dai giri | 1 | Troppo presto 1 | — |
+| La chiusura finale della curva è… | smorzati, curva dai giri | 1 | Giusto 1 | — |
+| Con un hog-to-hog di # s, per questo peso il tiro è risultato… | smorzati, curva dai giri | 1 | Troppo corto 1 | — |
+| Con rotazione alta (# giri) la pietra va dritta più a lungo e chiude più forte alla fine. Secondo te la pietra… | smorzati, curva dai giri | 1 | Simile va bene 1 | — |
 
 ## Commenti
 
+- 2026-11-12 · tiro 9 · Draw: Ho rifatto una guardia con esattamente la stessa velocità e scopa, modificando unicamente il numero di giri di rotazione. Risulta più corta la guardia con rotazione alta rispetto a rotazione normale ed inltre ha curlato di più. In pratica dovrebbe essere il contrario.
 - 2026-11-07 · tiro 2 · Draw: https://www.reddit.com/r/Curling/comments/1r76c1t/why_do_curlers_rotate_their_stones_so_much/
 - 2026-11-06 · tiro 7 · Draw: Con un alto numero di giri dovrebbe curvare di più alla fine ("grab")
 - 2026-11-05 · tiro 3 · Raise o freeze · pietra rimossa: La seconda pietra colpita si è spostata troppo, circa il 30-40% in più di quanto atteso
 
 ## Messaggi
 
+- [2026-11-12 · web-1247ff8a506f](messages/2026-11-12-web-1247ff8a506f.md) · 3 tiri · versione 0.3.1
 - [2026-11-11 · web-a7ef66446bb1](messages/2026-11-11-web-a7ef66446bb1.md) · 1 tiri · versione 0.3.1
 - [2026-11-10 · web-2dcc1e0583bc](messages/2026-11-10-web-2dcc1e0583bc.md) · 1 tiri · versione 0.3.1
 - [2026-11-10 · web-89c47f9736f6](messages/2026-11-10-web-89c47f9736f6.md) · 1 tiri · versione 0.3.1
